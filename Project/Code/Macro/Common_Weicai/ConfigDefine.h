@@ -13,7 +13,12 @@
 /**
  ****   融云环境 0测试1生产
  ***/
-static int isLine = 0;
+
+typedef enum{
+    RongYunModel_test = 0,//测试
+    RongYunModel_public = 1,
+}RongYunModel;
+static int rongYunMode = RongYunModel_test;
 
 
 /**
@@ -21,7 +26,12 @@ static int isLine = 0;
  ***/
 //static NSString* const RyTestKey = @"8luwapkv8j60l"; 8w7jv4qb82ury z3v5yqkbz1wp0
 static NSString* const RyTestKey = @"8w7jv4qb82ury";
-static NSString* const RyTestKeySecret = @"WHiY5t6MjT5ms"; //WHiY5t6MjT5ms   6OK3ehwG6a9
+static NSString* const RyTestKeySecret = @"WHiY5t6MjT5ms";
+
+//asong
+//static NSString* const RyTestKey = @"qd46yzrfqi8wf";
+//static NSString* const RyTestKeySecret = @"bHLPf2s0iDH0P";
+
 static NSString* const RyKey = @"8brlm7uf8zos3";
 static NSString* const RySecret = @"JzYmITZJaJP2";
 
@@ -41,8 +51,10 @@ static NSString* const WXShareLink  = @"https://www.pgyer.com/wxs";
 /**
  ****   接口地址 var BaseImg_url = 'http://cp2.xmnet.xyz/api/'; http://lc.xmnet.xyz/api/
  ***/
-static NSString* const Line_pre  =  @"http://lc.xmnet.xyz/api/";
-static NSString* const Img_pre  =  @"http://lc.xmnet.xyz";
+static NSString* const url_preix  =  @"http://103.107.236.103:9999/";
+//a song
+//static NSString* const url_preix  =  @"http://172.20.208.87:9999/";
+
 static NSString* const ServiceLink  =  @"http://api.pop800.com/chat/366223";
 
 static NSString* const H_KEY  =  @"652e6f3c7dcf22227cc884ce9c5730b5";//临时请求，key固定 玩家接口i

@@ -8,6 +8,7 @@
 
 #import "RecommendedViewController.h"
 #import "RecommendNet.h"
+#import "NetRequestManager.h"
 
 @interface RecommendedViewController ()<UITableViewDelegate,UITableViewDataSource>{
     UITableView *_tableView;
@@ -23,6 +24,9 @@
     [self initData];
     [self initSubviews];
     [self initLayout];
+    _model.page = 1;
+    SV_SHOW;
+    [self getData];
 }
 
 #pragma mark ----- Data
@@ -52,7 +56,7 @@
     [self.view addSubview:_tableView];
     _tableView.delegate = self;
     _tableView.dataSource = self;
-    _tableView.rowHeight = 94;
+    _tableView.rowHeight = 66;//94;
     _tableView.separatorColor = TBSeparaColor;
     
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
@@ -67,37 +71,36 @@
     
     _tableView.mj_footer = [MJRefreshAutoFooter footerWithRefreshingBlock:^{
         CDStrongSelf(self);
-        if (!weakModel.IsMost) {
+        if (!weakModel.isMost) {
             weakModel.page ++;
             [self getData];
         }
     }];
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self->_tableView.mj_header beginRefreshing];
-    });
 }
 
+//-(void)viewDidAppear:(BOOL)animated{
+//    [super viewDidAppear:animated];
+//    [self->_tableView.mj_header beginRefreshing];
+//}
 #pragma mark net
 - (void)getData{
-
-    CDWeakSelf(self);
-    [_model getPlayerObj:@{@"uid":_uid,@"page":@(_model.page)} Success:^(NSDictionary *dic) {
-        CDStrongSelf(self);
-        [self reload];
-    } Failure:^(NSError *error) {
-        SV_ERROR(error);
-        [self reload];
+    WEAK_OBJ(weakSelf, self);
+    [_model getMyPlayerWithSuccess:^(NSDictionary *dict) {
+        SV_DISMISS;
+        [weakSelf reload];
+    } Failure:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
+        [weakSelf reload];
     }];
 }
 
 - (void)reload{
     [_tableView.mj_footer endRefreshing];
     [_tableView.mj_header endRefreshing];
-    if(_model.IsNetError){
+    if(_model.isNetError){
         [_tableView.StateView showNetError];
     }
-    else if(_model.IsEmpty){
+    else if(_model.isEmpty){
         [_tableView.StateView showEmpty];
     }else{
         [_tableView.StateView hidState];
@@ -117,13 +120,13 @@
     return [tableView CDdequeueReusableCellWithIdentifier:_model.dataList[indexPath.row]];
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    RecommendedViewController *vc = [[RecommendedViewController alloc]init];
-    CDTableModel *model = _model.dataList[indexPath.row];
-    vc.uid = model.obj[@"id"];
-    vc.title = [NSString stringWithFormat:@"%@的玩家",model.obj[@"nickname"]];
-    [self.navigationController pushViewController:vc animated:YES];
-}
+//- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+//    RecommendedViewController *vc = [[RecommendedViewController alloc]init];
+//    CDTableModel *model = _model.dataList[indexPath.row];
+//    vc.uid = model.obj[@"id"];
+//    vc.title = [NSString stringWithFormat:@"%@的玩家",model.obj[@"userNick"]];
+//    [self.navigationController pushViewController:vc animated:YES];
+//}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

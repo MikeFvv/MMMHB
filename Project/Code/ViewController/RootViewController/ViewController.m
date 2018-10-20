@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-#import "RonYun.h"
+#import "RongYunManager.h"
 #import "TabbarButton.h"
 
 
@@ -34,7 +34,7 @@
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    [RONG_YUN doConnect];
+    [RONG_YUN_MANAGER connect];
 }
 
 //- (void)test{
@@ -44,8 +44,13 @@
 
 #pragma mark 收到消息重新刷新
 - (void)updateValue{
+    NSInteger num = 0;
+    for (NSDictionary *dic in APP_MODEL.unReadNumberArray) {
+        NSInteger ureadNum = [dic[@"unreadNum"] integerValue];
+        num += ureadNum;
+    }
     dispatch_async(dispatch_get_main_queue(), ^{
-        [_tabbar[1] setBadeValue:(APP_MODEL.unReadNumber>0)?@"1":@"null"];
+        [_tabbar[1] setBadeValue:(num>0)?@"1":@"0"];
     });
 }
 
@@ -53,10 +58,10 @@
     _selectIndex = 0;
     self.delegate = self;
     
-    NSArray *vcs = @[@"MessageViewController",@"GroupViewController",@"MemberViewController"];
-    NSArray *titles = @[@"消息",@"群组",@"我的"];
-    NSArray *nors = @[@"footer-icon-tip",@"footer-icon-group",@"footer-icon-my"];
-    NSArray *ses = @[@"footer-icon-tip-on",@"footer-icon-group-on",@"footer-icon-my-on"];
+    NSArray *vcs = @[@"MessageViewController",@"GroupViewController",@"DiscoverViewController",@"MemberViewController"];
+    NSArray *titles = @[@"消息",@"群组",@"发现",@"我的"];
+    NSArray *nors = @[@"footer-icon-tip",@"footer-icon-group",@"tabar_find",@"footer-icon-my"];
+    NSArray *ses = @[@"footer-icon-tip-on",@"footer-icon-group-on",@"tabar_find_on",@"footer-icon-my-on"];
     NSMutableArray *vs = [[NSMutableArray alloc]init];
     CGFloat w = CDScreenWidth/vcs.count;
     for (int i = 0; i<vcs.count; i++) {

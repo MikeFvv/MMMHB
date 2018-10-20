@@ -10,13 +10,12 @@
 
 @interface RecommmendObj : NSObject
 
-@property (nonatomic ,copy) NSString *avatar;
-
-@property (nonatomic ,assign) NSInteger gender;
+@property (nonatomic ,copy) NSString *userAvatar;
+@property (nonatomic ,assign) NSInteger userGender;
 @property (nonatomic ,assign) NSInteger daili_num;
 @property (nonatomic ,assign) NSInteger player_num;
-@property (nonatomic ,copy) NSString *rId;
-@property (nonatomic ,copy) NSString *nickname;
+@property (nonatomic ,copy) NSString *userId;
+@property (nonatomic ,copy) NSString *userNick;
 @property (nonatomic ,copy) NSString *rate;
 @property (nonatomic ,copy) NSString *yonjin;
 

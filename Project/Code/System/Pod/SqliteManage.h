@@ -13,8 +13,14 @@
 
 + (SqliteManage *)shareInstance;
 
-+ (void)updateGroup:(NSString *)group number:(int)number lastMessage:(NSString *)last;
-+ (void)removeGroup:(NSString *)group;
+
+/**
+
+ @param groupId 组id
+ @param number 传-1表示清除数量
+ @param message 最后一条信息
+ */
++ (void)updateGroup:(NSString *)groupId number:(int)number lastMessage:(NSString *)message;
 + (MessageItem *)queryById:(NSString *)groupId;
 
 + (void)clean;

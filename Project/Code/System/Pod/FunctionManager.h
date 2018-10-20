@@ -88,4 +88,9 @@ typedef NS_ENUM(NSInteger, FixTypes)
 
 //通用处理接口返回的错误
 -(void)handleFailResponse:(id)responseObj;
+
+//获取银行列表
+-(NSArray *)getBankList;
+
+- (void)updateChat:(NSString *)chatId number:(NSInteger)number lastMessage:(NSString *)message lastTime:(NSString *)lastTime;
 @end

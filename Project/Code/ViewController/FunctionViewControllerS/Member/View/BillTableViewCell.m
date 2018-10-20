@@ -40,13 +40,13 @@
 - (void)initLayout{
     [_state mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.contentView).offset(15);
-        make.top.equalTo(self.contentView).offset(8);
+        make.top.equalTo(self.contentView).offset(11);
         make.width.lessThanOrEqualTo(@(200));
     }];
     
     [_date mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(self.contentView.mas_right).offset(-15);
-        make.top.equalTo(self.contentView).offset(9);
+        make.top.equalTo(self.contentView).offset(11);
     }];
     
     [_name mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -56,7 +56,7 @@
     
     [_money mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(self.contentView.mas_right).offset(-15);
-        make.top.equalTo(self->_date.mas_bottom).offset(13);
+        make.top.equalTo(self.contentView).offset(11);
     }];
     
     [_content mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -70,7 +70,7 @@
 - (void)initSubviews{
     _state = [UILabel new];
     [self.contentView addSubview:_state];
-    _state.font = [UIFont scaleFont:14]; //#369b3c收入 #ff4646支出
+    _state.font = [UIFont scaleFont:15]; //#369b3c收入 #ff4646支出
     
     _date = [UILabel new];
     [self.contentView addSubview:_date];
@@ -84,7 +84,7 @@
     
     _money = [UILabel new]; //#369b3c收入 #ff4646支出
     [self.contentView addSubview:_money];
-    _money.font = [UIFont scaleFont:14];
+    _money.font = [UIFont scaleFont:15];
     _money.textColor = HexColor(@"#369b3c");
     
     _content = [UILabel new]; //#369b3c收入 #ff4646支出
@@ -95,19 +95,21 @@
     UIImageView *line = [[UIImageView alloc]initWithFrame:CGRectMake(0, 71, CDScreenWidth, 2)];
     [self.contentView addSubview:line];
     line.image = CD_DRline(line);
-   
 }
 
 - (void)setObj:(id)obj{
     BillItem *item = [BillItem mj_objectWithKeyValues:obj];
-    BOOL b = [item.money containsString:@"-"];
+    BOOL b = [item.billMoney containsString:@"-"];
     _state.textColor = (b)?HexColor(@"#ff4646"):HexColor(@"#369b3c");
     _state.text = (b)?@"支出":@"收入";
     _date.text = dateString_stamp(item.dateline,nil);
-    _name.text = @"资金";
-    _money.text = item.money;
+    _name.text = item.billtTile;
+    if(b == NO)
+        _money.text = [NSString stringWithFormat:@"+%@元",item.billMoney];
+    else
+        _money.text = [NSString stringWithFormat:@"%@元",item.billMoney];;
     _money.textColor = (b)?HexColor(@"#ff4646"):HexColor(@"#369b3c");
-    _content.text = item.intro;
+    _content.text = dateString_stamp([item.createTime integerValue],nil);;
 }
 
 

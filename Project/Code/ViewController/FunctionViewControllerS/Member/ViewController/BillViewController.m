@@ -10,13 +10,13 @@
 #import "BillHeadView.h"
 #import "BillNet.h"
 #import "CDAlertViewController.h"
+#import "NetRequestManager.h"
 
 @interface BillViewController ()<UITableViewDelegate,UITableViewDataSource>{
     UITableView *_tableView;
-    BillHeadView *_headView;
-    BillNet *_model;
 }
-
+@property(nonatomic,strong)BillNet *model;
+@property(nonatomic,strong)BillHeadView *headView;
 @end
 
 @implementation BillViewController
@@ -26,11 +26,16 @@
     [self initData];
     [self initSubviews];
     [self initLayout];
+    [self getBillType];
+    _model.page = 1;
+    SV_SHOW;
+    [self getData];
 }
 
 #pragma mark ----- Data
 - (void)initData{
     _model = [[BillNet alloc]init];
+    _model.type = 999;
 }
 
 
@@ -44,7 +49,7 @@
 #pragma mark ----- subView
 - (void)initSubviews{
     
-    self.navigationItem.title = @"我的明细";
+    self.navigationItem.title = @"我的账单";
     
     CDWeakSelf(self);
     __weak BillNet *weakModel = _model;
@@ -57,6 +62,7 @@
     _headView = [BillHeadView headView];
     _headView.beginTime = _model.beginTime;
     _headView.endTime = _model.endTime;
+    _headView.billTypeArray = _model.billTypeArray;
     _headView.endChange = ^(id time) {
         CDStrongSelf(self);
         [self datePickerByType:1];
@@ -67,7 +73,9 @@
     };
     _headView.TypeChange = ^(NSInteger type) {
         CDStrongSelf(self);
-        weakModel.type = type;
+        NSArray * typeList = self.model.billTypeArray;
+        NSDictionary *typeDic = typeList[type];
+        weakModel.type = [typeDic[@"billtId"] integerValue];
         weakModel.page = 1;
         [self getData];
     };
@@ -82,22 +90,44 @@
     
     _tableView.mj_footer = [MJRefreshAutoFooter footerWithRefreshingBlock:^{
         CDStrongSelf(self);
-        if (!weakModel.IsMost) {
+        if (!weakModel.isMost) {
             weakModel.page ++;
             [self getData];
         }
     }];
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self->_tableView.mj_header beginRefreshing];
-    });
 }
+
+-(void)getBillType{
+    WEAK_OBJ(weakObj, self);
+    [NET_REQUEST_MANAGER requestBillTypeWithSuccess:^(id object) {
+        NSArray *array = object[@"data"];
+        NSMutableArray *newArr = [[NSMutableArray alloc] initWithArray:array];
+        NSDictionary *dic = @{@"billtId":@"999",@"billtTitle":@"所有"};
+        [newArr insertObject:dic atIndex:0];
+        weakObj.model.billTypeArray = newArr;
+        weakObj.headView.billTypeArray = weakObj.model.billTypeArray;
+    } fail:^(id object) {
+    }];
+}
+
+//-(void)viewDidAppear:(BOOL)animated{
+//    [super viewDidAppear:animated];
+//    [self->_tableView.mj_header beginRefreshing];
+//}
 
 - (void)datePickerByType:(NSInteger)type{
     __weak typeof(self) weakSelf = self;
+    NSDateFormatter *formatter=[[NSDateFormatter alloc]init];
+    [formatter setDateFormat:@"yyyy-MM-dd"];
+    NSDate *date = nil;
+    if(type == 1)
+        date = [formatter dateFromString:_model.endTime];
+    else
+        date = [formatter dateFromString:_model.beginTime];
+    double inv = [date timeIntervalSince1970];
     [CDAlertViewController showDatePikerDate:^(NSString *date) {
         [weakSelf updateType:type date:date];
-    }];
+    } defaultTime:inv];
 }
 
 - (void)updateType:(NSInteger)type date:(NSString *)date{
@@ -113,16 +143,13 @@
 }
 
 - (void)getData{
-    
-    CDWeakSelf(self);//
-    NSString *range_time = [NSString stringWithFormat:@"%ld|%ld",timeStamp_string(_model.beginTime, CDDateDay),timeStamp_string(_model.endTime, CDDateDay)];
-    [_model GetBillObj:@{@"range_time":range_time,@"uid":APP_MODEL.user.userId,@"type":@(_model.type),@"page":@(_model.page)} Success:^(NSDictionary *info) {
-        CDStrongSelf(self);
-        [self reload];
-    } Failure:^(NSError *error) {
-        CDStrongSelf(self);
-        [self reload];
-        SV_ERROR(error);
+    WEAK_OBJ(weakObj, self);
+    [_model getBillListWithSuccess:^(id object) {
+        SV_DISMISS;
+        [weakObj reload];
+    } Failure:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
+        [weakObj reload];
     }];
 }
 
@@ -130,7 +157,7 @@
     [_tableView.mj_footer endRefreshing];
     [_tableView.mj_header endRefreshing];
     [_tableView reloadData];
-    if (_model.IsMost) {
+    if (_model.isMost) {
         [_tableView.mj_footer endRefreshingWithNoMoreData];
     }
 }

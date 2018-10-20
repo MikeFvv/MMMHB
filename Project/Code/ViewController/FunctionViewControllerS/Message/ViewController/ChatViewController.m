@@ -19,7 +19,8 @@
 #import "WebViewController.h"
 #import "IQKeyboardManager.h"
 #import "EnvelopeNet.h"
-#import "SqliteManage.h"
+#import "RongYunManager.h"
+#import "NetRequestManager.h"
 
 @interface ChatViewController ()<RCPluginBoardViewDelegate,RCMessageCellDelegate>
 
@@ -27,6 +28,8 @@
 
 @end
 
+
+// 群组类
 @implementation ChatViewController
 
 static ChatViewController *_chatVC;
@@ -40,7 +43,6 @@ static ChatViewController *_chatVC;
     
     _chatVC.messageItem = obj;
     //设置聊天会话界面要显示的标题
-    [SqliteManage updateGroup:obj.groupId number:0 lastMessage:nil];
     _chatVC.title = obj.groupName;
     return _chatVC;
 }
@@ -58,9 +60,11 @@ static ChatViewController *_chatVC;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
     [self initData];
     [self initSubviews];
     [self initLayout];
+    [FUNCTION_MANAGER updateChat:self.messageItem.groupId number:-1 lastMessage:nil lastTime:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated{
@@ -73,10 +77,22 @@ static ChatViewController *_chatVC;
     [super viewWillDisappear:animated];
     [IQKeyboardManager sharedManager].enableAutoToolbar = YES;
     [[IQKeyboardManager sharedManager]setEnable:YES];
+    [FUNCTION_MANAGER updateChat:self.messageItem.groupId number:-1 lastMessage:nil lastTime:nil];
 }
 
-#pragma mark ----- Data
+#pragma mark - 获取组详情
 - (void)initData{
+    // 获取群组信息 Mike
+//    SV_SHOW;
+//    CDWeakSelf(self);
+    
+//    [NET_REQUEST_MANAGER requestGroupDetailWithId:self.messageItem.groupId success:^(id object) {
+//
+//        NSLog(@"1111");
+//
+//    } fail:^(id object) {
+//        [FUNCTION_MANAGER handleFailResponse:object];
+//    }];
     
 }
 
@@ -106,15 +122,15 @@ static ChatViewController *_chatVC;
     [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"chart-cash"] title:@"提现" atIndex:7 tag:2003];
     [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"chart-service"] title:@"客服" atIndex:8 tag:2004];
     
-    UIButton *exBtn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 30)];
+    UIButton *exBtn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
     [exBtn setImage:[UIImage imageNamed:@"delete-icon"] forState:UIControlStateNormal];
     exBtn.titleLabel.font = [UIFont scaleFont:12];
     [exBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [exBtn addTarget:self action:@selector(action_exitGroup) forControlEvents:UIControlEventTouchUpInside];
+    [exBtn addTarget:self action:@selector(exitGroup) forControlEvents:UIControlEventTouchUpInside];
     
     UIBarButtonItem *exItem = [[UIBarButtonItem alloc]initWithCustomView:exBtn];
     
-    UIButton *info = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 30)];
+    UIButton *info = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
     [info setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [info setImage:[UIImage imageNamed:@"group-info"] forState:UIControlStateNormal];
     
@@ -128,7 +144,7 @@ static ChatViewController *_chatVC;
 #pragma mark RCPluginBoardViewDelegate
 - (void)pluginBoardView:(RCPluginBoardView *)pluginBoardView clickedItemWithTag:(NSInteger)tag{
     NSLog(@"%ld",tag);
-    if (tag == 1104) {//红包        
+    if (tag == 1104) {//红包
         UINavigationController *vc = [[UINavigationController alloc]initWithRootViewController:CDPVC(@"EnvelopeViewController", _messageItem)];
         [self presentViewController:vc animated:YES completion:nil];
     }
@@ -149,7 +165,7 @@ static ChatViewController *_chatVC;
         [self.navigationController pushViewController:vc animated:YES];
     }
     else if (tag == 2003){
-        UIViewController *vc = [[NSClassFromString(@"TopupViewController")alloc]init];
+        UIViewController *vc = [[NSClassFromString(@"WithdrawalViewController")alloc]init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
     }
@@ -160,7 +176,7 @@ static ChatViewController *_chatVC;
         [self.navigationController pushViewController:vc animated:YES];
     }
     else
-        [super pluginBoardView:pluginBoardView clickedItemWithTag:tag];
+    [super pluginBoardView:pluginBoardView clickedItemWithTag:tag];
 }
 
 #pragma mark data
@@ -198,12 +214,12 @@ static ChatViewController *_chatVC;
         text = @"【红包】";
     }
     else
-        text = @"暂无未读消息";
-    [SqliteManage updateGroup:_messageItem.groupId number:0 lastMessage:text];
+    text = @"暂无未读消息";
 }
 
 //头像点击事件
 - (void)didTapCellPortrait:(NSString *)userId {
+
     NSLog(@"点击了头像");
 }
 
@@ -212,33 +228,64 @@ static ChatViewController *_chatVC;
     // Dispose of any resources that can be recreated.
 }
 
-
-#pragma mark action
-- (void)action_tapCustom:(RCMessageModel *)obj{
+#pragma mark 抢红包  Mike
+- (void)action_tapCustom:(RCMessageModel *)obj {
+    
     EnvelopeMessage *message = (EnvelopeMessage*)obj.content;
     NSDictionary *dic = message.content.mj_JSONObject;
-    CGFloat multiple = [_messageItem.multiple floatValue];
+    CGFloat multiple = [_messageItem.handicap floatValue];
     CGFloat money = [[dic objectForKey:@"money"] floatValue];
     CGFloat e = [APP_MODEL.user.userBalance floatValue];
-    if ((money * multiple) >e) {
+    if ((money * multiple) > e) {
         SV_ERROR_STATUS(@"余额不足，请充值~");
         return;
     }
     SV_SHOW;
     CDWeakSelf(self);
-    [EnvelopeNet getEnvelopInfo:@{@"uid":APP_MODEL.user.userId,@"redpacketId":[dic objectForKey:@"redpacketId"]} Success:^(NSDictionary *info) {
+    
+    [NET_REQUEST_MANAGER grabRedPackageWithRedPackageId:[dic objectForKey:@"redpacketId"] type:self.messageItem.type success:^(id object) {
         CDStrongSelf(self);
         SV_DISMISS;
-        NSMutableDictionary *eMessage = [[NSMutableDictionary alloc]initWithDictionary:info];
+        NSMutableDictionary *eMessage = [[NSMutableDictionary alloc]initWithDictionary:object];
         [eMessage setObject:@(obj.messageId) forKey:@"messageId"];
-        [self actionShowEnvelop:eMessage];
-    } Failure:^(NSError *error) {
-        SV_ERROR(error);
+        [self actionShowEnvelop:eMessage packetId:[dic objectForKey:@"redpacketId"]];
+    } fail:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
     }];
+    
 }
 
-- (void)actionShowEnvelop:(id)obj{
-    
+
+
+
+#pragma mark action
+//- (void)action_tapCustom:(RCMessageModel *)obj{
+//    EnvelopeMessage *message = (EnvelopeMessage*)obj.content;
+//    NSDictionary *dic = message.content.mj_JSONObject;
+//    CGFloat multiple = [_messageItem.multiple floatValue];
+//    CGFloat money = [[dic objectForKey:@"money"] floatValue];
+//    CGFloat e = [APP_MODEL.user.userBalance floatValue];
+//    if ((money * multiple) >e) {
+//        SV_ERROR_STATUS(@"余额不足，请充值~");
+//        return;
+//    }
+//    SV_SHOW;
+//    CDWeakSelf(self);
+//    [EnvelopeNet getEnvelopInfo:@{@"uid":APP_MODEL.user.userId,@"redpacketId":[dic objectForKey:@"redpacketId"]} Success:^(NSDictionary *info) {
+//        CDStrongSelf(self);
+//        SV_DISMISS;
+//        NSMutableDictionary *eMessage = [[NSMutableDictionary alloc]initWithDictionary:info];
+//        [eMessage setObject:@(obj.messageId) forKey:@"messageId"];
+//        [self actionShowEnvelop:eMessage];
+//    } Failure:^(NSError *error) {
+//        SV_ERROR(error);
+//    }];
+//}
+
+
+
+
+- (void)actionShowEnvelop:(id)obj packetId:(NSString *)packetId{
     NSInteger num = [[obj objectForKey:@"num"] integerValue];
     NSInteger messageId = [[obj objectForKey:@"messageId"] integerValue];
     NSInteger left = [[obj objectForKey:@"left"] integerValue];
@@ -278,7 +325,7 @@ static ChatViewController *_chatVC;
             }
         }
         [self.conversationMessageCollectionView reloadData];
-        [self actionEnvelopDetail:obj[@"id"]];
+        [self actionEnvelopDetail:packetId];
         return;
     }
     [view showInView:self.view];
@@ -286,13 +333,32 @@ static ChatViewController *_chatVC;
 
 
 - (void)actionEnvelopDetail:(id)obj{
-    CDPush(self.navigationController, CDPVC(@"EnvelopeListViewController", obj), YES);
+    NSString *s = obj;
+    if([obj isKindOfClass:[NSNumber class]])
+        s = [obj stringValue];
+    CDPush(self.navigationController, CDPVC(@"EnvelopeListViewController", s), YES);
 }
 
+-(void)exitGroup{
+    WEAK_OBJ(weakSelf, self);
+    UIAlertController *vc = [UIAlertController alertControllerWithTitle:@"提示" message:@"是否退出该群？" preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *cancle = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+    [vc addAction:cancle];
+    UIAlertAction *make = [UIAlertAction actionWithTitle:@"退出" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [weakSelf action_exitGroup];
+    }];
+    [vc addAction:make];
+    [self presentViewController:vc animated:YES completion:nil];
+}
 - (void)action_exitGroup{
+    SV_SHOW;
     [MESSAGE_NET quitGroup:self.targetId success:^(NSDictionary *info) {
+        SV_DISMISS;
         CDPop(self.navigationController, YES);
     } failure:^(NSError *error) {
+        SV_DISMISS;
         [FUNCTION_MANAGER handleFailResponse:error];
     }];
 }
@@ -314,14 +380,50 @@ static ChatViewController *_chatVC;
         
     }
 }
-/*
- #pragma mark - Navigation
- 
- // In a storyboard-based application, you will often want to do a little preparation before navigation
- - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
- // Get the new view controller using [segue destinationViewController].
- // Pass the selected object to the new view controller.
- }
- */
 
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    UICollectionViewCell *cell = [super collectionView:collectionView cellForItemAtIndexPath:indexPath];
+    return cell;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    CGSize size = [super collectionView:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
+    NSLog(@"size = %@",NSStringFromCGSize(size));
+    RCMessageModel *model = self.conversationDataRepository[indexPath.row];
+    RCTextMessage *textMessage = model.content;
+    if([textMessage isKindOfClass:[RCTextMessage class]]){
+        NSString *conten = textMessage.content;
+        if([conten isEqualToString:@"~!@#$%^&*()"]){
+            NSString *extra = textMessage.extra;
+            NSDictionary *dict = [extra mj_JSONObject];
+            EnvelopeMessage *messageCus = [[EnvelopeMessage alloc] initWithObj:dict];
+            model.content = messageCus;
+        }
+    }
+    if([model.content isKindOfClass:[EnvelopeMessage class]]){
+        NSInteger height = 94;
+        if(model.isDisplayMessageTime)
+            height += 44;
+        if(model.isDisplayNickname)
+            height += 18;
+            return CGSizeMake([[UIScreen mainScreen] bounds].size.width, height);
+    }
+    return size;
+}
+
+- (RCMessage *)willAppendAndDisplayMessage:(RCMessage *)message{
+    RCTextMessage *textMessage = message.content;
+    if([textMessage isKindOfClass:[RCTextMessage class]]){
+        NSString *conten = textMessage.content;
+        if([conten isEqualToString:@"~!@#$%^&*()"]){
+            NSString *extra = textMessage.extra;
+            NSDictionary *dict = [extra mj_JSONObject];
+            EnvelopeMessage *messageCus = [[EnvelopeMessage alloc] initWithObj:dict];
+            message.content = messageCus;
+//            return message;
+        }
+    }
+    
+    return message;
+}
 @end

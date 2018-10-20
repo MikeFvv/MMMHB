@@ -35,11 +35,11 @@
 
 + (UIFont *) scaleFont:(CGFloat)scale{
     CGFloat s = (CDScreenHeight /667 > 1)?1:CDScreenHeight /667;
-    return [UIFont systemFontOfSize:s*scale];
+    return [UIFont systemFontOfSize:s*scale + 1];
 }
 
 + (UIFont *)scaleBoldFont:(CGFloat)scale{
-    return [UIFont boldSystemFontOfSize:scale*(CDScreenHeight)/667];
+    return [UIFont boldSystemFontOfSize:scale*(CDScreenHeight)/667 + 1];
 }
 
 @end
@@ -48,19 +48,11 @@
 
 
 + (NSString *)cdImageLink:(NSString *)link{
-    NSMutableString *str = [[NSMutableString alloc]init];
-    if ([link hasPrefix:@"http://"]|[link hasPrefix:@"https://"]) {
-        [str appendString:link];
-    }
-    else if ([link hasPrefix:@"/public"]) {
-        [str appendFormat:@"%@%@",Img_pre,link];
-    }
-    else if ([link hasPrefix:@"public"]) {
-        [str appendFormat:@"%@/%@",Img_pre,link];
-    }
-    else
-    [str appendFormat:@"%@/public/%@",Img_pre,link];
-    return str;
+//    NSMutableString *str = [[NSMutableString alloc]init];
+//    if ([link hasPrefix:@"http://"]|[link hasPrefix:@"https://"]) {
+//        [str appendString:link];
+//    }
+    return link;
 }
 
 + (NSString *)deviceModel{

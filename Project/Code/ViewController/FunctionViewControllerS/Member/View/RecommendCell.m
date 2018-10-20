@@ -120,30 +120,31 @@
     _account.font = [UIFont scaleFont:12];
     _account.textColor = Color_9;
     
-    _layNumber = [UILabel new];
-    [self.contentView addSubview:_layNumber];
-    _layNumber.font = [UIFont scaleFont:12];
-    _layNumber.textColor = Color_9;
+//    _layNumber = [UILabel new];
+//    [self.contentView addSubview:_layNumber];
+//    _layNumber.font = [UIFont scaleFont:12];
+//    _layNumber.textColor = Color_9;
+//
+//    _playerNumber = [UILabel new];
+//    [self.contentView addSubview:_playerNumber];
+//    _playerNumber.font = [UIFont scaleFont:12];
+//    _playerNumber.textColor = Color_9;
+//
+//    _backMoney = [UILabel new];
+//    [self.contentView addSubview:_backMoney];
+//    _backMoney.font = [UIFont scaleFont:12];
+//    _backMoney.textColor = HexColor(@"#FF334C");
+//
     
-    _playerNumber = [UILabel new];
-    [self.contentView addSubview:_playerNumber];
-    _playerNumber.font = [UIFont scaleFont:12];
-    _playerNumber.textColor = Color_9;
-    
-    _backMoney = [UILabel new];
-    [self.contentView addSubview:_backMoney];
-    _backMoney.font = [UIFont scaleFont:12];
-    _backMoney.textColor = HexColor(@"#FF334C");
- 
-    
-    _detail = [UIButton new];
-    [self.contentView addSubview:_detail];
-    _detail.titleLabel.font = [UIFont scaleFont:12];
-    _detail.layer.cornerRadius = 6;
-    _detail.layer.masksToBounds = YES;
-    _detail.backgroundColor = HexColor(@"#FF334C");
-    [_detail setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_detail setTitle:@"查看详情" forState:UIControlStateNormal];
+//    _detail = [UIButton new];
+//    [self.contentView addSubview:_detail];
+//    _detail.titleLabel.font = [UIFont scaleFont:12];
+//    _detail.layer.cornerRadius = 4;
+//    _detail.layer.masksToBounds = YES;
+//    _detail.userInteractionEnabled = NO;
+//    _detail.backgroundColor = HexColor(@"#FF334C");
+//    [_detail setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//    [_detail setTitle:@"查看详情" forState:UIControlStateNormal];
 }
 
 
@@ -155,11 +156,11 @@
 
 - (void)setObj:(id)obj{
     RecommmendObj *model = [RecommmendObj mj_objectWithKeyValues:obj];
-    NSString *url = [NSString cdImageLink:model.avatar];
+    NSString *url = [NSString cdImageLink:model.userAvatar];
     [_headIcon cd_setImageWithURL:[NSURL URLWithString:url] placeholderImage:[UIImage imageNamed:@"user-default"]];
-    _name.text = model.nickname;
-    _sexIcon.image = (model.gender == 0)?[UIImage imageNamed:@"male"]:[UIImage imageNamed:@"female"];
-    _account.text = [NSString stringWithFormat:@"ID:%@",model.rId];
+    _name.text = model.userNick;
+    _sexIcon.image = (model.userNick == 0)?[UIImage imageNamed:@"male"]:[UIImage imageNamed:@"female"];
+    _account.text = [NSString stringWithFormat:@"ID:%@",model.userId];
     NSString *back = [NSString stringWithFormat:@"返点总计：%@",model.rate];
     NSMutableAttributedString *AttributedStr = [[NSMutableAttributedString alloc]initWithString:back];
     NSRange rang = [back rangeOfString:@"返点总计："];

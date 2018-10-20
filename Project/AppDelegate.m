@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import "RonYun.h"
+#import "RongYunManager.h"
 #import "WXManage.h"
 #import "AFNetworkReachabilityManager.h"
 #import "NetRequestManager.h"
@@ -24,12 +24,14 @@
     // Override point for customization after application launch.
     self.window = [[UIWindow alloc]initWithFrame:[UIScreen mainScreen].bounds];
     self.window.backgroundColor = CDCOLOR(245, 245, 245);
-    self.window.rootViewController = [AppModel rootVc];
+    self.window.rootViewController = [APP_MODEL rootVc];
     [NET_REQUEST_MANAGER test];
     [self AFNReachability];
     [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
-    [AppModel initSetUp];
-    NSString *s = [FUNCTION_MANAGER getApplicationID];
+    [SVProgressHUD setImageViewSize:CGSizeMake(20, 20)];
+    [APP_MODEL initSetUp];
+    if(APP_MODEL.user.isLogined)
+        [NET_REQUEST_MANAGER requestAppConfigWithSuccess:nil fail:nil];
     return YES;
 }
 
@@ -43,7 +45,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
                         stringByReplacingOccurrencesOfString:@">"
                         withString:@""] stringByReplacingOccurrencesOfString:@" "
                        withString:@""];
-    [RONG_YUN setToken:token];
+    [RONG_YUN_MANAGER setPushToken:token];
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {

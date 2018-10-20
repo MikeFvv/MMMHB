@@ -107,6 +107,7 @@
         make.centerY.equalTo(self ->_name);
         make.width.height.equalTo(@(15));
     }];
+    sexBack.hidden = YES;
     
     _sex = [UIImageView new];
     [sexBack addSubview:_sex];
@@ -137,40 +138,32 @@
 }
 
 - (void)setObj:(id)obj{
-    NSString *avatar = [NSString cdImageLink:[obj objectForKey:@"avatar"]];
-    NSString *grap_money = [NSString stringWithFormat:@"%@",[obj objectForKey:@"grap_money"]];
-    NSString *nickname = [NSString stringWithFormat:@"%@",[obj objectForKey:@"nickname"]];
+    NSString *avatar = [NSString cdImageLink:[obj objectForKey:@"userAvatar"]];
+    NSString *grap_money = [NSString stringWithFormat:@"%@",[obj objectForKey:@"redbgMoney"]];
+    NSString *nickname = [NSString stringWithFormat:@"%@",[obj objectForKey:@"userNick"]];
     [_icon cd_setImageWithURL:[NSURL URLWithString:avatar] placeholderImage:[UIImage imageNamed:@"user-default"]];
-    NSInteger sex = [[obj objectForKey:@"gender"] integerValue];
+    NSInteger sex = [[obj objectForKey:@"userGender"] integerValue];
     _money.text = (![grap_money isKindOfClass:[NSNull class]])?grap_money:@"";
-    _date.text = dateString_stamp([[obj objectForKey:@"dateline"] integerValue],nil);
+    _date.text = dateString_stamp([[obj objectForKey:@"redbgCreateTime"] integerValue],nil);
     _name.text = (![nickname isKindOfClass:[NSNull class]])?nickname:@"";;
     _sex.image = (sex==0)?[UIImage imageNamed:@"male"]:[UIImage imageNamed:@"female"];
     EnvelopeNet *model = [EnvelopeNet shareInstance];
-    NSArray *mids = [model.mids componentsSeparatedByString:@","];
-    NSString *userId = [NSString stringWithFormat:@"%@",[obj objectForKey:@"userId"]];
-    for (NSString *i in mids) {
-        if ([userId isEqualToString:i]) {
-            NSInteger length = 0;
-            if (grap_money.length >0) {
-                length = grap_money.length - 1;
-            }
-            NSRange r = NSMakeRange(length, 1);
-            _money.text = [grap_money stringByReplacingCharactersInRange:r withString:@"*"];
-            break;
-        }
-    }
-    if (model.IsEnd) {
-        CGFloat m = [grap_money floatValue];
-        _max.hidden = (m == model.maxMoney)?NO:YES;
-        _maxImg.hidden = (m == model.maxMoney)?NO:YES;
-    }else{
-        _max.hidden = YES;
-        _maxImg.hidden = YES;
-    }
-  
-    
-    
+//    NSArray *mids = [model.mids componentsSeparatedByString:@","];
+//    NSString *userId = [NSString stringWithFormat:@"%@",[obj objectForKey:@"userId"]];
+//    for (NSString *i in mids) {
+//        if ([userId isEqualToString:i]) {
+//            NSInteger length = 0;
+//            if (grap_money.length >0) {
+//                length = grap_money.length - 1;
+//            }
+//            NSRange r = NSMakeRange(length, 1);
+//            _money.text = [grap_money stringByReplacingCharactersInRange:r withString:@"*"];
+//            break;
+//        }
+//    }
+    CGFloat m = [grap_money floatValue];
+    _max.hidden = (m == model.maxMoney)?NO:YES;
+    _maxImg.hidden = (m == model.maxMoney)?NO:YES;
 }
 
 @end

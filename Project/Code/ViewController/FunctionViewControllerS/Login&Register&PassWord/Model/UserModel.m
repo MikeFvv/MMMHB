@@ -18,24 +18,24 @@ MJCodingImplementation
 }
 
 
-+ (void)getUserInfoObj:(id)obj
-               Success:(void (^)(NSDictionary *))success
-               Failure:(void (^)(NSError *))failue{
-    CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = obj;
-    net.path = Line_UserInfo;
-    [net doGetSuccess:^(NSDictionary *dic) {
-        NSLog(@"%@",dic);
-        if (CD_Success([dic objectForKey:@"status"], 1)) {
-            success([dic objectForKey:@"data"]);
-        }else{
-            failue(nil);
-        }
-        
-    } failure:^(NSError *error) {
-        NSLog(@"%@",[error debugDescription]);
-        failue(error);
-    }];
-}
+//+ (void)getUserInfoObj:(id)obj
+//               Success:(void (^)(NSDictionary *))success
+//               Failure:(void (^)(NSError *))failue{
+//    CDBaseNet *net = [CDBaseNet normalNet];
+//    net.param = obj;
+//    net.path = Line_UserInfo;
+//    [net doGetSuccess:^(NSDictionary *dic) {
+//        NSLog(@"%@",dic);
+//        if (CD_Success([dic objectForKey:@"status"], 1)) {
+//            success([dic objectForKey:@"data"]);
+//        }else{
+//            failue(nil);
+//        }
+//        
+//    } failure:^(NSError *error) {
+//        NSLog(@"%@",[error debugDescription]);
+//        failue(error);
+//    }];
+//}
 
 @end

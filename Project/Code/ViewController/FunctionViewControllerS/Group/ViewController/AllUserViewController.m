@@ -61,10 +61,37 @@
     _tableView.delegate = self;
     _tableView.dataSource = self;
     [_tableView reloadData];
+    
+    WEAK_OBJ(weakModel, self.model);
+    WEAK_OBJ(weakSelf, self);
+    _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        weakModel.page = 1;
+        [weakSelf getData];
+    }];
+    
+    _tableView.mj_footer = [MJRefreshAutoFooter footerWithRefreshingBlock:^{
+        if (!weakModel.isMost) {
+            weakModel.page ++;
+            [weakSelf getData];
+        }
+    }];
 }
 
+-(void)getData{
+    WEAK_OBJ(weakSelf, self);
+    [self.model getUserListWithSuccess:^(NSDictionary *info) {
+        [weakSelf reloadTable];
+    } failure:^(id object) {
+        WEAK_OBJ(weakSelf, self);
+        [FUNCTION_MANAGER handleFailResponse:object];
+    }];
+}
 
-
+-(void)reloadTable{
+    [_tableView.mj_footer endRefreshing];
+    [_tableView.mj_header endRefreshing];
+    [_tableView reloadData];
+}
 #pragma mark UITableViewDataSource
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     return _model.dataList.count;

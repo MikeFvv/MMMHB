@@ -13,6 +13,7 @@
 #import "MessageItem.h"
 #import "WebViewController.h"
 #import "ModelHelper.h"
+#import "NotifViewController.h"
 
 @interface MessageViewController ()<UITableViewDelegate,UITableViewDataSource>{
     UITableView *_tableView;
@@ -76,10 +77,8 @@
         [self getData];
     }];
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self->_tableView.mj_header beginRefreshing];
-//        [self test];
-    });
+    SV_SHOW;
+    [self getData];
     
 }
 
@@ -93,6 +92,7 @@
 - (void)getData{
     WEAK_OBJ(weakSelf, self);
     [_model requestGroupListWithSuccess:^(NSDictionary *info) {
+        SV_DISMISS;
         [weakSelf reload];
     } Failure:^(NSError *error) {
         [FUNCTION_MANAGER handleFailResponse:error];
@@ -131,9 +131,23 @@
     
     CDTableModel *model = _model.dataList[indexPath.row];
     //MessageItem *item = [MessageItem mj_objectWithKeyValues:model.obj];
-    MessageItem *item = [MODEL_HELPER getMessageItem:model.obj];
+    MessageItem *item = nil;
+    if([model.obj isKindOfClass:[MessageItem class]])
+        item = model.obj;
+    else
+        item = [MODEL_HELPER getMessageItem:model.obj];
+
+    CGFloat userMoney = [APP_MODEL.user.userBalance floatValue];
+    if (item.joinMoney.floatValue > userMoney) {
+        NSString *mess = [NSString stringWithFormat:@"小于最小进群余额%@元，请充值~", item.joinMoney];
+        SV_ERROR_STATUS(mess);
+        return;
+    }
+    
     if ([item.groupName isEqualToString:@"通知消息"]) {
-        CDPush(self.navigationController, CDVC(@"NotifViewController"), YES);
+        NotifViewController *vc = [[NotifViewController alloc] init];
+        vc.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:vc animated:YES];
         return;
     }
     if ([item.groupName isEqualToString:@"在线客服"]) {
@@ -171,6 +185,7 @@
 - (void)groupChat:(id)obj{
     ChatViewController *vc = [ChatViewController groupChatWithObj:obj];
     vc.hidesBottomBarWhenPushed = YES;
+    
     [self.navigationController pushViewController:vc animated:YES];
 }
 

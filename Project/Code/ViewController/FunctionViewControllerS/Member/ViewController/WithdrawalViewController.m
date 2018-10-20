@@ -9,14 +9,18 @@
 #import "WithdrawalViewController.h"
 #import "WithdrawalNet.h"
 #import "WithHisListTableViewCell.h"
-
-@interface WithdrawalViewController ()<UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate>{
+#import "NetRequestManager.h"
+#import "WithdrawalModel.h"
+@interface WithdrawalViewController ()<UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate,UITextFieldDelegate>{
     UITableView *_tableView;
     UITextField *_textField[6];
     NSArray *_rowList;
     UILabel *_typeLabel;
-    WithdrawalNet *_model;
+    //WithdrawalNet *_model;
+    NSInteger _tempSelect;//记录选择哪个历史帐号
 }
+@property(nonatomic,strong)NSArray *bankList;
+@property(nonatomic,strong)NSArray *recordList;
 
 @end
 
@@ -24,15 +28,23 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [NET_REQUEST_MANAGER requestBankListWithSuccess:nil fail:nil];
     [self initData];
     [self initSubviews];
     [self initLayout];
+    
+    WEAK_OBJ(weakSelf, self);
+    self.bankList = [FUNCTION_MANAGER readArchiveWithFileName:@"bankList"];
+    [NET_REQUEST_MANAGER requestBankListWithSuccess:^(id object) {
+        weakSelf.bankList = [FUNCTION_MANAGER readArchiveWithFileName:@"bankList"];
+    } fail:^(id object) {
+        
+    }];
 }
 
 #pragma mark ----- Data
 - (void)initData{
     _rowList = @[@[@"金额"],@[@"卡号",@"持卡人",@"开户行",@"开户地址",@"备注"]];
-    _model = [WithdrawalNet new];
 }
 
 
@@ -49,8 +61,6 @@
     self.navigationItem.title = @"提现";
     
     CDWeakSelf(self);
-    __weak WithdrawalNet *weakModel = _model;
-    
     _tableView = [UITableView groupTable];
     [self.view addSubview:_tableView];
     _tableView.backgroundColor = BaseColor;
@@ -61,48 +71,40 @@
     _tableView.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
         CDStrongSelf(self);
-        weakModel.page = 1;
-        [self getData];
+        [self requestRecordList];
     }];
-    
-    _tableView.mj_footer = [MJRefreshAutoFooter footerWithRefreshingBlock:^{
-        CDStrongSelf(self);
-        if (!weakModel.IsMost) {
-            weakModel.page ++;
-            [self getData];
-        }
-    }];
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self->_tableView.mj_header beginRefreshing];
-    });
+    [self requestRecordList];
 }
 
-- (void)getData{
-    CDWeakSelf(self);
-    [_model WithdrawalListObj:@{@"uid":APP_MODEL.user.userId,@"page":@(_model.page)} Success:^(NSDictionary *dic) {
-        CDStrongSelf(self);
-        [self reload];
-    } Failure:^(NSError *error) {
-        CDStrongSelf(self);
-        [self reload];
-        SV_ERROR(error);
+- (void)requestRecordList{
+    WEAK_OBJ(weakSelf, self);
+    [NET_REQUEST_MANAGER requestDrawRecordListWithSuccess:^(id object) {
+        NSArray *array = object[@"data"];
+        weakSelf.recordList = array;
+        [weakSelf reload];
+    } fail:^(id object) {
+        [weakSelf reload];
+        [FUNCTION_MANAGER handleFailResponse:object];
     }];
+//    [_model withdrawalListObj:@{@"uid":APP_MODEL.user.userId,@"page":@(_model.page)} Success:^(NSDictionary *dic) {
+//        CDStrongSelf(self);
+//        [self reload];
+//    } Failure:^(NSError *error) {
+//        CDStrongSelf(self);
+//        [self reload];
+//        SV_ERROR(error);
+//    }];
 }
 
 - (void)reload{
     [_tableView.mj_footer endRefreshing];
     [_tableView.mj_header endRefreshing];
     [_tableView reloadData];
-    if (_model.IsMost) {
-        [_tableView.mj_footer endRefreshingWithNoMoreData];
-    }
 }
-
 
 #pragma mark UITableViewDataSource
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
-    return _rowList.count+_model.dataList.count;
+    return _rowList.count+self.recordList.count;
 }
 
 - (nullable UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
@@ -132,18 +134,17 @@
         }];
     }
     if (section == 2) {
-        view.backgroundColor = HexColor(@"#D8D8D8");
+        view.backgroundColor = COLOR_Y(240);
         UILabel *label = [UILabel new];
         [view addSubview:label];
         label.text = @"历史提交账号列表";
         label.font = [UIFont scaleFont:12];
-        label.textColor = Color_6;
+        label.textColor = COLOR_Y(130);
         [label mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.equalTo(view.mas_left).offset(15);
             make.centerY.equalTo(view);
         }];
     }
-    
     return view;
 }
 
@@ -153,9 +154,9 @@
         view.frame = CGRectMake(0, 0, CDScreenWidth, 48);
         UILabel *label = [UILabel new];
         [view addSubview:label];
-        label.font = [UIFont scaleFont:12];
+        label.font = [UIFont scaleFont:14];
         label.textColor = Color_6;
-        label.text = APP_MODEL.user.userBalance;
+        label.text = [NSString stringWithFormat:@"余额：%@ 元", APP_MODEL.user.userBalance];
         
         [label mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.equalTo(view.mas_left).offset(15);
@@ -184,7 +185,7 @@
         
         UILabel *tip = [UILabel new];
         [view addSubview:tip];
-        tip.textColor = Color_6;
+        tip.textColor = COLOR_Y(130);
         tip.text = @"申请后，请耐心等待审核";
         tip.font = [UIFont scaleFont:12];
         
@@ -202,7 +203,7 @@
         return 48;
     }
     else
-        return 116;
+        return 126;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
@@ -214,7 +215,12 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
-    return (section == 1||section == 2)?48:0;
+    if(section == 1)
+        return 48;
+    else if(section == 2)
+        return 30;
+    else
+        return 0;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
@@ -229,32 +235,40 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    
-    
     if (indexPath.section <_rowList.count) {
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
         if (cell == nil) {
             cell = [[UITableViewCell alloc]initWithStyle:0 reuseIdentifier:@"cell"];
-            NSInteger row = indexPath.section*1+indexPath.row;
+            NSInteger index = indexPath.section*1+indexPath.row;
             cell.textLabel.text = _rowList[indexPath.section][indexPath.row];
             cell.textLabel.font = [UIFont scaleFont:14];
             
-            _textField[row] = [UITextField new];
-            [cell.contentView addSubview:_textField[row]];
-            _textField[row].font = [UIFont scaleFont:13];
-            _textField[row].placeholder = (row == 0)?@"0.00":nil;
-            _textField[row].textAlignment = NSTextAlignmentRight;
-            if (row == 0) {
+            _textField[index] = [UITextField new];
+            [cell.contentView addSubview:_textField[index]];
+            _textField[index].font = [UIFont scaleFont:13];
+            _textField[index].placeholder = (index == 0)?@"0.00":nil;
+            _textField[index].textAlignment = NSTextAlignmentRight;
+            if(index == 0 && indexPath.section == 0)
+                _textField[index].keyboardType = UIKeyboardTypeDecimalPad;
+            _textField[index].clearButtonMode = UITextFieldViewModeWhileEditing;
+            if (index == 0) {
                 UILabel *unit = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 30, 20)];
                 unit.font = [UIFont scaleFont:14];
                 unit.text = @"元";
                 unit.textAlignment = NSTextAlignmentRight;
                 unit.textColor = HexColor(@"#151515");
-                _textField[row].rightView  = unit;
-                _textField[row].rightViewMode = UITextFieldViewModeAlways;
+                _textField[index].rightView  = unit;
+                _textField[index].rightViewMode = UITextFieldViewModeAlways;
             }
             
-            [_textField[row] mas_makeConstraints:^(MASConstraintMaker *make) {
+            if(index == 5)
+                _textField[index].returnKeyType = UIReturnKeyDone;
+            else
+                _textField[index].returnKeyType = UIReturnKeyNext;
+            if(index == 3)
+                _textField[index].userInteractionEnabled = NO;
+            _textField[index].delegate = self;
+            [_textField[index] mas_makeConstraints:^(MASConstraintMaker *make) {
                 make.left.equalTo(@(120));
                 make.right.equalTo(cell.contentView).offset(-15);
                 make.top.bottom.equalTo(cell.contentView);
@@ -267,21 +281,63 @@
         if (cell == nil) {
             cell = [[WithHisListTableViewCell alloc]initWithStyle:0 reuseIdentifier:@"WithHis"];
         }
-        CDTableModel *model = _model.dataList[indexPath.section - _rowList.count];
-        cell.obj = model.obj;
+        NSDictionary *dict = self.recordList[indexPath.section - _rowList.count];
+        cell.obj = dict;
         return cell;
     }
     return nil;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [self.view endEditing:YES];
+    if(indexPath.section == 1 && indexPath.row == 2){
+        UIActionSheet *sheet = [[UIActionSheet alloc]initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:nil];
+        NSArray *bankList = [FUNCTION_MANAGER readArchiveWithFileName:@"bankList"];
+        if(bankList.count == 0)
+            [NET_REQUEST_MANAGER requestBankListWithSuccess:nil fail:nil];
+        for (NSDictionary *dic in bankList) {
+            [sheet addButtonWithTitle:dic[@"upaytTitle"]];
+        }
+        sheet.tag = 1;
+        [sheet showInView:self.view];
+    }else if(indexPath.section == 2){
+        _tempSelect = indexPath.row;
+        WEAK_OBJ(weakSelf, self);
+        UIAlertController *vc = [UIAlertController alertControllerWithTitle:@"提示" message:@"是否使用此账号进行提现？" preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *cancle = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            
+        }];
+        [vc addAction:cancle];
+        UIAlertAction *make = [UIAlertAction actionWithTitle:@"使用" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [weakSelf backfillInfo];
+        }];
+        [vc addAction:make];
+        [self presentViewController:vc animated:YES completion:nil];
+    }
+}
+
+-(void)backfillInfo{
+    if(_tempSelect < self.recordList.count){
+        NSDictionary *dic = self.recordList[_tempSelect];
+        WithdrawalModel *model = [WithdrawalModel mj_objectWithKeyValues:dic];
+        _textField[1].text = model.upayNo;
+        _textField[2].text = model.upayUser;
+        _textField[3].text = model.upayBankname;
+        _textField[4].text = model.upayRegion;
+    }
+}
 #pragma mark UIActionSheetDelegate
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
-    
-    if (buttonIndex >0) {
-        return;
+    if(actionSheet.tag == 0){
+        if (buttonIndex >0) {
+            return;
+        }
+        NSArray *list = @[@"银行卡"];
+        _typeLabel.text = list[buttonIndex];
+    }else{
+        if(buttonIndex != 0)
+            _textField[3].text = [actionSheet buttonTitleAtIndex:buttonIndex];
     }
-    NSArray *list = @[@"银行卡"];
-    _typeLabel.text = list[buttonIndex];
 }
 
 #pragma mark action
@@ -320,12 +376,18 @@
     if (_textField[5].text.length != 0) {
         [dic setObject:_textField[5].text forKey:@"cashRemarks"];
     }
-    
-    [WithdrawalNet WithdrawalObj:dic Success:^(NSDictionary *info) {
-        CDPop(self.navigationController, YES);
-    } Failure:^(NSError *error) {
-        SV_ERROR(error);
+    WEAK_OBJ(weakSelf, self);
+    [NET_REQUEST_MANAGER widthDrawWithAmount:_textField[0].text userName:_textField[2].text bankName:_textField[3].text address:_textField[4].text uppayNO:_textField[1].text remark:_textField[5].text success:^(id object) {
+        SV_SUCCESS_STATUS(object[@"data"]);
+        CDPop(weakSelf.navigationController, YES);
+    } fail:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
     }];
+//    [WithdrawalNet WithdrawalObj:dic Success:^(NSDictionary *info) {
+//        CDPop(self.navigationController, YES);
+//    } Failure:^(NSError *error) {
+//        SV_ERROR(error);
+//    }];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -343,4 +405,16 @@
  }
  */
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+    for (NSInteger i = 0; i < 5; i ++) {
+        if(textField == _textField[i]){
+            if(i == 2)
+                i += 1;
+            [_textField[i + 1] becomeFirstResponder];
+            return YES;
+        }
+    }
+    [textField resignFirstResponder];
+    return YES;
+}
 @end

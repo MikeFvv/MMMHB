@@ -13,12 +13,13 @@
 @property (nonatomic ,strong) AFHTTPSessionManager *manager;
 @end
 
+static AFHTTPSessionManager *manager;
+
 @implementation CDBaseNet
 
 
 - (AFHTTPSessionManager *)manager {
     static dispatch_once_t onceToken;
-    static AFHTTPSessionManager *manager;
     dispatch_once(&onceToken, ^{
         manager = [AFHTTPSessionManager manager];
         manager.requestSerializer.timeoutInterval = 10.0;

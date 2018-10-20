@@ -10,6 +10,8 @@
 #import "TopupBarView.h"
 #import "MemberNet.h"
 #import "WebViewController.h"
+#import "NetRequestManager.h"
+
 
 @interface TopupViewController (){
     UITableView *_tableView;
@@ -64,7 +66,7 @@
     submit.layer.cornerRadius = 8;
     submit.backgroundColor = MBTNColor;
     submit.titleLabel.font = [UIFont scaleFont:17];
-    [submit setTitle:@"确认支付" forState:UIControlStateNormal];
+    [submit setTitle:@"确认充值" forState:UIControlStateNormal];
     [submit setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [submit addTarget:self action:@selector(action_submit) forControlEvents:UIControlEventTouchUpInside];
     
@@ -80,7 +82,7 @@
     tipLabel.font = [UIFont scaleFont:12];
     tipLabel.numberOfLines = 0;
     tipLabel.textColor = Color_6;
-    tipLabel.text = @"以下操作导致积分不到账\n1、保持的二维码只能用一次，不能重复使用\n2、二维码保存后30秒不使用即失效，必须重新保存。";
+    tipLabel.text = @"以下操作导致充值不到账\n1、保持的二维码只能用一次，不能重复使用\n2、二维码保存后30秒不使用即失效，必须重新保存。";
     [tipLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(footer.mas_left).offset(18);
         make.right.equalTo(footer.mas_right).offset(-18);
@@ -108,28 +110,57 @@
     return nil;
 }
 
-#pragma mark action
+
+
+#pragma mark 充值 Mike
 - (void)action_submit{
     if (_topupBar.money.length == 0) {
         SV_ERROR_STATUS(@"请输入充值金额！");
         return;
     }
     SV_SHOW;
-    [MemberNet TopupObj:@{@"uid":APP_MODEL.user.userId,@"type":@(_topupBar.type),@"money":_topupBar.money} Success:^(NSDictionary *info) {
-        SV_DISMISS;
-        NSInteger type = [info[@"data"][@"type"]integerValue];//[info objectForKey:@"data"]
-        NSString *html = info[@"data"][@"html"];
-        if (type == 1) {//1-html字符串，2-地址
-            WebViewController *vc = [[WebViewController alloc]initWithHtmlString:html];
-            [self.navigationController pushViewController:vc animated:YES];
-        }else{
-            WebViewController *vc = [[WebViewController alloc]initWithUrl:html];
-            [self.navigationController pushViewController:vc animated:YES];
-        }
-    } Failure:^(NSError *error) {
-        SV_ERROR(error);
+    WEAK_OBJ(weakself, self)
+    [NET_REQUEST_MANAGER rechargeWithUserId:APP_MODEL.user.userId type:[NSString stringWithFormat:@"%zd", _topupBar.type] money:_topupBar.money success:^(id object) {
+        SV_SUCCESS_STATUS(@"充值成功！");
+        CDPop(weakself.navigationController, YES);
+    } fail:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
     }];
+   
 }
+
+
+
+
+
+
+#pragma mark action
+//- (void)action_submitOld{
+//    if (_topupBar.money.length == 0) {
+//        SV_ERROR_STATUS(@"请输入充值金额！");
+//        return;
+//    }
+//    SV_SHOW;
+//    [MemberNet TopupObj:@{@"uid":APP_MODEL.user.userId,@"type":@(_topupBar.type),@"money":_topupBar.money} Success:^(NSDictionary *info) {
+//        SV_DISMISS;
+//        NSInteger type = [info[@"data"][@"type"]integerValue];//[info objectForKey:@"data"]
+//        NSString *html = info[@"data"][@"html"];
+//        if (type == 1) {//1-html字符串，2-地址
+//            WebViewController *vc = [[WebViewController alloc]initWithHtmlString:html];
+//            [self.navigationController pushViewController:vc animated:YES];
+//        }else{
+//            WebViewController *vc = [[WebViewController alloc]initWithUrl:html];
+//            [self.navigationController pushViewController:vc animated:YES];
+//        }
+//    } Failure:^(NSError *error) {
+//        SV_ERROR(error);
+//    }];
+//}
+
+
+
+
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

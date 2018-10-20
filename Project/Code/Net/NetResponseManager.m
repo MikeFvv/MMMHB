@@ -40,10 +40,14 @@ static NetResponseManager *instance = nil;
         [newDic setObject:httpSessionManager.requestParameters forKey:@"requestParameters"];
     if(httpSessionManager.action == ActionGetUserInfo)
         [self handleUserInfo:newDic];
-    else if(httpSessionManager.action == ActionGetToken)
+    else if(httpSessionManager.action == ActionGetToken || httpSessionManager.action == ActionGetTokenByVerifyCode)
         [self handleGetToken:newDic];
     else if(httpSessionManager.action == ActionGetIMToken)
         [self handleRongYunToken:newDic];
+    else if(httpSessionManager.action == ActionGetBankList)
+        [self handleGetBankList:newDic];
+    else if(httpSessionManager.action == ActionGetAppConfig)
+        [self handleGetAppConfig:newDic];
     ResultCode code = (ResultCode)[[newDic objectForKey:@"code"] integerValue];
     if(([newDic objectForKey:@"code"] && code == ResultCodeSuccess) || [newDic objectForKey:@"access_token"]){
         if(httpSessionManager.successBlock){
@@ -62,13 +66,16 @@ static NetResponseManager *instance = nil;
 
 -(void)handleGetToken:(NSDictionary *)data{
     if(data){
+        WEAK_OBJ(weak_request,NET_REQUEST_MANAGER);
         ResultCode code = (ResultCode)[[data objectForKey:@"code"] integerValue];
         if(([data objectForKey:@"code"] && code == ResultCodeSuccess) || [data objectForKey:@"access_token"]){
             NSString *token = data[@"access_token"];
             APP_MODEL.user.token = token;
-            APP_MODEL.user.tokenType = @"Bearer";//data[@"token_type"];
+            NSString *tokenType = [data[@"token_type"] capitalizedString];
+            APP_MODEL.user.tokenType = tokenType;
             APP_MODEL.user.userId = [NSString stringWithFormat:@"%ld",[data[@"userId"] integerValue]];
             APP_MODEL.user.fullToken = [NSString stringWithFormat:@"%@ %@",APP_MODEL.user.tokenType,APP_MODEL.user.token];
+            [weak_request requestAppConfigWithSuccess:nil fail:nil];
             [APP_MODEL saveToDisk];
         }
     }
@@ -94,9 +101,28 @@ static NetResponseManager *instance = nil;
 -(void)handleRongYunToken:(NSDictionary *)data{
     if(data){
         ResultCode code = (ResultCode)[[data objectForKey:@"code"] integerValue];
-        if(([data objectForKey:@"code"] && code == ResultCodeSuccess) || [data objectForKey:@"access_token"]){
+        if(([data objectForKey:@"code"] && code == ResultCodeSuccess)){
             APP_MODEL.rongYunToken = data[@"data"];
             [APP_MODEL saveToDisk];
+        }
+    }
+}
+
+-(void)handleGetBankList:(NSDictionary *)data{
+    if(data){
+        ResultCode code = (ResultCode)[[data objectForKey:@"code"] integerValue];
+        if(([data objectForKey:@"code"] && code == ResultCodeSuccess)){
+            NSArray *array = data[@"data"];
+            [FUNCTION_MANAGER archiveWithData:array andFileName:@"bankList"];
+        }
+    }
+}
+
+-(void)handleGetAppConfig:(NSDictionary *)data{
+    if(data){
+        ResultCode code = (ResultCode)[[data objectForKey:@"code"] integerValue];
+        if(([data objectForKey:@"code"] && code == ResultCodeSuccess)){
+            
         }
     }
 }

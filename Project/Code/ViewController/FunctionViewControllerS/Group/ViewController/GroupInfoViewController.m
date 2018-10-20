@@ -40,12 +40,12 @@
 #pragma mark ----- Data
 - (void)initData{
     _model = [GroupNet new];
-    
 }
 
 - (void)update{
     CDWeakSelf(self);
     _headView = [GroupHeadView headViewWithList:_model.dataList];
+    [_headView setTotalNum:_model.total];
     _headView.click = ^(NSInteger index) {
         CDStrongSelf(self);
         [self action_allUser];
@@ -75,13 +75,19 @@
     _tableView.rowHeight = UITableViewAutomaticDimension;
     _tableView.sectionFooterHeight = 8.0f;
     
-    CDWeakSelf(self);
-    [_model queryUserObj:@{@"groupId":_groupInfo.groupId} Success:^(NSDictionary *info) {
-        CDStrongSelf(self);
-        [self update];
-    } Failure:^(NSError *error) {
-        SV_ERROR(error);
+    WEAK_OBJ(weakSelf, self);
+    _model.groupId = _groupInfo.groupId;
+    [_model getUserListWithSuccess:^(NSDictionary * info) {
+        [weakSelf update];
+    } failure:^(id error) {
+        [FUNCTION_MANAGER handleFailResponse:error];
     }];
+//    [_model queryUserObj:@{@"groupId":_groupInfo.groupId} Success:^(NSDictionary *info) {
+//        CDStrongSelf(self);
+//        [self update];
+//    } Failure:^(NSError *error) {
+//        SV_ERROR(error);
+//    }];
 }
 
 #pragma mark UITableViewDataSource

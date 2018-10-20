@@ -297,6 +297,13 @@
            else if([dic objectForKey:@"error"])
                error = nil;
        }
+       NSHTTPURLResponse *resp = (NSHTTPURLResponse *)response;
+       NSInteger statusCode = resp.statusCode;
+       if(statusCode == 401){
+           responseObject = @{@"code":@401,@"msg":@"用户不存在或密码错误"};
+       }else if(statusCode == 400){
+           responseObject = @{@"code":@400,@"msg":@"用户不存在或密码错误"};
+       }
         if (error) {
             if (failure) {
                 failure(dataTask, error);

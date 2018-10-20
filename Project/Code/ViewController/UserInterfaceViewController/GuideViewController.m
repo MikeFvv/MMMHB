@@ -89,9 +89,9 @@
     UIImageView *img = [UIImageView new];
     [cell.contentView addSubview:img];
     img.image = [UIImage imageNamed:_dataList[indexPath.row]];
+    img.contentMode = UIViewContentModeScaleAspectFit;
     [img mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.width.equalTo(cell.contentView.mas_width);
-       // make.centerY.mas_equalTo(cell.contentView)
+        make.edges.equalTo(cell.contentView);
     }];
     return cell;
 }
@@ -104,7 +104,7 @@
 
 #pragma mark action
 - (void)action_done{
-    [AppModel hidGuide];
+    [APP_MODEL hidGuide];
 }
 
 

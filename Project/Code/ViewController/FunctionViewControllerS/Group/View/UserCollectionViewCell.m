@@ -44,6 +44,7 @@
     [_name mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self->_icon.mas_bottom).offset(CD_Scal(6, 667));
         make.centerX.equalTo(self.contentView);
+        make.width.equalTo(@80);
     }];
 }
 
@@ -59,11 +60,12 @@
     [self.contentView addSubview:_name];
     _name.textColor = Color_3;
     _name.font = [UIFont scaleFont:13];
+    _name.textAlignment = NSTextAlignmentCenter;
 }
 
 
 - (void)update:(id)obj{
-    [_icon cd_setImageWithURL:[NSURL URLWithString:[NSString cdImageLink:[obj objectForKey:@"avatar"]]] placeholderImage:[UIImage imageNamed:@"user-default"]];
-    _name.text = [NSString stringWithFormat:@"%@",[obj objectForKey:@"nickname"]];
+    [_icon cd_setImageWithURL:[NSURL URLWithString:[NSString cdImageLink:[obj objectForKey:@"userAvatar"]]] placeholderImage:[UIImage imageNamed:@"user-default"]];
+    _name.text = [NSString stringWithFormat:@"%@",[obj objectForKey:@"userNick"]];
 }
 @end

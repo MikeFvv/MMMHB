@@ -108,8 +108,6 @@
         make.left.equalTo(self.bubbleBackgroundView).offset(15);
         make.bottom.equalTo(self.bubbleBackgroundView.mas_bottom).offset(-2);
     }];
-    
-    
 }
 
 - (NSString *)typeString:(NSInteger)type{
@@ -136,10 +134,18 @@
     NSMutableDictionary *dic = model.extra.mj_JSONObject;
     NSInteger type = [dic[@"type"]integerValue];
     NSDictionary *conDic = content.content.mj_JSONObject;
+
     if (conDic) {
-        _contentLabel.text = [NSString stringWithFormat:@"%@-%@",conDic[@"money"],conDic[@"num"]];
+        NSString *money = conDic[@"money"];
+        if([money isKindOfClass:[NSNumber class]])
+            money = [(NSNumber *)money stringValue];
+        NSString *num = conDic[@"num"];
+        if([num isKindOfClass:[NSNumber class]])
+            num = [(NSNumber *)num stringValue];
+        _contentLabel.text = [NSString stringWithFormat:@"%@-%@",money,num];
         _redType.text = [self typeString:[conDic[@"type"]integerValue]];
     }
+    
     _redIcon.image = (type == 0)?[UIImage imageNamed:@"red-icon"]:[UIImage imageNamed:@"red-icon-disabled"];
     CGRect bubbleFrame,messageFrame = self.messageContentView.frame;
     messageFrame.origin.x = (MessageDirection_RECEIVE == self.messageDirection)?HeadAndContentSpacing +

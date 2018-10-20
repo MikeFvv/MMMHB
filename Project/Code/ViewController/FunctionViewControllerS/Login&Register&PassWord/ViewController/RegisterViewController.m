@@ -9,7 +9,7 @@
 #import "RegisterViewController.h"
 #import "NetRequestManager.h"
 
-@interface RegisterViewController ()<UITableViewDataSource,UITableViewDelegate,UIActionSheetDelegate>{
+@interface RegisterViewController ()<UITableViewDataSource,UITableViewDelegate,UIActionSheetDelegate,UITextFieldDelegate>{
     UITableView *_tableView;
     NSArray *_dataList;
     UITextField *_textField[5];
@@ -132,7 +132,14 @@
             _textField[indexPath.row].placeholder = list[indexPath.row][@"title"];
             _textField[indexPath.row].secureTextEntry = (indexPath.row == 2 || indexPath.row == 3)?YES:NO;
             _textField[indexPath.row].font = [UIFont scaleFont:14];
-            
+            _textField[indexPath.row].clearButtonMode = UITextFieldViewModeWhileEditing;
+            _textField[indexPath.row].delegate = self;
+                    _textField[indexPath.row].returnKeyType = UIReturnKeyNext;
+
+            if(indexPath.row == 0)
+                _textField[0].keyboardType = UIKeyboardTypePhonePad;
+            else if(indexPath.row == 1)
+                _textField[1].keyboardType = UIKeyboardTypeNamePhonePad;
             CGFloat r = (indexPath.row == 0)?120:12;
             [_textField[indexPath.row] mas_makeConstraints:^(MASConstraintMaker *make) {
                 make.left.equalTo(cell.contentView.mas_left).offset(50);
@@ -146,7 +153,9 @@
                 [cell.contentView addSubview:_textField[4]];
                 _textField[4].placeholder = list[indexPath.row][@"title"];
                 _textField[4].font = [UIFont scaleFont:14];
-                
+                _textField[4].clearButtonMode = UITextFieldViewModeWhileEditing;
+                _textField[4].returnKeyType = UIReturnKeyDone;
+                _textField[4].delegate = self;
                 [_textField[4] mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.left.equalTo(cell.contentView.mas_left).offset(50);
                     make.top.bottom.equalTo(cell.contentView);
@@ -194,7 +203,7 @@
 
 #pragma mark action
 - (void)action_submit{
-    if (_textField[0].text.length != 11) {
+    if (_textField[0].text.length < 11) {
         SV_ERROR_STATUS(@"请输入正确的手机号！");
         return;
     }
@@ -202,8 +211,8 @@
         SV_ERROR_STATUS(@"请验证码！");
         return;
     }
-    if (_textField[2].text.length == 0 || _textField[3].text.length == 0) {
-        SV_ERROR_STATUS(@"请输入密码！");
+    if (_textField[2].text.length < 6 || _textField[3].text.length < 6) {
+        SV_ERROR_STATUS(@"请输入6位以上密码！");
         return;
     }
     if (![_textField[2].text isEqualToString:_textField[3].text]) {
@@ -225,7 +234,7 @@
 }
 
 - (void)action_getCode{
-    if (_textField[0].text.length != 11) {
+    if (_textField[0].text.length < 11) {
         SV_ERROR_STATUS(@"请输入正确的手机号！");
         return;
     }
@@ -234,9 +243,14 @@
     [NET_REQUEST_MANAGER requestSmsCodeWithPhone:_textField[0].text code:@"reg" success:^(id object) {
         SV_SUCCESS_STATUS(@"验证码发送成功");
         [weakSelf.codeBtn beginTime:60];
+        [weakSelf af];
     } fail:^(id object) {
         [FUNCTION_MANAGER handleFailResponse:object];
     }];
+}
+
+-(void)af{
+    [_textField[1] becomeFirstResponder];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -254,4 +268,14 @@
  }
  */
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+    for (NSInteger i = 0; i < 4; i ++) {
+        if(_textField[i] == textField){
+            [_textField[i + 1] becomeFirstResponder];
+            return YES;
+        }
+    }
+    [textField resignFirstResponder];
+    return YES;
+}
 @end

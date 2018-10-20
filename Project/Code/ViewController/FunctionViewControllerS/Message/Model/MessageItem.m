@@ -27,7 +27,7 @@ MJCodingImplementation
 }
 
 - (NSString *)path{
-    NSString *path = [NSString stringWithFormat:@"%@_%@_%d",Line_pre,APP_MODEL.user.userId,isLine];
+    NSString *path = [NSString stringWithFormat:@"%@_%@_%d",url_preix,APP_MODEL.user.userId,rongYunMode];
     return path;//[path MD5ForLower32Bate];
 }
 

@@ -17,7 +17,6 @@ typedef void (^PikerHandle)(NSString *date);
 
 @interface CDAlertViewController (){
     UIControl *_backControl;
-    UIDatePicker *_picker;
 }
 
 @property (nonatomic ,copy) PikerHandle piker;
@@ -77,7 +76,7 @@ typedef void (^PikerHandle)(NSString *date);
         _picker.locale = [NSLocale localeWithLocaleIdentifier:@"zh"];
         _picker.datePickerMode = UIDatePickerModeDate;
         _picker.backgroundColor = [UIColor whiteColor];
-        _picker.date = [NSDate dateWithTimeIntervalSince1970:APP_MODEL.user.jointime];
+//        _picker.date = [NSDate dateWithTimeIntervalSince1970:APP_MODEL.user.jointime];
         [_picker setMaximumDate:[NSDate date]];
         [_picker setMinimumDate:[NSDate dateWithTimeIntervalSince1970:APP_MODEL.user.jointime]];
     }
@@ -134,6 +133,15 @@ typedef void (^PikerHandle)(NSString *date);
     alert.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     alert.modalPresentationStyle = UIModalPresentationOverCurrentContext;
     alert.piker = date;
+    [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alert animated:YES completion:nil];
+}
+
++ (void)showDatePikerDate:(void (^)(NSString *))date defaultTime:(double)defaultTime{
+    CDAlertViewController *alert = [[CDAlertViewController alloc]initWithStyle:CDAlertDatePiker];
+    alert.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    alert.modalPresentationStyle = UIModalPresentationOverCurrentContext;
+    alert.piker = date;
+    alert.picker.date = [NSDate dateWithTimeIntervalSince1970:defaultTime];
     [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alert animated:YES completion:nil];
 }
 /*

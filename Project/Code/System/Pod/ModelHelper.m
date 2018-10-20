@@ -39,10 +39,19 @@ static ModelHelper *instance = nil;
         item.know = detail[@"know"];
         item.rule = detail[@"rule"];
         item.notice = detail[@"notice"];
+        item.localType = [dict[@"localType"] integerValue];
         item.status = [detail[@"active"] integerValue];
         if([ruleBomb isKindOfClass:[NSDictionary class]]){
+            // 判断是否扫雷群 Mike
+            item.type = 1;
+            
             item.maxMoney = ruleBomb[@"maxMoney"];
             item.minMoney = ruleBomb[@"minMoney"];
+            
+            item.count = ruleBomb[@"count"];
+            item.handicap = ruleBomb[@"handicap"];
+            item.ruleBombId = ruleBomb[@"id"];
+            item.name = ruleBomb[@"name"];
         }
     }
     return item;

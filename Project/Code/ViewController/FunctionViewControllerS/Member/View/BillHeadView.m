@@ -56,8 +56,8 @@
     UserModel *user = APP_MODEL.user;
     CGFloat w = (CDScreenWidth-1)/2;
     CGFloat h = w / BSCAL;
-    NSArray *list = @[@"my-icon1",@"my-icon2",@"my-icon3",@"my-icon4",@"my-icon5",@"my-icon6"];
-    NSArray *titles = @[user.userBalance,user.userFrozenMoney,@"",@"",user.userBalance,@"全部"];
+    NSArray *list = @[@"my-icon1",@"my-icon2",@"my-icon3",@"my-icon4",@"my-icon6"];//,@"my-icon5",@"my-icon6"
+    NSArray *titles = @[[NSString stringWithFormat:@"余额：%@元",user.userBalance],[NSString stringWithFormat:@"冻结：%@元",user.userFrozenMoney],@"",@"",@"全部"];//,user.userBalance,@"全部"
     for (int i = 0; i<list.count; i++) {
         UIButton *b = [self item:list[i] title:titles[i] frame:CGRectMake((1+w)*(i%2), (1+h)*(i/2), w, h)];//[[UIButton alloc]initWithFrame:];
         b.tag = BClickTAG + i;
@@ -111,8 +111,11 @@
             self.endChange(nil);
         }
     }
-    if (sender.tag == BClickTAG+5) {//类型
-        UIActionSheet *sheet = [[UIActionSheet alloc]initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"全部",@"充值",@"转账",@"扣除",@"红包发布",@"提现", nil];
+    if (sender.tag == BClickTAG+4) {//类型
+        UIActionSheet *sheet = [[UIActionSheet alloc]initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:nil];
+        for (NSDictionary *dic in self.billTypeArray) {
+            [sheet addButtonWithTitle:dic[@"billtTitle"]];
+        }
         [sheet showInView:[UIApplication sharedApplication].keyWindow.rootViewController.view];
     }
 }
@@ -135,14 +138,11 @@
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
     NSLog(@"t:%ld",buttonIndex);
-    NSArray *list = @[@"全部",@"充值",@"转账",@"扣除",@"红包发布",@"提现"];
-    if (buttonIndex>list.count-1) {
+    if(buttonIndex == 0)
         return;
-    }
-    
-    [self update:BClickTAG+5 content:list[buttonIndex]];
+    [self update:BClickTAG+4 content:[actionSheet buttonTitleAtIndex:buttonIndex]];
     if (self.TypeChange) {
-        self.TypeChange(buttonIndex);
+        self.TypeChange(buttonIndex - 1);
     }
 }
 

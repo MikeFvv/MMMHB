@@ -13,24 +13,16 @@
 + (EnvelopeNet *)shareInstance;
 
 @property (nonatomic ,strong) NSMutableArray *dataList;
-@property (nonatomic ,assign) NSInteger page; ///< 页数(从1开始，默认值1)           可选
-@property (nonatomic ,assign) NSInteger total;
-@property (nonatomic ,assign) NSInteger pageSize; ///< 页大小(默认值15)                可选
 
-@property (nonatomic ,copy) NSString *mids;
 @property (nonatomic ,strong) NSDictionary *user;
 
 @property (nonatomic ,assign) CGFloat maxMoney;
 
-@property (nonatomic ,assign) BOOL IsEnd;
+@property (nonatomic ,assign) BOOL isEmpty;///<空
+@property (nonatomic ,assign) BOOL isNetError;///<没有更多
 
-@property (nonatomic ,assign) BOOL IsEmpty;///<空
-@property (nonatomic ,assign) BOOL IsMost;///<没有更多
-@property (nonatomic ,assign) BOOL IsNetError;///<没有更多
-
-- (void)getListObj:(id)obj
-           Success:(void (^)(NSDictionary *))success
-           Failure:(void (^)(NSError *))failue;
+-(void)getListWithPacketId:(NSString *)packetId success:(void (^)(NSDictionary *))success
+                   failure:(void (^)(NSError *))failue;
 
 + (void)sendEnvelop:(id)obj
             Success:(void (^)(NSDictionary *))success

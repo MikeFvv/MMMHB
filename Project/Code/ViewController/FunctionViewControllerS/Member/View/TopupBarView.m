@@ -81,7 +81,7 @@
     
     _iLabel = [UILabel new];
     [_inputView addSubview:_iLabel];
-    _iLabel.text = @"支付金额";
+    _iLabel.text = @"充值金额";
     _iLabel.font = [UIFont scaleFont:14];
     
     UILabel *unit = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 30, 20)];
@@ -103,7 +103,7 @@
     _pLabel = [UILabel new];
     [self addSubview:_pLabel];
     _pLabel.textColor = Color_6;
-    _pLabel.text = @"支付方式";
+    _pLabel.text = @"充值方式";
     
     CGFloat y = 78;
     CGFloat w = (CDScreenWidth -50)/2,h = 60;

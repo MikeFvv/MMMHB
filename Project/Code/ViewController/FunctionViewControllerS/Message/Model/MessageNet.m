@@ -8,7 +8,6 @@
 
 #import "MessageNet.h"
 #import "MessageItem.h"
-#import "SqliteManage.h"
 #import "NetRequestManager.h"
 
 @implementation MessageNet
@@ -35,15 +34,15 @@
 }
 
 - (NSArray *)localList{
-    CDTableModel *notif = [CDTableModel new];
-    notif.className = @"MessageTableViewCell";
-    MessageItem *notif_model = [MessageItem new];
-    notif_model.localImg = @"msg1";
-    notif_model.groupName = @"通知消息";
-    notif_model.groupId = @"";
-    notif_model.notice = @"活动最新消息（点击查看）";
-    notif_model.dateline = 0;
-    notif.obj = notif_model;
+//    CDTableModel *notif = [CDTableModel new];
+//    notif.className = @"MessageTableViewCell";
+//    MessageItem *notif_model = [MessageItem new];
+//    notif_model.localImg = @"msg1";
+//    notif_model.groupName = @"通知消息";
+//    notif_model.groupId = @"";
+//    notif_model.notice = @"活动最新消息（点击查看）";
+//    notif_model.dateline = 0;
+//    notif.obj = notif_model;
     
     CDTableModel *service = [CDTableModel new];
     MessageItem *service_model = [MessageItem new];
@@ -55,7 +54,8 @@
     service_model.dateline = 0;
     service.obj = service_model;
     
-    return @[notif,service];
+//    return @[notif,service];
+    return @[service];
 }
 
 -(void)requestGroupListWithSuccess:(void (^)(NSDictionary *))success
@@ -74,10 +74,7 @@
     WEAK_OBJ(weakSelf, self)
     [NET_REQUEST_MANAGER requestGroupListMyJoinedWithPage:self.page pageSize:PAGE_SIZE orderField:@"id" asc:NO success:^(id object) {
         [weakSelf handleGroupListData:object[@"data"] andIsMyJoined:YES];
-        if(success)
-            success(object);
-        else
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"reloadMyGroupList" object:nil];
+        success(object);
     } fail:^(id object) {
         failue(object);
     }];
@@ -203,7 +200,7 @@
     WEAK_OBJ(weakSelf, self);
     [NET_REQUEST_MANAGER quitGroupWithId:groupId success:^(id object) {
         [weakSelf requestMyJoinedGroupListWithSuccess:^(NSDictionary *info) {
-            
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"reloadMyGroupList" object:nil];
         } Failure:^(NSError *error) {
             
         }];

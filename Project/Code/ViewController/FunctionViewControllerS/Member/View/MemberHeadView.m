@@ -54,7 +54,7 @@
     
     [_nickName mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self->_headIcon.mas_right).offset(12);
-        make.top.equalTo(self->_headIcon.mas_top);
+        make.top.equalTo(self->_headIcon.mas_top).offset(-5);
     }];
     
     [_sexBackView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -69,12 +69,12 @@
     
     [_integral mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self->_headIcon.mas_right).offset(12);
-        make.top.equalTo(self->_nickName.mas_bottom).offset(3);
+        make.top.equalTo(self->_nickName.mas_bottom).offset(5);
     }];
     
     [_account mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self->_headIcon.mas_right).offset(12);
-        make.top.equalTo(self->_integral.mas_bottom).offset(2);
+        make.top.equalTo(self->_integral.mas_bottom).offset(4);
     }];
 }
 
@@ -87,7 +87,7 @@
     
     _nickName = [UILabel new];
     [self addSubview:_nickName];
-    _nickName.font = [UIFont scaleFont:14];
+    _nickName.font = [UIFont scaleFont:15];
     
     _sexBackView = [UIView new];
     [self addSubview:_sexBackView];
@@ -99,20 +99,20 @@
     
     _integral = [UILabel new];
     [self addSubview:_integral];
-    _integral.font = [UIFont scaleFont:13];
-    _integral.textColor = Color_6;
+    _integral.font = [UIFont scaleFont:12];
+    _integral.textColor = COLOR_Y(160);
 
     _account = [UILabel new];
     [self addSubview:_account];
-    _account.font = [UIFont scaleFont:13];
+    _account.font = [UIFont scaleFont:12];
     _account.textColor = [UIColor lightGrayColor];
-    _account.textColor = Color_6;
+    _account.textColor = COLOR_Y(160);
 }
 
 - (void)update{
     UserModel *user = APP_MODEL.user;
     _nickName.text = user.userNick;
-    _integral.text = (user.userBalance)?[NSString stringWithFormat:@"总积分：%@",user.userBalance]:@"总积分：0.00";
+    _integral.text = (user.userBalance)?[NSString stringWithFormat:@"余额：%@ 元",user.userBalance]:@"余额：0.00 元";
     _account.text = [NSString stringWithFormat:@"账号：%@",user.userId];
     [_headIcon cd_setImageWithURL:[NSURL URLWithString:[NSString cdImageLink:user.userAvatar]] placeholderImage:[UIImage imageNamed:@"user-default"]];
     _sexIcon.image = (user.userGender == 1)?[UIImage imageNamed:@"male"]:[UIImage imageNamed:@"female"];

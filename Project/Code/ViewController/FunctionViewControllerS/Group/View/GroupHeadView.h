@@ -16,5 +16,5 @@ typedef void (^HeadClick)(NSInteger index);
 + (GroupHeadView *)headViewWithList:(NSArray *)lit;
 
 - (void)updateList:(NSArray *)list;
-
+-(void)setTotalNum:(NSInteger)num;
 @end

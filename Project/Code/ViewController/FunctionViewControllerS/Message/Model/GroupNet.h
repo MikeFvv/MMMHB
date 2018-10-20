@@ -13,13 +13,14 @@
 @property (nonatomic ,strong) NSMutableArray *dataList;
 @property (nonatomic ,assign) NSInteger page; ///< 页数(从1开始，默认值1)           可选
 @property (nonatomic ,assign) NSInteger total;
-@property (nonatomic ,assign) NSInteger pageSize; ///< 页大小(默认值15)                可选
 
-@property (nonatomic ,assign) BOOL IsEmpty;///<空
-@property (nonatomic ,assign) BOOL IsMost;///<没有更多
+@property (nonatomic ,assign) BOOL isEmpty;///<空
+@property (nonatomic ,assign) BOOL isMost;///<没有更多
+@property(nonatomic,copy)NSString *groupId;
 
-
-- (void)queryUserObj:(id)obj
-             Success:(void (^)(NSDictionary *))success
-             Failure:(void (^)(NSError *))failue;
+-(void)getUserListWithSuccess:(void (^)(NSDictionary *))success
+                      failure:(void (^)(id))failue;
+//- (void)queryUserObj:(id)obj
+//             Success:(void (^)(NSDictionary *))success
+//             Failure:(void (^)(NSError *))failue;
 @end

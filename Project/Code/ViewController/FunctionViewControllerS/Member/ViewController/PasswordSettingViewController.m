@@ -26,7 +26,8 @@
 
 #pragma mark ----- Data
 - (void)initData{
-    _rowList = @[@"登录密码",@"支付密码"];
+//    _rowList = @[@"登录密码",@"支付密码"];
+    _rowList = @[@"登录密码"];
 }
 
 

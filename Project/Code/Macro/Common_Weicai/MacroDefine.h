@@ -9,7 +9,7 @@
 #ifndef Macro_h
 #define Macro_h
 
-#define Line(a) [NSString stringWithFormat:@"%@%@",Line_pre,a]
+#define Line(a) [NSString stringWithFormat:@"%@%@",url_preix,a]
 
 //短信
 #define Line_SMS Line(@"Login/send_sms")//c
@@ -31,6 +31,9 @@
 #define Line_UpdateUserInfo Line(@"User/update")
 //上传图片
 #define Line_UpdateHead Line(@"Uploader/upload")
+//上传图片
+#define Line_UpdateHeadMM Line(@"admin/user/upload")
+
 //群组列表
 #define Line_ChatGroup Line(@"Rongcloud/groupList")
 //检测是否有该群组的权限
@@ -82,8 +85,6 @@
 //分享
 #define Line_Share Line(@"Index/config")
 
-#define SERVER_URL @"http://103.107.236.103:9999/"
-
 #define COLOR_X(R,G,B,A) [UIColor colorWithRed:R/255.0 green:G/255.0 blue:B/255.0 alpha:A]
 
 #define COLOR_Y(X) [UIColor colorWithRed:X/255.0 green:X/255.0 blue:X/255.0 alpha:1.0]
@@ -105,5 +106,5 @@ typedef enum{
     ResultCodeFailed = 1,
 }ResultCode;
 
-#define PAGE_SIZE 20
+#define PAGE_SIZE 30
 #endif /* Macro_h */

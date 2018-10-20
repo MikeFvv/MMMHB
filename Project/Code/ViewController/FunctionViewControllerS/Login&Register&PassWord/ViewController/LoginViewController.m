@@ -10,7 +10,8 @@
 #import "WXManage.h"
 #import "NetRequestManager.h"
 
-@interface LoginViewController ()<UITableViewDelegate,UITableViewDataSource>{
+
+@interface LoginViewController ()<UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate>{
     UITableView *_tableView;
     UITextField *_textField[2];
     NSMutableDictionary *_wxRegister;
@@ -83,78 +84,96 @@
         make.height.equalTo(@(42));
     }];
     
+    
+    UIButton *verCodeBtn = [UIButton new];
+    [fotView addSubview:verCodeBtn];
+    verCodeBtn.layer.cornerRadius = 8;
+    verCodeBtn.layer.masksToBounds = YES;
+    verCodeBtn.layer.borderColor = [UIColor colorWithRed:0.503 green:0.503 blue:0.503 alpha:1.000].CGColor;
+    verCodeBtn.layer.borderWidth = 0.5;
+//    verCodeBtn.backgroundColor = MBTNColor;
+    verCodeBtn.titleLabel.font = [UIFont scaleFont:16];
+    [verCodeBtn setTitle:@"验证码登录" forState:UIControlStateNormal];
+    [verCodeBtn setTitleColor:[UIColor colorWithRed:0.503 green:0.503 blue:0.503 alpha:1.000] forState:UIControlStateNormal];
+//    [verCodeBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [verCodeBtn addTarget:self action:@selector(action_verCodelogin) forControlEvents:UIControlEventTouchUpInside];
+    
+    [verCodeBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view.mas_left).offset(16);
+        make.right.equalTo(self.view.mas_right).offset(-16);
+        make.top.equalTo(loginBtn.mas_bottom).offset(25);
+        make.height.equalTo(@(42));
+    }];
+    
+    
     UIButton *forGot = [UIButton new];
     [fotView addSubview:forGot];
     [forGot addTarget:self action:@selector(action_forgot) forControlEvents:UIControlEventTouchUpInside];
-    
-    NSMutableAttributedString *AttributedStr = [[NSMutableAttributedString alloc]initWithString:@"忘记密码"];
-    NSRange rang = NSMakeRange(0, 4);
-    [AttributedStr addAttribute:NSFontAttributeName value:[UIFont scaleFont:13] range:rang];
-    [AttributedStr addAttribute:NSForegroundColorAttributeName value:HexColor(@"#a19cea") range:rang];
-    [AttributedStr addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:rang];
-    
-    [forGot setAttributedTitle:AttributedStr forState:UIControlStateNormal];
-    
+    NSString *s = @"忘记密码？";
+    [forGot setTitle:s forState:UIControlStateNormal];
+    [forGot setTitleColor:HexColor(@"#a19cea") forState:UIControlStateNormal];
+    forGot.titleLabel.font = [UIFont scaleFont:13];
     [forGot mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.right.equalTo(self.view.mas_right).offset(-30);
-        make.top.equalTo(loginBtn.mas_bottom).offset(5);
-        make.height.equalTo(@(33));
+        make.right.equalTo(self.view.mas_right).offset(-24);
+//        make.top.equalTo(loginBtn.mas_bottom).offset(5);
+         make.top.equalTo(verCodeBtn.mas_bottom).offset(0);
+        make.height.equalTo(@(44));
     }];
     
     
-    UIView *thirdView = [UIView new];
-    [fotView addSubview:thirdView];
-//    BOOL b = [WXManage isWXAppInstalled];
-//
-//    thirdView.hidden = [WXManage isWXAppInstalled];///<yes安装
-    
-    [thirdView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.bottom.equalTo(fotView);
-        make.top.equalTo(forGot.mas_bottom).offset(50);
-    }];
-    
-    
-    
-    UILabel *thirdLabel = [UILabel new];
-    [thirdView addSubview:thirdLabel];
-    thirdLabel.font = [UIFont scaleFont:14];
-    thirdLabel.text = @"第三方账号登录";
-    thirdLabel.textColor = Color_9;
-    
-    [thirdLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.top.equalTo(thirdView);
-    }];
-    
-    UIView *lineleft = [UIView new];
-    [thirdView addSubview:lineleft];
-    lineleft.backgroundColor = Color_9;
-    
-    [lineleft mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(thirdView.mas_left).offset(15);
-        make.right.greaterThanOrEqualTo(thirdLabel.mas_left).offset(-15);
-        make.centerY.equalTo(thirdLabel.mas_centerY);
-        make.height.equalTo(@(1.0));
-    }];
-    
-    UIView *lineright = [UIView new];
-    [thirdView addSubview:lineright];
-    lineright.backgroundColor = Color_9;
-    [lineright mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.lessThanOrEqualTo(thirdLabel.mas_right).offset(15);
-        make.right.equalTo(thirdView.mas_right).offset(-15);
-        make.height.equalTo(@(1.0));
-        make.centerY.equalTo(thirdLabel.mas_centerY);
-    }];
-    
-    UIButton *wx = [UIButton new];
-    [thirdView addSubview:wx];
-    [wx setBackgroundImage:[UIImage imageNamed:@"icon_wx"] forState:UIControlStateNormal];
-    [wx addTarget:self action:@selector(action_wxLogin) forControlEvents:UIControlEventTouchUpInside];
-    
-    [wx mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.equalTo(thirdView);
-        make.top.equalTo(thirdLabel.mas_bottom).offset(25);
-    }];
+//    UIView *thirdView = [UIView new];
+//    [fotView addSubview:thirdView];
+////    BOOL b = [WXManage isWXAppInstalled];
+////
+////    thirdView.hidden = [WXManage isWXAppInstalled];///<yes安装
+//    
+//    [thirdView mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.right.bottom.equalTo(fotView);
+//        make.top.equalTo(forGot.mas_bottom).offset(50);
+//    }];
+//    
+//    
+//    
+//    UILabel *thirdLabel = [UILabel new];
+//    [thirdView addSubview:thirdLabel];
+//    thirdLabel.font = [UIFont scaleFont:14];
+//    thirdLabel.text = @"第三方账号登录";
+//    thirdLabel.textColor = Color_9;
+//    
+//    [thirdLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.centerX.top.equalTo(thirdView);
+//    }];
+//    
+//    UIView *lineleft = [UIView new];
+//    [thirdView addSubview:lineleft];
+//    lineleft.backgroundColor = Color_9;
+//    
+//    [lineleft mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.equalTo(thirdView.mas_left).offset(15);
+//        make.right.greaterThanOrEqualTo(thirdLabel.mas_left).offset(-15);
+//        make.centerY.equalTo(thirdLabel.mas_centerY);
+//        make.height.equalTo(@(1.0));
+//    }];
+//    
+//    UIView *lineright = [UIView new];
+//    [thirdView addSubview:lineright];
+//    lineright.backgroundColor = Color_9;
+//    [lineright mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.lessThanOrEqualTo(thirdLabel.mas_right).offset(15);
+//        make.right.equalTo(thirdView.mas_right).offset(-15);
+//        make.height.equalTo(@(1.0));
+//        make.centerY.equalTo(thirdLabel.mas_centerY);
+//    }];
+//    
+//    UIButton *wx = [UIButton new];
+//    [thirdView addSubview:wx];
+//    [wx setBackgroundImage:[UIImage imageNamed:@"icon_wx"] forState:UIControlStateNormal];
+//    [wx addTarget:self action:@selector(action_wxLogin) forControlEvents:UIControlEventTouchUpInside];
+//    
+//    [wx mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.centerX.equalTo(thirdView);
+//        make.top.equalTo(thirdLabel.mas_bottom).offset(25);
+//    }];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -183,7 +202,15 @@
         _textField[indexPath.row].font = [UIFont scaleFont:14];
         _textField[indexPath.row].placeholder = (indexPath.row == 0)?@"手机号/用户名":@"密码";
         _textField[indexPath.row].secureTextEntry = (indexPath.row == 1)?YES:NO;
-        
+        _textField[indexPath.row].clearButtonMode = UITextFieldViewModeWhileEditing;
+        _textField[indexPath.row].delegate = self;
+        if(indexPath.row == 0)
+            _textField[0].returnKeyType = UIReturnKeyNext;
+        else
+            _textField[1].returnKeyType = UIReturnKeyDone;
+        if(indexPath.row == 0)
+            _textField[0].keyboardType = UIKeyboardTypePhonePad;
+
         [_textField[indexPath.row] mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.equalTo(cell.contentView.mas_left).offset(20);
             make.right.equalTo(cell.contentView.mas_right).offset(-20);
@@ -212,7 +239,7 @@
         SV_ERROR_STATUS(@"请输入密码！");
         return;
     }
-    SV_SHOW_STATUS(@"请稍候...");
+    SV_SHOW;
     WEAK_OBJ(weakSelf,self);
     [NET_REQUEST_MANAGER requestTockenWithAccount:_textField[0].text password:_textField[1].text success:^(id object) {
         [weakSelf requestUserInfo];
@@ -225,14 +252,22 @@
 //    } Failure:^(NSError *error) {
 //        SV_ERROR(error);
 //    }];
-    
 }
+
+
+#pragma mark - 验证码登录
+- (void)action_verCodelogin{
+    
+    CDPush(self.navigationController, CDVC(@"VerCodeLoginController"), YES);
+}
+
+
 
 -(void)requestUserInfo{
     WEAK_OBJ(weakSelf, self);
     [NET_REQUEST_MANAGER requestUserInfoWithUserId:APP_MODEL.user.userId success:^(id object) {
-            [AppModel resetRootAnimation:YES];
-            [weakSelf.navigationController popViewControllerAnimated:YES];
+            [APP_MODEL resetRootAnimation:YES];
+//            [weakSelf.navigationController popViewControllerAnimated:YES];
     }fail:^(id object) {
         [FUNCTION_MANAGER handleFailResponse:object];
     }];
@@ -240,18 +275,18 @@
 - (void)action_wxLogin{
     SV_SHOW;
     CDWeakSelf(self);
-    [AppModel wxLoginSuccess:^(NSDictionary *info) {
-        CDStrongSelf(self);
-        if (info) {
-            SV_DISMISS;
-            [self alert:info];
-        }
-        else{
-            SV_SUCCESS_STATUS(@"登录成功");
-        }
-    } Failure:^(NSError *error) {
-        SV_ERROR(error);
-    }];
+//    [AppModel wxLoginSuccess:^(NSDictionary *info) {
+//        CDStrongSelf(self);
+//        if (info) {
+//            SV_DISMISS;
+//            [self alert:info];
+//        }
+//        else{
+//            SV_SUCCESS_STATUS(@"登录成功");
+//        }
+//    } Failure:^(NSError *error) {
+//        [FUNCTION_MANAGER handleFailResponse:error];
+//    }];
 }
 
 - (void)alert:(NSDictionary *)alert{
@@ -281,16 +316,16 @@
 
 - (void)action_wxRester{
     SV_SHOW;
-    if (_reField.text.length == 0) {
-        return;
-    }
-    [_wxRegister setObject:_reField.text forKey:@"referralCode"];
-    [AppModel wxResterObj:_wxRegister Success:^(NSDictionary *info) {
-        SV_SUCCESS_STATUS(@"登录成功");
-//        [self.navigationController popViewControllerAnimated:YES];
-    } Failure:^(NSError *error) {
-        SV_ERROR(error);
-    }];
+//    if (_reField.text.length == 0) {
+//        return;
+//    }
+//    [_wxRegister setObject:_reField.text forKey:@"referralCode"];
+//    [AppModel wxResterObj:_wxRegister Success:^(NSDictionary *info) {
+//        SV_SUCCESS_STATUS(@"登录成功");
+////        [self.navigationController popViewControllerAnimated:YES];
+//    } Failure:^(NSError *error) {
+//        SV_ERROR(error);
+//    }];
 }
 
 - (void)action_forgot{
@@ -301,5 +336,15 @@
     CDPush(self.navigationController, CDVC(@"RegisterViewController"), YES);
 }
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+    if(textField == _textField[0])
+        [_textField[1] becomeFirstResponder];
+    else
+        [_textField[1] resignFirstResponder];
+    return YES;
+}
 
+-(void)dealloc{
+    NSLog(@"");
+}
 @end

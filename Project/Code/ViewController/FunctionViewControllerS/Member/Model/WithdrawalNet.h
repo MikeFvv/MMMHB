@@ -18,13 +18,13 @@
 @property (nonatomic ,assign) BOOL IsEmpty;///<空
 @property (nonatomic ,assign) BOOL IsMost;///<没有更多
 
-- (void)WithdrawalListObj:(id)obj
-                  Success:(void (^)(NSDictionary *))success
-                  Failure:(void (^)(NSError *))failue;
+//- (void)withdrawalListObj:(id)obj
+//                  Success:(void (^)(NSDictionary *))success
+//                  Failure:(void (^)(NSError *))failue;
 
-+ (void)WithdrawalObj:(id)obj
-              Success:(void (^)(NSDictionary *))success
-              Failure:(void (^)(NSError *))failue;
+//+ (void)WithdrawalObj:(id)obj
+//              Success:(void (^)(NSDictionary *))success
+//              Failure:(void (^)(NSError *))failue;
 
 
 

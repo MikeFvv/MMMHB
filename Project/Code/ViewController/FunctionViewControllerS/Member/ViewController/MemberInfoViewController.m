@@ -7,6 +7,8 @@
 //
 
 #import "MemberInfoViewController.h"
+#import "NetRequestManager.h"
+#import "RongYunManager.h"
 
 @interface MemberInfoViewController ()<UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate>{
     UITableView *_tableView;
@@ -56,7 +58,7 @@
     btn.titleLabel.font = [UIFont scaleFont:14];
     [btn setTitle:@"保存" forState:UIControlStateNormal];
     [btn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [btn addTarget:self action:@selector(action_save) forControlEvents:UIControlEventTouchUpInside];
+    [btn addTarget:self action:@selector(action_saveNew) forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *right = [[UIBarButtonItem alloc]initWithCustomView:btn];
     self.navigationItem.rightBarButtonItem = right;
     
@@ -184,38 +186,80 @@
     [picker dismissViewControllerAnimated:YES completion:nil];
 }
 
-#pragma mark action
-- (void)action_save{
+
+
+
+#pragma mark 修改用户头像 保存  Mike
+- (void)action_saveNew {
     
     SV_SHOW;
     CDWeakSelf(self);
-    [AppModel updataUserObj:@{@"uid":APP_MODEL.user.userId,@"face":_headUrl,@"nickname":_nickName.text,@"gender":@(_sexType)} Success:^(NSDictionary *info) {
+
+    [NET_REQUEST_MANAGER editUserInfoWithUserAvatar:_headUrl userNick:_nickName.text gender:_sexType success:^(id object) {
         CDStrongSelf(self);
         [self updateInfo];
-        SV_SUCCESS_STATUS([info objectForKey:@"msg"]);
-    } Failure:^(NSError *error) {
-        SV_ERROR(error);
+        SV_SUCCESS_STATUS([object objectForKey:@"data"]);
+        CDPop(weakself.navigationController, YES);
+    } fail:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
     }];
+    
 }
+
+
+
+#pragma mark action
+//- (void)action_save{
+//
+//    SV_SHOW;
+//    CDWeakSelf(self);
+//    [AppModel updataUserObj:@{@"uid":APP_MODEL.user.userId,@"face":_headUrl,@"nickname":_nickName.text,@"gender":@(_sexType)} Success:^(NSDictionary *info) {
+//        CDStrongSelf(self);
+//        [self updateInfo];
+//        SV_SUCCESS_STATUS([info objectForKey:@"msg"]);
+//    } Failure:^(NSError *error) {
+//        SV_ERROR(error);
+//    }];
+//}
 
 - (void)updateInfo{
     APP_MODEL.user.userAvatar = _headUrl;
     APP_MODEL.user.userNick = _nickName.text;
     APP_MODEL.user.userGender = _sexType;
     [APP_MODEL saveToDisk];
+    
+    [RONG_YUN_MANAGER updateUserInfo];
 }
 
+
+// 上传图片
 - (void)upload:(UIImage *)image{
     SV_SHOW;
     UIImage *img = CD_TailorImg(image, CGSizeMake(100, 100));
-    [AppModel uploadIconObj:img Success:^(NSDictionary *info) {
+    
+    [NET_REQUEST_MANAGER upLoadImageObj:img success:^(id object) {
         SV_SUCCESS_STATUS(@"上传成功");
-        self-> _headUrl = [info objectForKey:@"path"];
+        self-> _headUrl = [object objectForKey:@"data"];
         self-> _headIcon.image = img;
-    } Failure:^(NSError *error) {
-        SV_ERROR(error);
+    } fail:^(id object) {
+        SV_ERROR(object);
     }];
+
 }
+
+
+
+//- (void)upload:(UIImage *)image{
+//    SV_SHOW;
+//    UIImage *img = CD_TailorImg(image, CGSizeMake(100, 100));
+//    [AppModel uploadIconObj:img Success:^(NSDictionary *info) {
+//        SV_SUCCESS_STATUS(@"上传成功");
+//        self-> _headUrl = [info objectForKey:@"path"];
+//        self-> _headIcon.image = img;
+//    } Failure:^(NSError *error) {
+//        SV_ERROR(error);
+//    }];
+//}
 
 - (void)action_nick:(NSNotification *)notif{
     _nickName.text = notif.object[@"text"];

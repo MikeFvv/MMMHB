@@ -19,9 +19,9 @@
 
 
 //签到
-+ (void)SignObj:(id)obj
-         Success:(void (^)(NSDictionary *))success
-         Failure:(void (^)(NSError *))failue;
+//+ (void)SignObj:(id)obj
+//         Success:(void (^)(NSDictionary *))success
+//         Failure:(void (^)(NSError *))failue;
 
 
 @end

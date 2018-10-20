@@ -12,6 +12,7 @@
 #import "MemberRow.h"
 #import "WXShareModel.h"
 #import "WXManage.h"
+#import "NetRequestManager.h"
 
 @interface MemberViewController ()<UITableViewDelegate,UITableViewDataSource>{
     UITableView *_tableView;
@@ -71,15 +72,24 @@
 
 #pragma mark net
 - (void)getUserInfo{
-    CDWeakSelf(self);
-    [AppModel getUserInfoSuccess:^(NSDictionary *info) {
-        CDStrongSelf(self);
-        [self update];
-    } Failure:^(NSError *error) {
-        CDStrongSelf(self);
-        SV_ERROR(error);
-        [self update];
+    if(APP_MODEL.user.userId == nil){
+        [_tableView.mj_header endRefreshing];
+        return;
+    }
+    WEAK_OBJ(weakSelf, self);
+    [NET_REQUEST_MANAGER requestUserInfoWithUserId:APP_MODEL.user.userId success:^(id object) {
+        [weakSelf update];
+    } fail:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
     }];
+//    [AppModel getUserInfoSuccess:^(NSDictionary *info) {
+//        CDStrongSelf(self);
+//        [self update];
+//    } Failure:^(NSError *error) {
+//        CDStrongSelf(self);
+//        SV_ERROR(error);
+//        [self update];
+//    }];
 }
 
 - (void)update{
@@ -109,20 +119,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     if (indexPath.section == 0) {
         if (indexPath.row == 0) {
-            CDWeakSelf(self);
-            WXShareModel *model = [[WXShareModel alloc]init];
-            model.title = WXShareTitle;
-            model.imageIcon = [UIImage imageNamed:@"my-recharge"];
-            model.link = WXShareLink;
-            model.content = WXShareDescription;
-            model.WXShareType = 1;
-            [[WXManage shareInstance]wxShareObj:model Success:^{
-                CDStrongSelf(self);
-                [self action_sign];
-            } Failure:^(NSError *error) {
-                SV_ERROR(error);
-            }];
-            
+            [self shareToWeChat];
         }
         else if (indexPath.row == 1){
             
@@ -144,18 +141,37 @@
         
     }
     else{//退出
-        [AppModel loginOut];
+        [APP_MODEL loginOut];
     }
 }
 
 #pragma mark action
 - (void)action_sign{
-    [MemberNet SignObj:@{@"uid":APP_MODEL.user.userId} Success:^(NSDictionary *info) {
-        NSLog(@"%@",info);
-        SV_SUCCESS_STATUS(@"红包已领取");
+    SV_SHOW;
+    [NET_REQUEST_MANAGER signWithSuccess:^(id object) {
+        SV_SUCCESS_STATUS(object[@"msg"]);
+    } fail:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
+    }];
+}
+
+-(void)shareToWeChat{
+    WXShareModel *model = [[WXShareModel alloc]init];
+    model.title = WXShareTitle;
+    model.imageIcon = [UIImage imageNamed:@"my-recharge"];
+    model.link = WXShareLink;
+    model.content = WXShareDescription;
+    model.WXShareType = 1;
+    WEAK_OBJ(weakSelf, self);
+    [[WXManage shareInstance]wxShareObj:model Success:^{
+        [weakSelf action_sign];
     } Failure:^(NSError *error) {
         SV_ERROR(error);
     }];
+}
+
+-(void)shareFinish{
+    
 }
 
 - (void)action_info{

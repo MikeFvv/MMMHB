@@ -8,7 +8,7 @@
 
 #import "UpdateNicknameViewController.h"
 
-@interface UpdateNicknameViewController (){///<UITableViewDataSource,UITableViewDelegate>
+@interface UpdateNicknameViewController ()<UITextFieldDelegate>{///<UITableViewDataSource,UITableViewDelegate>
     UITableView *_tableView;
     UITextField *_textField;
 }
@@ -62,6 +62,9 @@
     _textField.placeholder = @"填写16字以内的昵称（只能输入中文、数字、字母）";
     _textField.text = APP_MODEL.user.userNick;
     _textField.font = [UIFont scaleFont:14];
+    _textField.delegate = self;
+    _textField.clearButtonMode = UITextFieldViewModeWhileEditing;
+    _textField.returnKeyType = UIReturnKeyDone;
     
     [_textField mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.view.mas_left).offset(12);
@@ -85,6 +88,9 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void)viewDidAppear:(BOOL)animated{
+    [_textField becomeFirstResponder];
+}
 /*
 #pragma mark - Navigation
 
@@ -95,4 +101,8 @@
 }
 */
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+    [textField resignFirstResponder];
+    return YES;
+}
 @end

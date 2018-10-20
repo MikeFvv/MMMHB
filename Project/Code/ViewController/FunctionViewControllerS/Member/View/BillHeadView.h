@@ -20,5 +20,5 @@ typedef void (^TypeBlock)(NSInteger type);
 @property (nonatomic ,copy) TypeBlock TypeChange;
 @property (nonatomic ,copy) NSString *beginTime;
 @property (nonatomic ,copy) NSString *endTime;
-
+@property (nonatomic,strong) NSArray *billTypeArray;
 @end

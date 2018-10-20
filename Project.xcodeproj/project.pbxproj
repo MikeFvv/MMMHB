@@ -52,7 +52,7 @@
 		043B248421351838008AFB5B /* PayButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D6746C82122B668005B841F /* PayButton.m */; };
 		043B248521351838008AFB5B /* TopupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D7242BA2111A19300C02A88 /* TopupViewController.m */; };
 		043B248621351838008AFB5B /* GroupNet.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D9C706B212569FF0006079F /* GroupNet.m */; };
-		043B248721351838008AFB5B /* RonYun.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3F7EC2110643A00D500E0 /* RonYun.m */; };
+		043B248721351838008AFB5B /* RongYunManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3F7EC2110643A00D500E0 /* RongYunManager.m */; };
 		043B248821351838008AFB5B /* MemberNet.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D7242A8211188C100C02A88 /* MemberNet.m */; };
 		043B248921351838008AFB5B /* RecommendCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D7089812112E6EA000D525C /* RecommendCell.m */; };
 		043B248A21351838008AFB5B /* StateView.m in Sources */ = {isa = PBXBuildFile; fileRef = 04477C532133F9ED00B9F2C6 /* StateView.m */; };
@@ -83,7 +83,6 @@
 		043B24A421351838008AFB5B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 10F0DC5D20F4436D008372B6 /* AppDelegate.m */; };
 		043B24A521351838008AFB5B /* GroupHeadView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D9C7065212563C30006079F /* GroupHeadView.m */; };
 		043B24A621351838008AFB5B /* CDBaseNet.m in Sources */ = {isa = PBXBuildFile; fileRef = 10F0DC9F20F48498008372B6 /* CDBaseNet.m */; };
-		043B24A721351838008AFB5B /* SqliteManage.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D19A9F5211C13E1004ABBC6 /* SqliteManage.m */; };
 		043B24A821351838008AFB5B /* WebProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D6746CE2122D63B005B841F /* WebProgressView.m */; };
 		043B24A921351838008AFB5B /* CDFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 04477C502133CAED00B9F2C6 /* CDFunction.m */; };
 		043B24AA21351838008AFB5B /* BillNet.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D6746BC2122929D005B841F /* BillNet.m */; };
@@ -104,9 +103,14 @@
 		0449C5BE2170EB41004BE7AB /* FunctionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0449C5BC2170EB41004BE7AB /* FunctionManager.m */; };
 		0449C5C22170EB69004BE7AB /* DotIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0449C5C12170EB69004BE7AB /* DotIndicatorView.m */; };
 		0449C5C62170EDCB004BE7AB /* UIView+ModifyFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 0449C5C52170EDCB004BE7AB /* UIView+ModifyFrame.m */; };
+		045780AB217B188300F15C8C /* DiscoverViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 045780AA217B188300F15C8C /* DiscoverViewController.m */; };
 		0460DDCD212AC24C00104423 /* EnvelopeNet.m in Sources */ = {isa = PBXBuildFile; fileRef = 0460DDCC212AC24C00104423 /* EnvelopeNet.m */; };
 		0460DDD0212AC67A00104423 /* EnvelopTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0460DDCF212AC67A00104423 /* EnvelopTableViewCell.m */; };
 		046712D7212C20F400F9B9A4 /* ChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D7242CC2111BFC100C02A88 /* ChatViewController.m */; };
+		049239C0217756A1009CAD6C /* GroupDetailsModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 049239BF217756A1009CAD6C /* GroupDetailsModel.m */; };
+		049239C3217756C5009CAD6C /* GroupRulesModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 049239C2217756C5009CAD6C /* GroupRulesModel.m */; };
+		049239C621775740009CAD6C /* GroupDetailsModels.m in Sources */ = {isa = PBXBuildFile; fileRef = 049239C521775740009CAD6C /* GroupDetailsModels.m */; };
+		04D6B43A217ACC9100DCB4E0 /* VerCodeLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D6B439217ACC9100DCB4E0 /* VerCodeLoginController.m */; };
 		04D94DC8217496450036E1B9 /* ModelHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D94DC7217496450036E1B9 /* ModelHelper.m */; };
 		04FBB1AB2171CD7700DE0C8E /* NSData+AES.m in Sources */ = {isa = PBXBuildFile; fileRef = 04FBB1A82171CD7600DE0C8E /* NSData+AES.m */; };
 		04FBB1AC2171CD7700DE0C8E /* GTMBase64.m in Sources */ = {isa = PBXBuildFile; fileRef = 04FBB1AA2171CD7600DE0C8E /* GTMBase64.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -125,7 +129,6 @@
 		3D19A9ED211AA825004ABBC6 /* EnvelopeMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D19A9EC211AA825004ABBC6 /* EnvelopeMessage.m */; };
 		3D19A9F0211AC28C004ABBC6 /* EnvelopeTipMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D19A9EF211AC28C004ABBC6 /* EnvelopeTipMessage.m */; };
 		3D19A9F3211AC2C6004ABBC6 /* EnvelopeTipCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D19A9F2211AC2C6004ABBC6 /* EnvelopeTipCell.m */; };
-		3D19A9F6211C13E1004ABBC6 /* SqliteManage.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D19A9F5211C13E1004ABBC6 /* SqliteManage.m */; };
 		3D19A9F9211C23E9004ABBC6 /* GroupInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D19A9F8211C23E9004ABBC6 /* GroupInfoViewController.m */; };
 		3D19A9FC211C3B97004ABBC6 /* PasswordSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D19A9FB211C3B97004ABBC6 /* PasswordSettingViewController.m */; };
 		3D19A9FF211C3CBD004ABBC6 /* PayWordSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D19A9FE211C3CBD004ABBC6 /* PayWordSettingViewController.m */; };
@@ -180,7 +183,7 @@
 		3DE3F7E42110612000D500E0 /* GroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3F7E32110612000D500E0 /* GroupViewController.m */; };
 		3DE3F7E72110613800D500E0 /* MemberViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3F7E62110613800D500E0 /* MemberViewController.m */; };
 		3DE3F7EA2110615300D500E0 /* MessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3F7E92110615300D500E0 /* MessageViewController.m */; };
-		3DE3F7ED2110643A00D500E0 /* RonYun.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3F7EC2110643A00D500E0 /* RonYun.m */; };
+		3DE3F7ED2110643A00D500E0 /* RongYunManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3F7EC2110643A00D500E0 /* RongYunManager.m */; };
 		3DE3F7F42110720B00D500E0 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3F7F32110720B00D500E0 /* LoginViewController.m */; };
 		3DE3F7F72110721900D500E0 /* RegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3F7F62110721900D500E0 /* RegisterViewController.m */; };
 		3DE3F7FA2110723200D500E0 /* ForgotViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE3F7F92110723200D500E0 /* ForgotViewController.m */; };
@@ -215,10 +218,20 @@
 		0449C5C12170EB69004BE7AB /* DotIndicatorView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DotIndicatorView.m; sourceTree = "<group>"; };
 		0449C5C42170EDCB004BE7AB /* UIView+ModifyFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+ModifyFrame.h"; sourceTree = "<group>"; };
 		0449C5C52170EDCB004BE7AB /* UIView+ModifyFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+ModifyFrame.m"; sourceTree = "<group>"; };
+		045780A9217B188300F15C8C /* DiscoverViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DiscoverViewController.h; sourceTree = "<group>"; };
+		045780AA217B188300F15C8C /* DiscoverViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DiscoverViewController.m; sourceTree = "<group>"; };
 		0460DDCB212AC24C00104423 /* EnvelopeNet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EnvelopeNet.h; sourceTree = "<group>"; };
 		0460DDCC212AC24C00104423 /* EnvelopeNet.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EnvelopeNet.m; sourceTree = "<group>"; };
 		0460DDCE212AC67A00104423 /* EnvelopTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EnvelopTableViewCell.h; sourceTree = "<group>"; };
 		0460DDCF212AC67A00104423 /* EnvelopTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EnvelopTableViewCell.m; sourceTree = "<group>"; };
+		049239BE217756A1009CAD6C /* GroupDetailsModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GroupDetailsModel.h; sourceTree = "<group>"; };
+		049239BF217756A1009CAD6C /* GroupDetailsModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GroupDetailsModel.m; sourceTree = "<group>"; };
+		049239C1217756C5009CAD6C /* GroupRulesModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GroupRulesModel.h; sourceTree = "<group>"; };
+		049239C2217756C5009CAD6C /* GroupRulesModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GroupRulesModel.m; sourceTree = "<group>"; };
+		049239C421775740009CAD6C /* GroupDetailsModels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GroupDetailsModels.h; sourceTree = "<group>"; };
+		049239C521775740009CAD6C /* GroupDetailsModels.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GroupDetailsModels.m; sourceTree = "<group>"; };
+		04D6B438217ACC9100DCB4E0 /* VerCodeLoginController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VerCodeLoginController.h; sourceTree = "<group>"; };
+		04D6B439217ACC9100DCB4E0 /* VerCodeLoginController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VerCodeLoginController.m; sourceTree = "<group>"; };
 		04D94DC6217496450036E1B9 /* ModelHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModelHelper.h; sourceTree = "<group>"; };
 		04D94DC7217496450036E1B9 /* ModelHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModelHelper.m; sourceTree = "<group>"; };
 		04FBB1A62171CD7600DE0C8E /* NSData+AES.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+AES.h"; sourceTree = "<group>"; };
@@ -258,8 +271,6 @@
 		3D19A9EF211AC28C004ABBC6 /* EnvelopeTipMessage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EnvelopeTipMessage.m; sourceTree = "<group>"; };
 		3D19A9F1211AC2C6004ABBC6 /* EnvelopeTipCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EnvelopeTipCell.h; sourceTree = "<group>"; };
 		3D19A9F2211AC2C6004ABBC6 /* EnvelopeTipCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EnvelopeTipCell.m; sourceTree = "<group>"; };
-		3D19A9F4211C13E1004ABBC6 /* SqliteManage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SqliteManage.h; sourceTree = "<group>"; };
-		3D19A9F5211C13E1004ABBC6 /* SqliteManage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SqliteManage.m; sourceTree = "<group>"; };
 		3D19A9F7211C23E9004ABBC6 /* GroupInfoViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GroupInfoViewController.h; sourceTree = "<group>"; };
 		3D19A9F8211C23E9004ABBC6 /* GroupInfoViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GroupInfoViewController.m; sourceTree = "<group>"; };
 		3D19A9FA211C3B97004ABBC6 /* PasswordSettingViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PasswordSettingViewController.h; sourceTree = "<group>"; };
@@ -370,8 +381,8 @@
 		3DE3F7E62110613800D500E0 /* MemberViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MemberViewController.m; sourceTree = "<group>"; };
 		3DE3F7E82110615300D500E0 /* MessageViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MessageViewController.h; sourceTree = "<group>"; };
 		3DE3F7E92110615300D500E0 /* MessageViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MessageViewController.m; sourceTree = "<group>"; };
-		3DE3F7EB2110643A00D500E0 /* RonYun.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RonYun.h; sourceTree = "<group>"; };
-		3DE3F7EC2110643A00D500E0 /* RonYun.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RonYun.m; sourceTree = "<group>"; };
+		3DE3F7EB2110643A00D500E0 /* RongYunManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RongYunManager.h; sourceTree = "<group>"; };
+		3DE3F7EC2110643A00D500E0 /* RongYunManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RongYunManager.m; sourceTree = "<group>"; };
 		3DE3F7F22110720B00D500E0 /* LoginViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		3DE3F7F32110720B00D500E0 /* LoginViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		3DE3F7F52110721900D500E0 /* RegisterViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RegisterViewController.h; sourceTree = "<group>"; };
@@ -445,6 +456,39 @@
 			path = "UIView+Frame";
 			sourceTree = "<group>";
 		};
+		045780A5217B183A00F15C8C /* Discover */ = {
+			isa = PBXGroup;
+			children = (
+				045780A8217B186600F15C8C /* Model */,
+				045780A6217B186600F15C8C /* View */,
+				045780A7217B186600F15C8C /* ViewController */,
+			);
+			path = Discover;
+			sourceTree = "<group>";
+		};
+		045780A6217B186600F15C8C /* View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		045780A7217B186600F15C8C /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				045780A9217B188300F15C8C /* DiscoverViewController.h */,
+				045780AA217B188300F15C8C /* DiscoverViewController.m */,
+			);
+			path = ViewController;
+			sourceTree = "<group>";
+		};
+		045780A8217B186600F15C8C /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		04FBB1A52171CD7600DE0C8E /* GTMBase64 */ = {
 			isa = PBXGroup;
 			children = (
@@ -510,7 +554,6 @@
 				10F0DC7420F447BB008372B6 /* Pod */,
 				10F0DC7520F447BB008372B6 /* BaseKit */,
 				10F0DC7620F447BB008372B6 /* NetWork */,
-				10F0DC7920F447BB008372B6 /* Other */,
 			);
 			path = System;
 			sourceTree = "<group>";
@@ -526,12 +569,10 @@
 				10F0DC9920F47E23008372B6 /* UIView+CDSDImage.m */,
 				10F0DC9E20F48498008372B6 /* CDBaseNet.h */,
 				10F0DC9F20F48498008372B6 /* CDBaseNet.m */,
-				3DE3F7EB2110643A00D500E0 /* RonYun.h */,
-				3DE3F7EC2110643A00D500E0 /* RonYun.m */,
+				3DE3F7EB2110643A00D500E0 /* RongYunManager.h */,
+				3DE3F7EC2110643A00D500E0 /* RongYunManager.m */,
 				3D822E3C211403DA005C7572 /* SVProgressHUD+CDHUD.h */,
 				3D822E3D211403DA005C7572 /* SVProgressHUD+CDHUD.m */,
-				3D19A9F4211C13E1004ABBC6 /* SqliteManage.h */,
-				3D19A9F5211C13E1004ABBC6 /* SqliteManage.m */,
 				3D19AA00211D329D004ABBC6 /* WXManage.h */,
 				3D19AA01211D329D004ABBC6 /* WXManage.m */,
 				3D19AA03211D6219004ABBC6 /* WXShareModel.h */,
@@ -574,13 +615,6 @@
 			path = NetWork;
 			sourceTree = "<group>";
 		};
-		10F0DC7920F447BB008372B6 /* Other */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Other;
-			sourceTree = "<group>";
-		};
 		10F0DC7B20F447BB008372B6 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
@@ -603,6 +637,7 @@
 		10F0DC7D20F447BB008372B6 /* FunctionViewControllerS */ = {
 			isa = PBXGroup;
 			children = (
+				045780A5217B183A00F15C8C /* Discover */,
 				3DE3F7EE211071EE00D500E0 /* Login&Register&PassWord */,
 				3DE3F7DA2110610000D500E0 /* Group */,
 				3DE3F7D62110610000D500E0 /* Member */,
@@ -787,6 +822,12 @@
 				3D6746DD2123CF10005B841F /* NotifMessage.m */,
 				0460DDCB212AC24C00104423 /* EnvelopeNet.h */,
 				0460DDCC212AC24C00104423 /* EnvelopeNet.m */,
+				049239C421775740009CAD6C /* GroupDetailsModels.h */,
+				049239C521775740009CAD6C /* GroupDetailsModels.m */,
+				049239BE217756A1009CAD6C /* GroupDetailsModel.h */,
+				049239BF217756A1009CAD6C /* GroupDetailsModel.m */,
+				049239C1217756C5009CAD6C /* GroupRulesModel.h */,
+				049239C2217756C5009CAD6C /* GroupRulesModel.m */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -835,7 +876,6 @@
 			isa = PBXGroup;
 			children = (
 				3DE3F7EF211071EE00D500E0 /* Model */,
-				3DE3F7F0211071EE00D500E0 /* View */,
 				3DE3F7F1211071EE00D500E0 /* ViewController */,
 			);
 			path = "Login&Register&PassWord";
@@ -852,18 +892,13 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
-		3DE3F7F0211071EE00D500E0 /* View */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = View;
-			sourceTree = "<group>";
-		};
 		3DE3F7F1211071EE00D500E0 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
 				3DE3F7F22110720B00D500E0 /* LoginViewController.h */,
 				3DE3F7F32110720B00D500E0 /* LoginViewController.m */,
+				04D6B438217ACC9100DCB4E0 /* VerCodeLoginController.h */,
+				04D6B439217ACC9100DCB4E0 /* VerCodeLoginController.m */,
 				3DE3F7F52110721900D500E0 /* RegisterViewController.h */,
 				3DE3F7F62110721900D500E0 /* RegisterViewController.m */,
 				3DE3F7F82110723200D500E0 /* ForgotViewController.h */,
@@ -1162,7 +1197,7 @@
 				043B248421351838008AFB5B /* PayButton.m in Sources */,
 				043B248521351838008AFB5B /* TopupViewController.m in Sources */,
 				043B248621351838008AFB5B /* GroupNet.m in Sources */,
-				043B248721351838008AFB5B /* RonYun.m in Sources */,
+				043B248721351838008AFB5B /* RongYunManager.m in Sources */,
 				043B248821351838008AFB5B /* MemberNet.m in Sources */,
 				043B248921351838008AFB5B /* RecommendCell.m in Sources */,
 				043B248A21351838008AFB5B /* StateView.m in Sources */,
@@ -1194,7 +1229,6 @@
 				040D7872214220CB00F9AD67 /* CDAlertViewController.m in Sources */,
 				043B24A521351838008AFB5B /* GroupHeadView.m in Sources */,
 				043B24A621351838008AFB5B /* CDBaseNet.m in Sources */,
-				043B24A721351838008AFB5B /* SqliteManage.m in Sources */,
 				043B24A821351838008AFB5B /* WebProgressView.m in Sources */,
 				043B24A921351838008AFB5B /* CDFunction.m in Sources */,
 				043B24AA21351838008AFB5B /* BillNet.m in Sources */,
@@ -1214,6 +1248,7 @@
 				3D6746CC2122D5C5005B841F /* WebViewController.m in Sources */,
 				3D6746AE212164C8005B841F /* EnvelopeListViewController.m in Sources */,
 				3D19A9FF211C3CBD004ABBC6 /* PayWordSettingViewController.m in Sources */,
+				049239C0217756A1009CAD6C /* GroupDetailsModel.m in Sources */,
 				3D7242BE2111A1B500C02A88 /* BillViewController.m in Sources */,
 				3D7242C42111A28500C02A88 /* RecommendedViewController.m in Sources */,
 				3D6746ED2124133C005B841F /* WithdrawalModel.m in Sources */,
@@ -1230,8 +1265,10 @@
 				3DE3F7F42110720B00D500E0 /* LoginViewController.m in Sources */,
 				10F0DC8820F44A4A008372B6 /* NSObject+CDCategory.m in Sources */,
 				3D19AA05211D6219004ABBC6 /* WXShareModel.m in Sources */,
+				045780AB217B188300F15C8C /* DiscoverViewController.m in Sources */,
 				10F0DC6120F4436D008372B6 /* ViewController.m in Sources */,
 				3D7242B221118E7D00C02A88 /* MemberCell.m in Sources */,
+				04D6B43A217ACC9100DCB4E0 /* VerCodeLoginController.m in Sources */,
 				3D19A9E7211A8757004ABBC6 /* EnvelopeCollectionViewCell.m in Sources */,
 				3D19A9F3211AC2C6004ABBC6 /* EnvelopeTipCell.m in Sources */,
 				3D9C7069212564500006079F /* UserCollectionViewCell.m in Sources */,
@@ -1253,7 +1290,7 @@
 				3D6746C92122B668005B841F /* PayButton.m in Sources */,
 				3D7242BB2111A19300C02A88 /* TopupViewController.m in Sources */,
 				3D9C706C212569FF0006079F /* GroupNet.m in Sources */,
-				3DE3F7ED2110643A00D500E0 /* RonYun.m in Sources */,
+				3DE3F7ED2110643A00D500E0 /* RongYunManager.m in Sources */,
 				3D7242A9211188C100C02A88 /* MemberNet.m in Sources */,
 				3D7089822112E6EA000D525C /* RecommendCell.m in Sources */,
 				04477C542133F9ED00B9F2C6 /* StateView.m in Sources */,
@@ -1262,10 +1299,12 @@
 				3D72429D2111695200C02A88 /* MessageTableViewCell.m in Sources */,
 				3D822E3E211403DA005C7572 /* SVProgressHUD+CDHUD.m in Sources */,
 				046712D7212C20F400F9B9A4 /* ChatViewController.m in Sources */,
+				049239C3217756C5009CAD6C /* GroupRulesModel.m in Sources */,
 				3D19A9FC211C3B97004ABBC6 /* PasswordSettingViewController.m in Sources */,
 				0449C5BB2170C2A3004BE7AB /* AFHTTPSessionManager2.m in Sources */,
 				3D72429A211162DA00C02A88 /* CDTableModel.m in Sources */,
 				10F0DC6C20F4436F008372B6 /* main.m in Sources */,
+				049239C621775740009CAD6C /* GroupDetailsModels.m in Sources */,
 				3D7242C12111A1E800C02A88 /* MakeMoneyViewController.m in Sources */,
 				3D9C706F2125798C0006079F /* AllUserViewController.m in Sources */,
 				3D19A9EA211A877A004ABBC6 /* EnvelopeViewController.m in Sources */,
@@ -1289,7 +1328,6 @@
 				040D78712142188500F9AD67 /* CDAlertViewController.m in Sources */,
 				3D9C7066212563C30006079F /* GroupHeadView.m in Sources */,
 				10F0DCA020F48498008372B6 /* CDBaseNet.m in Sources */,
-				3D19A9F6211C13E1004ABBC6 /* SqliteManage.m in Sources */,
 				3D6746CF2122D63B005B841F /* WebProgressView.m in Sources */,
 				04477C512133CAED00B9F2C6 /* CDFunction.m in Sources */,
 				3D6746BD2122929E005B841F /* BillNet.m in Sources */,
@@ -1480,6 +1518,7 @@
 			baseConfigurationReference = 34797CDB2FEB0C9575D97493 /* Pods-Project.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = W6D73TB3CU;
 				ENABLE_BITCODE = NO;
@@ -1492,8 +1531,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.xmfx.qq;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "12e9daea-d044-418f-884b-39020a9e49d3";
-				PROVISIONING_PROFILE_SPECIFIER = dev_all_1015;
+				PROVISIONING_PROFILE = "7fd7a1c5-e4cf-4cb3-af72-e6b073302bce";
+				PROVISIONING_PROFILE_SPECIFIER = dev_all_1019;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -1503,6 +1542,7 @@
 			baseConfigurationReference = A2C741AA596D2C6B4924973A /* Pods-Project.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = W6D73TB3CU;
 				ENABLE_BITCODE = NO;
@@ -1515,8 +1555,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.xmfx.qq;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "12e9daea-d044-418f-884b-39020a9e49d3";
-				PROVISIONING_PROFILE_SPECIFIER = dev_all_1015;
+				PROVISIONING_PROFILE = "7fd7a1c5-e4cf-4cb3-af72-e6b073302bce";
+				PROVISIONING_PROFILE_SPECIFIER = dev_all_1019;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;

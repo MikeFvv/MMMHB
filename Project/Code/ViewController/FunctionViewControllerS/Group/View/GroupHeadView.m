@@ -57,7 +57,10 @@
 - (void)updateList:(NSArray *)list{
     _dataList = list;
     [_collectionView reloadData];
-    NSString *count = [NSString stringWithFormat:@"全部群成员（%ld） >",_dataList.count];
+}
+
+-(void)setTotalNum:(NSInteger)num{
+    NSString *count = [NSString stringWithFormat:@"全部群成员（%ld） >",num];
     NSMutableAttributedString *AttributedStr = [[NSMutableAttributedString alloc]initWithString:count];
     NSRange rang = NSMakeRange(0, count.length);
     [AttributedStr addAttribute:NSFontAttributeName value:[UIFont scaleFont:14] range:rang];
@@ -65,7 +68,6 @@
     [AttributedStr addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:NSMakeRange(rang.location, rang.length-2)];
     [_allBtn setAttributedTitle:AttributedStr forState:UIControlStateNormal];
 }
-
 
 #pragma mark ----- Layout
 - (void)initLayout{

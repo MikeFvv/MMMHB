@@ -27,7 +27,7 @@
 
 #pragma mark ----- Data
 - (void)initData{
-    _rowList = @[@[@"账号",@"手机号",@"声音"],@[@"密码设置"]];
+    _rowList = @[@[@"账号",@"手机号",@"提示音"],@[@"重设密码"]];
 }
 
 
@@ -97,7 +97,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     if (indexPath.section == 1) {
-        CDPush(self.navigationController, CDVC(@"PasswordSettingViewController"), YES);
+        CDPush(self.navigationController, CDVC(@"ForgotViewController"), YES);
     }
 }
 

@@ -59,24 +59,30 @@
     [_dataList addObject:section2];
 }
 
-+ (void)TopupObj:(id)obj
-         Success:(void (^)(NSDictionary *))success
-         Failure:(void (^)(NSError *))failue{
-    CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = obj;
-    net.path = Line_TopupNew;
-    [net doGetSuccess:^(NSDictionary *dic) {
-        NSLog(@"%@",dic);
-        if (CD_Success([dic objectForKey:@"status"], 1)) {
-            success(dic);
-        }
-        else{
-            failue(tipError(dic[@"msg"], 0));
-        }
-    } failure:^(NSError *error) {
-        failue(error);
-    }];
-}
+
+
+
+//+ (void)TopupObj:(id)obj
+//         Success:(void (^)(NSDictionary *))success
+//         Failure:(void (^)(NSError *))failue{
+//    CDBaseNet *net = [CDBaseNet normalNet];
+//    net.param = obj;
+//    net.path = Line_TopupNew;
+//    [net doGetSuccess:^(NSDictionary *dic) {
+//        NSLog(@"%@",dic);
+//        if (CD_Success([dic objectForKey:@"status"], 1)) {
+//            success(dic);
+//        }
+//        else{
+//            failue(tipError(dic[@"msg"], 0));
+//        }
+//    } failure:^(NSError *error) {
+//        failue(error);
+//    }];
+//}
+
+
+
 
 + (void)WithdrawalObj:(id)obj
               Success:(void (^)(NSDictionary *))success
@@ -85,22 +91,22 @@
 }
 
 
-+ (void)SignObj:(id)obj
-        Success:(void (^)(NSDictionary *))success
-        Failure:(void (^)(NSError *))failue{
-    CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = obj;
-    net.path = Line_SIGN;
-    [net doGetSuccess:^(NSDictionary *dic) {
-        NSLog(@"%@",dic);
-        if (CD_Success([dic objectForKey:@"status"], 1)) {
-            success(dic);
-        }
-        else{
-            failue(tipError(dic[@"msg"], 0));
-        }
-    } failure:^(NSError *error) {
-        failue(error);
-    }];
-}
+//+ (void)SignObj:(id)obj
+//        Success:(void (^)(NSDictionary *))success
+//        Failure:(void (^)(NSError *))failue{
+//    CDBaseNet *net = [CDBaseNet normalNet];
+//    net.param = obj;
+//    net.path = Line_SIGN;
+//    [net doGetSuccess:^(NSDictionary *dic) {
+//        NSLog(@"%@",dic);
+//        if (CD_Success([dic objectForKey:@"status"], 1)) {
+//            success(dic);
+//        }
+//        else{
+//            failue(tipError(dic[@"msg"], 0));
+//        }
+//    } failure:^(NSError *error) {
+//        failue(error);
+//    }];
+//}
 @end

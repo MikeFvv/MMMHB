@@ -468,11 +468,54 @@ static FunctionManager *instance = nil;
     }
     NSDictionary *responseDic = responseObj;
     ResultCode code = (ResultCode)[[responseDic objectForKey:@"code"] integerValue];
-    if(code != ResultCodeSuccess){
+    if([responseDic objectForKey:@"code"] && code != ResultCodeSuccess){
         if(responseDic[@"msg"])
             SV_ERROR_STATUS(responseDic[@"msg"]);
         else
             SV_ERROR_STATUS(@"请求授权失败");
+    }else if(responseDic[@"error"]){
+        if([responseDic[@"error"] isEqualToString:@"unauthorized"])
+            SV_ERROR_STATUS(@"用户不存在");
+        else if([responseDic[@"error"] isEqualToString:@"invalid_grant"])
+            SV_ERROR_STATUS(@"密码错误");
+        else
+            SV_ERROR_STATUS(responseDic[@"error"]);
     }
+    else
+        SV_DISMISS;
+}
+
+-(NSArray *)getBankList{
+    return [self readArchiveWithFileName:@"bankList"];
+}
+
+- (void)updateChat:(NSString *)chatId number:(NSInteger)number lastMessage:(NSString *)message lastTime:(NSString *)lastTime{
+    BOOL isIn = NO;
+    for (NSMutableDictionary *dic in APP_MODEL.unReadNumberArray) {
+        NSString *cId = dic[@"chatId"];
+        if([cId isEqualToString:chatId]){
+            NSInteger unreadNum = [dic[@"unreadNum"] integerValue];
+            if(number == -1)
+                dic[@"unreadNum"] = @"0";
+            else
+                dic[@"unreadNum"] = [NSString stringWithFormat:@"%ld",unreadNum+number];
+            dic[@"lastMessage"] = message;
+            dic[@"lastTime"] = lastTime;
+            isIn = YES;
+            break;
+        }
+    }
+    if(isIn == NO){
+        if(number > 0){
+            NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
+            [dic setObject:chatId forKey:@"chatId"];
+            [dic setObject:[NSString stringWithFormat:@"%ld",number] forKey:@"unreadNum"];
+            dic[@"lastMessage"] = message;
+            dic[@"lastTime"] = lastTime;
+            [APP_MODEL.unReadNumberArray addObject:dic];
+        }
+    }
+    [FUNCTION_MANAGER archiveWithData:APP_MODEL.unReadNumberArray andFileName:@"unreadRecord"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"CDReadNumberChange" object:nil];
 }
 @end

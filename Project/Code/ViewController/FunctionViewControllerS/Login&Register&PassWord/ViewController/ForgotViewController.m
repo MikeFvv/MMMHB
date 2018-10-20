@@ -9,7 +9,7 @@
 #import "ForgotViewController.h"
 #import "NetRequestManager.h"
 
-@interface ForgotViewController ()<UITableViewDelegate,UITableViewDataSource>{
+@interface ForgotViewController ()<UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate>{
     UITableView *_tableView;
     NSArray *_dataList;
     UITextField *_textField[5];
@@ -43,7 +43,7 @@
 #pragma mark ----- subView
 - (void)initSubviews{
     
-    self.navigationItem.title = @"忘记密码";
+    self.navigationItem.title = @"重设密码";
     
     _tableView = [UITableView groupTable];
     [self.view addSubview:_tableView];
@@ -108,6 +108,14 @@
         [cell.contentView addSubview:_textField[indexPath.row]];
         _textField[indexPath.row].placeholder = _dataList[indexPath.row][@"title"];
         _textField[indexPath.row].font = [UIFont scaleFont:14];
+        _textField[indexPath.row].clearButtonMode = UITextFieldViewModeWhileEditing;
+        _textField[indexPath.row].delegate = self;
+        if(_dataList.count - 1 == indexPath.row)
+            _textField[indexPath.row].returnKeyType = UIReturnKeyDone;
+        else
+            _textField[indexPath.row].returnKeyType = UIReturnKeyNext;
+        if(indexPath.row == 0)
+            _textField[0].keyboardType = UIKeyboardTypePhonePad;
         
         CGFloat r = (indexPath.row == 0)?120:12;
         [_textField[indexPath.row] mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -123,14 +131,14 @@
 
 #pragma mark action
 - (void)action_getCode{
-    if (_textField[0].text.length != 11) {
+    if (_textField[0].text.length < 11) {
         SV_ERROR_STATUS(@"请输入正确的手机号！");
         return;
     }
     SV_SHOW;
     WEAK_OBJ(weakSelf, self);
     [NET_REQUEST_MANAGER requestSmsCodeWithPhone:_textField[0].text code:@"reset_passwd" success:^(id object) {
-        SV_DISMISS;
+        SV_SUCCESS_STATUS(@"验证码发送成功");
         [weakSelf.codeBtn beginTime:60];
     } fail:^(id object) {
         [FUNCTION_MANAGER handleFailResponse:object];
@@ -138,7 +146,7 @@
 }
 
 - (void)action_submit{
-    if (_textField[0].text.length != 11) {
+    if (_textField[0].text.length < 11) {
         SV_ERROR_STATUS(@"请输入正确的手机号！");
         return;
     }
@@ -146,8 +154,8 @@
         SV_ERROR_STATUS(@"请验证码！");
         return;
     }
-    if (_textField[2].text.length == 0 || _textField[3].text.length == 0) {
-        SV_ERROR_STATUS(@"请输入密码！");
+    if (_textField[2].text.length < 6 || _textField[3].text.length < 6) {
+        SV_ERROR_STATUS(@"请输入6位以上密码！");
         return;
     }
     if (![_textField[2].text isEqualToString:_textField[3].text]) {
@@ -155,12 +163,18 @@
         return;
     }
     SV_SHOW;
-    [AppModel updataPasswordObj:@{@"username":_textField[0].text,@"passwd":_textField[2].text,@"smscode":_textField[1].text} Success:^(NSDictionary *info) {
-        SV_SUCCESS_STATUS(@"修改成功！");
+    [NET_REQUEST_MANAGER findPasswordWithPhone:_textField[0].text smsCode:_textField[1].text password:_textField[2].text success:^(id object) {
+        SV_SUCCESS_STATUS(@"重设密码成功！");
         CDPop(self.navigationController, YES);
-    } Failure:^(NSError *error) {
-        SV_ERROR(error);
+    } fail:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
     }];
+//    [AppModel updataPasswordObj:@{@"username":_textField[0].text,@"passwd":_textField[2].text,@"smscode":_textField[1].text} Success:^(NSDictionary *info) {
+//        SV_SUCCESS_STATUS(@"修改成功！");
+//        CDPop(self.navigationController, YES);
+//    } Failure:^(NSError *error) {
+//        SV_ERROR(error);
+//    }];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -168,6 +182,21 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+    for (NSInteger i = 0; i < _dataList.count; i++) {
+        if(textField == _textField[i]){
+            if(i == _dataList.count - 1){
+                [textField resignFirstResponder];
+                return YES;
+            }
+            else{
+                [_textField[i + 1] becomeFirstResponder];
+                return YES;
+            }
+        }
+    }
+    return YES;
+}
 /*
  #pragma mark - Navigation
  

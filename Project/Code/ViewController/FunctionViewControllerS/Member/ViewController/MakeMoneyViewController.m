@@ -144,8 +144,8 @@
     
     UILabel *lb1 = [UILabel new];
     [qrView addSubview:lb1];
-    lb1.text = @"扫一扫选择浏览器下载";
-    lb1.font = [UIFont scaleFont:18];
+    lb1.text = @"扫一扫选择浏览器下载APP";
+    lb1.font = [UIFont scaleFont:17];
     
     [lb1 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerX.equalTo(qrView.mas_centerX);
@@ -154,7 +154,7 @@
     
     UILabel *lb2 = [UILabel new];
     [qrView addSubview:lb2];
-    lb2.font = [UIFont scaleFont:15];
+    lb2.font = [UIFont scaleFont:14];
     lb2.textColor = [UIColor lightGrayColor];
     lb2.text = @"安卓用户选择官方下载";
     
@@ -165,7 +165,7 @@
     
     UILabel *lb3 = [UILabel new];
     [qrView addSubview:lb3];
-    lb3.font = [UIFont scaleFont:15];
+    lb3.font = [UIFont scaleFont:14];
     lb3.textColor = [UIColor lightGrayColor];
     lb3.text = @"下载完成输入以下推荐码进入";
     
@@ -184,7 +184,13 @@
     
     [lb4 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerX.equalTo(qrView.mas_centerX);
-        make.top.equalTo(lb3.mas_bottom).offset(CD_Scal(3, 667));
+        NSInteger a = CDScreenHeight;
+        NSInteger b = CD_Scal(3, 667);
+        if(a == 812)//iphoneX
+            b = 20;
+        else if(a == 736)
+            b = 8;
+        make.top.equalTo(lb3.mas_bottom).offset(b);
     }];
     
     UILabel *share = [UILabel new];

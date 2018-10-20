@@ -114,7 +114,7 @@
 
 - (void)setBadeValue:(NSString *)badeValue{
     _badeValue = badeValue;
-    if([badeValue isEqualToString:@"null"]){
+    if([badeValue isEqualToString:@"0"]){
         _badeLabel.hidden = YES;
         _badeBack.hidden = YES;
     }else{

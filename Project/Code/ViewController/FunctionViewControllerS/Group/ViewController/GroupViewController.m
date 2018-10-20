@@ -10,7 +10,6 @@
 #import "MessageNet.h"
 #import "ChatViewController.h"
 #import "MessageItem.h"
-#import "SqliteManage.h"
 #import "ModelHelper.h"
 
 @interface GroupViewController ()<UITableViewDelegate,UITableViewDataSource>{
@@ -26,6 +25,7 @@
     [self initData];
     [self initSubviews];
     [self initLayout];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(updateUnreadNumDot)name:@"CDReadNumberChange" object:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated{
@@ -46,6 +46,9 @@
     }];
 }
 
+-(void)updateUnreadNumDot{
+    [_tableView reloadData];
+}
 #pragma mark ----- subView
 - (void)initSubviews{
     
@@ -77,10 +80,8 @@
         [self getData];
     }];
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self->_tableView.mj_header beginRefreshing];
-    });
-    
+    SV_SHOW;
+    [self getData];
 }
 
 #pragma mark 收到消息重新刷新
@@ -105,9 +106,9 @@
 }
 
 - (void)getData{
-    
     WEAK_OBJ(weakObj, self);
     [MESSAGE_NET requestMyJoinedGroupListWithSuccess:^(NSDictionary *info) {
+        SV_DISMISS;
         [weakObj reload];
     } Failure:^(NSError *error) {
         [FUNCTION_MANAGER handleFailResponse:error];
@@ -128,7 +129,19 @@
     
     CDTableModel *model = MESSAGE_NET.dataList[indexPath.row];
     //MessageItem *item = [MessageItem mj_objectWithKeyValues:model.obj];
-    MessageItem *item = [MODEL_HELPER getMessageItem:model.obj];
+    MessageItem *item = nil;
+    if([model.obj isKindOfClass:[MessageItem class]])
+        item = model.obj;
+    else
+        item = [MODEL_HELPER getMessageItem:model.obj];
+    
+    CGFloat userMoney = [APP_MODEL.user.userBalance floatValue];
+    if (item.joinMoney.floatValue > userMoney) {
+        NSString *mess = [NSString stringWithFormat:@"小于最小进群余额%@元，请充值~", item.joinMoney];
+        SV_ERROR_STATUS(mess);
+        return;
+    }
+    
 //    float min = [item.minMoney floatValue];
 //    float user = [APP_MODEL.user.money floatValue];
 //    if (user < min) {

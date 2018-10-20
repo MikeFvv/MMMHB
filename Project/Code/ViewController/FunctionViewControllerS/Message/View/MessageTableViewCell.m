@@ -8,12 +8,11 @@
 
 #import "MessageTableViewCell.h"
 #import "MessageItem.h"
-#import "SqliteManage.h"
 #import "ModelHelper.h"
 
 @interface MessageTableViewCell(){
     UIImageView *_headIcon;
-    UIView *_dotView;
+    UILabel *_dotView;
     UILabel *_titleLabel;
     UILabel *_descLabel;
     UILabel *_dateLabel;
@@ -59,9 +58,9 @@
     }];
     
     [_dotView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.right.equalTo(self->_headIcon.mas_right).offset(2);
-        make.top.equalTo(self->_headIcon.mas_top).offset(2);
-        make.width.height.equalTo(@(8));
+        make.right.equalTo(self.contentView.mas_right).offset(-15);
+        make.centerY.equalTo(self.contentView.mas_centerY);
+        make.width.height.equalTo(@(16));
     }];
     
     [_titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -90,10 +89,14 @@
     _headIcon.layer.masksToBounds = YES;
     //    _headIcon.backgroundColor = [UIColor randColor];
     
-    _dotView = [UIView new];
+    _dotView = [[UILabel alloc] init];
+    _dotView.font = [UIFont systemFontOfSize:10];
+    _dotView.textColor = [UIColor whiteColor];
+    _dotView.textAlignment = NSTextAlignmentCenter;
+    
     [self.contentView addSubview:_dotView];
     _dotView.backgroundColor = [UIColor redColor];
-    _dotView.layer.cornerRadius = 4;
+    _dotView.layer.cornerRadius = 8;
     _dotView.layer.masksToBounds = YES;
     
     _titleLabel = [UILabel new];
@@ -123,9 +126,11 @@
         item = (MessageItem *)obj;
     }
     else{
-        
         //item = [MessageItem mj_objectWithKeyValues:obj];
-        item = [MODEL_HELPER getMessageItem:obj];
+        if([obj isKindOfClass:[MessageItem class]])
+            item = obj;
+        else
+            item = [MODEL_HELPER getMessageItem:obj];
     }
     if (item.localImg.length>0) {
         _headIcon.image = [UIImage imageNamed:item.localImg];
@@ -133,6 +138,7 @@
         [_headIcon cd_setImageWithURL:[NSURL URLWithString:[NSString cdImageLink:item.img]] placeholderImage:[UIImage imageNamed:@"msg3"]];
     }
     _titleLabel.text = item.groupName;
+    _descLabel.text = item.notice;
     //
     //                        NSString *last = @"暂无最新消息";
     //                        int number = 0 ;
@@ -142,26 +148,23 @@
     //                        }
     //                        [group setObject:last forKey:@"lastMessage"];
     //                        [group setObject:@(number) forKey:@"number"];
+    _dotView.hidden = YES;
     if (item.localType == 1) {
-        MessageItem *g = [SqliteManage queryById:item.groupId];
-        if (g.number >0) {
-            _descLabel.text = (g.number>99)?[NSString stringWithFormat:@"【99+未读】%@",g.lastMessage]:[NSString stringWithFormat:@"【%d条未读】%@",g.number,g.lastMessage];
-            _dotView.hidden = NO;
-        }
-        else{
-            if (g.lastMessage.length >0) {
-                _descLabel.text = g.lastMessage;
+        NSString *groupId = item.groupId;
+        for (NSDictionary *dic in APP_MODEL.unReadNumberArray) {
+            NSString *gId = dic[@"chatId"];
+            if([gId isEqualToString:groupId]){
+                NSInteger unreadNum = [dic[@"unreadNum"] integerValue];
+                if(unreadNum > 0){
+                    _dotView.hidden = NO;
+                    if(unreadNum < 10)
+                        _dotView.text = [NSString stringWithFormat:@"%ld",unreadNum];
+                    else
+                        _dotView.text = @"···";
+                }
             }
-            else
-                _descLabel.text = @"暂无未读消息";
-            
-            _dotView.hidden = YES;
         }
-    }else{
-        _descLabel.text = item.notice;
-        _dotView.hidden = YES;
     }
-   
 }
 
 

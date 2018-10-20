@@ -52,24 +52,24 @@
 - (void)initLayout{
     [_noLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.contentView.mas_left).offset(15);
-        make.top.equalTo(self.contentView.mas_top).offset(9);
+        make.top.equalTo(self.contentView.mas_top).offset(10);
         make.right.equalTo(self.contentView.mas_right).offset(-15);
     }];
     
     [_nameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(self->_noLabel.mas_bottom).offset(2);
+        make.top.equalTo(self->_noLabel.mas_bottom).offset(5);
         make.left.equalTo(self.contentView.mas_left).offset(15);
         make.right.equalTo(self.contentView.mas_right).offset(-15);
     }];
     
     [_titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(self->_nameLabel.mas_bottom).offset(2);
+        make.top.equalTo(self->_nameLabel.mas_bottom).offset(5);
         make.left.equalTo(self.contentView.mas_left).offset(15);
         make.right.equalTo(self.contentView.mas_right).offset(-15);
     }];
     
     [_areaLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(self->_titleLabel.mas_bottom).offset(2);
+        make.top.equalTo(self->_titleLabel.mas_bottom).offset(5);
         make.left.equalTo(self.contentView.mas_left).offset(15);
         make.right.equalTo(self.contentView.mas_right).offset(-15);
     }];
@@ -97,17 +97,17 @@
     _nameLabel = [UILabel new];
     [self.contentView addSubview:_nameLabel];
     _nameLabel.font = [UIFont scaleFont:12];
-    _nameLabel.textColor = HexColor(@"#3F3F3F");//[UIColor colorWithHexString:@""];
+    _nameLabel.textColor = COLOR_Y(120);;//[UIColor colorWithHexString:@""];
     
     _titleLabel = [UILabel new];
     [self.contentView addSubview:_titleLabel];
     _titleLabel.font = [UIFont scaleFont:12];
-    _titleLabel.textColor = HexColor(@"#3F3F3F");
+    _titleLabel.textColor = _nameLabel.textColor;
     
     _areaLabel = [UILabel new];
     [self.contentView addSubview:_areaLabel];
     _areaLabel.font = [UIFont scaleFont:12];
-    _areaLabel.textColor = HexColor(@"#3F3F3F");
+    _areaLabel.textColor = _nameLabel.textColor;
     
     _typeIcon = [UIImageView new];
     [self.contentView addSubview:_typeIcon];
@@ -116,16 +116,16 @@
     _typeName = [UILabel new];
     [self.contentView addSubview:_typeName];
     _typeName.font = [UIFont scaleFont:12];
-    _typeName.textColor = HexColor(@"#3F3F3F");
+    _typeName.textColor = _nameLabel.textColor;
     _typeName.text = @"银行卡";
 }
 
 - (void)setObj:(id)obj{
     WithdrawalModel *model = [WithdrawalModel mj_objectWithKeyValues:obj];
-    _noLabel.text = [NSString stringWithFormat:@"卡号：%@",model.accNo];
-    _nameLabel.text = [NSString stringWithFormat:@"持卡人：%@",model.accUser];
-    _titleLabel.text = [NSString stringWithFormat:@"银行名称：%@",model.accTargetName];
-    _areaLabel.text = [NSString stringWithFormat:@"开卡地区：%@",model.accAreaName];
+    _noLabel.text = [NSString stringWithFormat:@"卡号：%@",model.upayNo];
+    _nameLabel.text = [NSString stringWithFormat:@"持卡人：%@",model.upayUser];
+    _titleLabel.text = [NSString stringWithFormat:@"银行名称：%@",model.upayBankname];
+    _areaLabel.text = [NSString stringWithFormat:@"开卡地区：%@",model.upayRegion];
 }
 
 

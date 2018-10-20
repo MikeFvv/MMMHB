@@ -29,9 +29,9 @@
 @property (nonatomic ,copy) NSString *fullToken;
 @property (nonatomic ,assign)BOOL isLogined;//是否登录
 
-+ (void)getUserInfoObj:(id)obj
-               Success:(void (^)(NSDictionary *))success
-               Failure:(void (^)(NSError *))failue;
+//+ (void)getUserInfoObj:(id)obj
+//               Success:(void (^)(NSDictionary *))success
+//               Failure:(void (^)(NSError *))failue;
 
 @end
 

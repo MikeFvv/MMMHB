@@ -28,7 +28,7 @@ MJCodingImplementation
     self = [super init];
     if (self) {
         NSMutableDictionary *extra = [[NSMutableDictionary alloc]init];
-        [extra CDSetNOTNULLObject:[obj objectForKey:@"id"] forKey:@"redpacketId"];
+        [extra CDSetNOTNULLObject:[obj objectForKey:@"redpacketId"] forKey:@"redpacketId"];
         [extra CDSetNOTNULLObject:[obj objectForKey:@"count"] forKey:@"count"];
         [extra CDSetNOTNULLObject:[obj objectForKey:@"money"] forKey:@"money"];
         [extra CDSetNOTNULLObject:[obj objectForKey:@"num"] forKey:@"num"];

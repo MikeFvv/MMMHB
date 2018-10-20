@@ -8,10 +8,9 @@
 
 #import "AppModel.h"
 #import "CDBaseNet.h"
-#import "RonYun.h"
+#import "RongYunManager.h"
 #import "UserModel.h"
 #import "WXManage.h"
-#import "SqliteManage.h"
 
 
 static NSString *Path = @"COM.XMFX.path";
@@ -19,10 +18,6 @@ static NSString *Path = @"COM.XMFX.path";
 @implementation AppModel
 
 MJCodingImplementation
-
-+ (void)load{
-    [self performSelectorOnMainThread:@selector(shareInstance) withObject:nil waitUntilDone:NO];
-}
 
 + (instancetype)shareInstance{
     static AppModel *instance;
@@ -43,6 +38,10 @@ MJCodingImplementation
         }else{
             _Sound = [RCIM sharedRCIM].disableMessageAlertSound;
         }
+        NSArray *array = [FUNCTION_MANAGER readArchiveWithFileName:@"unreadRecord"];
+        self.unReadNumberArray = [[NSMutableArray alloc] init];
+        if(array.count > 0)
+            [self.unReadNumberArray addObjectsFromArray:array];
     }
     return self;
 }
@@ -64,16 +63,21 @@ MJCodingImplementation
 }
 
 - (void)loginOut{
+    if(self.user.isLogined == NO)
+        return;
     self.user = [UserModel new];
+    APP_MODEL.unReadNumberArray = nil;
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"CDReadNumberChange" object:nil];
+    [APP_MODEL saveToDisk];
+    [self resetRootAnimation:YES];
+    [RONG_YUN_MANAGER disConnect];
 }
 
 #pragma mark method
 
-+ (void)initSetUp{
-    
-    
+- (void)initSetUp{
     //融云
-    [RonYun initWithMode:isLine];
+    [RongYunManager initWithMode:rongYunMode];
     
     //开启消息撤回功能
     //    [RCIM sharedRCIM].enableMessageRecall = YES;
@@ -90,8 +94,8 @@ MJCodingImplementation
     [[UIWindow appearance]setBackgroundColor:BaseColor];
     [[UIButton appearance]setExclusiveTouch:YES];
     [[UIBarButtonItem appearance]setBackButtonBackgroundImage:[UIImage imageNamed:@"navback"] forState:0 barMetrics:UIBarMetricsCompact];
-    [[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(-1000,0)
-                                                         forBarMetrics:UIBarMetricsDefault];
+//    [[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(-1000,0)
+//                                                         forBarMetrics:UIBarMetricsDefault];//不显示标题
     
     [[UINavigationBar appearance] setBackgroundColor:[UIColor whiteColor]];
     [[UINavigationBar appearance] setBarTintColor:Color_3];
@@ -104,28 +108,19 @@ MJCodingImplementation
     
 }
 
-+ (void)loginOut{
-    [APP_MODEL loginOut];
-    APP_MODEL.unReadNumber = 0;
-    [APP_MODEL saveToDisk];
-    [self resetRootAnimation:YES];
-    [RONG_YUN disConnect];
-    
-}
-
-+ (void)login{
-    [APP_MODEL saveToDisk];
+- (void)login{
+    [self saveToDisk];
     [self resetRootAnimation:YES];
 }
 
-+ (void)hidGuide{
+- (void)hidGuide{
     [[NSUserDefaults standardUserDefaults]setObject:@(YES) forKey:[NSString appVersion]];
     [[NSUserDefaults standardUserDefaults]synchronize];
     [self resetRootAnimation:NO];
 }
 
 
-+ (UIViewController *)rootVc{
+- (UIViewController *)rootVc{
     if (![[NSUserDefaults standardUserDefaults]objectForKey:[NSString appVersion]]) {
         return [[NSClassFromString(@"GuideViewController") alloc]init];
     }
@@ -139,7 +134,7 @@ MJCodingImplementation
     }
 }
 
-+ (void)resetRootAnimation:(BOOL)b{
+- (void)resetRootAnimation:(BOOL)b{
     UIWindow* window = [UIApplication sharedApplication].keyWindow;
     if (b) {
         [window.layer addAnimation:self.animation forKey:nil];
@@ -148,7 +143,7 @@ MJCodingImplementation
     window.rootViewController = self.rootVc;
 }
 
-+ (CATransition *)animation{
+- (CATransition *)animation{
     CATransition *animation = [CATransition animation];
     animation.duration = 0.5;
     animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
@@ -161,28 +156,28 @@ MJCodingImplementation
 
 
 #pragma mark net
-+ (void)getUserInfoSuccess:(void (^)(NSDictionary *))success
-                   Failure:(void (^)(NSError *))failue{
-    CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = @{@"uid":APP_MODEL.user.userId};
-    net.path = Line_MemberInfo;
-    CDWeakSelf(self);
-    [net doGetSuccess:^(NSDictionary *dic) {
-        CDStrongSelf(self);
-        CDLog(@"%@",dic);
-        if (CD_Success([dic objectForKey:@"status"], 1)) {
-            UserModel *user = [UserModel mj_objectWithKeyValues:dic[@"data"]];
-            APP_MODEL.user = user;
-            [APP_MODEL saveToDisk];
-            success(dic);
-        }
-        else{
-            failue(tipError(dic[@"msg"], 0));
-        }
-    } failure:^(NSError *error) {
-        failue(error);
-    }];
-}
+//+ (void)getUserInfoSuccess:(void (^)(NSDictionary *))success
+//                   Failure:(void (^)(NSError *))failue{
+//    CDBaseNet *net = [CDBaseNet normalNet];
+//    net.param = @{@"uid":APP_MODEL.user.userId};
+//    net.path = Line_MemberInfo;
+//    CDWeakSelf(self);
+//    [net doGetSuccess:^(NSDictionary *dic) {
+//        CDStrongSelf(self);
+//        CDLog(@"%@",dic);
+//        if (CD_Success([dic objectForKey:@"status"], 1)) {
+//            UserModel *user = [UserModel mj_objectWithKeyValues:dic[@"data"]];
+//            APP_MODEL.user = user;
+//            [APP_MODEL saveToDisk];
+//            success(dic);
+//        }
+//        else{
+//            failue(tipError(dic[@"msg"], 0));
+//        }
+//    } failure:^(NSError *error) {
+//        failue(error);
+//    }];
+//}
 
 //+ (void)sendSMSObj:(id)obj
 //           Success:(void (^)(NSDictionary *))success
@@ -282,137 +277,139 @@ MJCodingImplementation
 //    }];
 //}
 
-+ (void)updataUserObj:(id)obj
-              Success:(void (^)(NSDictionary *))success
-              Failure:(void (^)(NSError *))failue{
-    CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = obj;
-    net.path = Line_UpdateUserInfo;
-    [net doGetSuccess:^(NSDictionary *dic) {
-        CDLog(@"%@",dic);
-        if (CD_Success([dic objectForKey:@"status"], 1)) {
-            success(dic);
-        }else{
-            failue(tipError(dic[@"msg"], 0));
-        }
-    } failure:^(NSError *error) {
-        failue(error);
-    }];
-}
 
-+ (void)updataPasswordObj:(id)obj
-                  Success:(void (^)(NSDictionary *))success
-                  Failure:(void (^)(NSError *))failue{
-    CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = obj;
-    net.path = Line_UpdatePassword;
-    [net doGetSuccess:^(NSDictionary *dic) {
-        CDLog(@"%@",dic);
-        if (CD_Success([dic objectForKey:@"status"], 1)) {
-            success(nil);
-        }else{
-            failue(tipError(dic[@"msg"], 0));
-        }
-    } failure:^(NSError *error) {
-        failue(error);
-    }];
-}
+//+ (void)updataUserObj:(id)obj
+//              Success:(void (^)(NSDictionary *))success
+//              Failure:(void (^)(NSError *))failue{
+//    CDBaseNet *net = [CDBaseNet normalNet];
+//    net.param = obj;
+//    net.path = Line_UpdateUserInfo;
+//    [net doGetSuccess:^(NSDictionary *dic) {
+//        CDLog(@"%@",dic);
+//        if (CD_Success([dic objectForKey:@"status"], 1)) {
+//            success(dic);
+//        }else{
+//            failue(tipError(dic[@"msg"], 0));
+//        }
+//    } failure:^(NSError *error) {
+//        failue(error);
+//    }];
+//}
 
-+ (void)wxLoginSuccess:(void (^)(NSDictionary *))success
-               Failure:(void (^)(NSError *))failue{
-    
-    [[WXManage shareInstance] wxAuthSuccess:^(NSDictionary *info) {
-        if (info != NULL) {
-            [self wxLoginObj:info Success:success Failure:failue];
-        }
-        else{
-            failue(tipError(@"服务器出错，稍后尝试~", 0));
-        }
-    } Failure:^(NSError *error) {
-        failue(error);
-    }];
-}
 
-+ (void)wxLoginObj:(id)obj
-           Success:(void (^)(NSDictionary *))success
-           Failure:(void (^)(NSError *))failue{
-    NSDictionary *param = @{@"nickname":[obj objectForKey:@"nickname"],@"sex":[obj objectForKey:@"sex"],@"headimgurl":[obj objectForKey:@"headimgurl"],@"unionid":[obj objectForKey:@"unionid"]};
-    CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = param;
-    net.path = Line_wxLogin;
-    CDWeakSelf(self);
-    [net doGetSuccess:^(NSDictionary *dic) {
-        CDLog(@"%@",dic);
-        CDStrongSelf(self);
-        if (CD_Success([dic objectForKey:@"status"], 1)) {
-            UserModel *user = [UserModel mj_objectWithKeyValues:dic[@"data"]];
-            APP_MODEL.user = user;
-            APP_MODEL.user.isLogined = YES;
-            APP_MODEL.rongYunToken = nil;
-            [self login];
-            success(nil);
-        }
-        else if (CD_Success([dic objectForKey:@"status"], 0)){
-            success (param);
-        }
-        else{
-            failue(tipError(dic[@"msg"], 0));
-        }
-    } failure:^(NSError *error) {
-        failue(error);
-    }];
-}
+//+ (void)updataPasswordObj:(id)obj
+//                  Success:(void (^)(NSDictionary *))success
+//                  Failure:(void (^)(NSError *))failue{
+//    CDBaseNet *net = [CDBaseNet normalNet];
+//    net.param = obj;
+//    net.path = Line_UpdatePassword;
+//    [net doGetSuccess:^(NSDictionary *dic) {
+//        CDLog(@"%@",dic);
+//        if (CD_Success([dic objectForKey:@"status"], 1)) {
+//            success(nil);
+//        }else{
+//            failue(tipError(dic[@"msg"], 0));
+//        }
+//    } failure:^(NSError *error) {
+//        failue(error);
+//    }];
+//}
 
-+ (void)wxResterObj:(id)obj
-            Success:(void (^)(NSDictionary *))success
-            Failure:(void (^)(NSError *))failue{
-    CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = obj;
-    net.path = Line_wxRE;
-    CDWeakSelf(self);
-    [net doGetSuccess:^(NSDictionary *dic) {
-        CDLog(@"%@",dic);
-        CDStrongSelf(self);
-        if (CD_Success([dic objectForKey:@"status"], 1)) {
-            UserModel *user = [UserModel mj_objectWithKeyValues:dic[@"data"]];
-            APP_MODEL.user = user;
-            APP_MODEL.user.isLogined = YES;
-            APP_MODEL.rongYunToken = nil;
-            [self login];
-            success(nil);
-        }
-        else{
-            failue(tipError(dic[@"msg"], 0));
-        }
-    } failure:^(NSError *error) {
-        failue(error);
-    }];
-}
+//+ (void)wxLoginSuccess:(void (^)(NSDictionary *))success
+//               Failure:(void (^)(NSError *))failue{
+//
+//    [[WXManage shareInstance] wxAuthSuccess:^(NSDictionary *info) {
+//        if (info != NULL) {
+//            [self wxLoginObj:info Success:success Failure:failue];
+//        }
+//        else{
+//            failue(tipError(@"服务器出错，稍后尝试~", 0));
+//        }
+//    } Failure:^(NSError *error) {
+//        failue(error);
+//    }];
+//}
 
-+ (void)uploadIconObj:(UIImage *)icon
-              Success:(void (^)(NSDictionary *))success
-              Failure:(void (^)(NSError *))failue{
-    CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = UIImagePNGRepresentation(icon);;
-    net.path = Line_UpdateHead;
-    [net upLoadSuccess:^(NSDictionary *dic) {
-        success(dic);
-    } failure:^(NSError *error) {
-        failue(error);
-    }];
-}
+//+ (void)wxLoginObj:(id)obj
+//           Success:(void (^)(NSDictionary *))success
+//           Failure:(void (^)(NSError *))failue{
+//    NSDictionary *param = @{@"nickname":[obj objectForKey:@"nickname"],@"sex":[obj objectForKey:@"sex"],@"headimgurl":[obj objectForKey:@"headimgurl"],@"unionid":[obj objectForKey:@"unionid"]};
+//    CDBaseNet *net = [CDBaseNet normalNet];
+//    net.param = param;
+//    net.path = Line_wxLogin;
+//    CDWeakSelf(self);
+//    [net doGetSuccess:^(NSDictionary *dic) {
+//        CDLog(@"%@",dic);
+//        CDStrongSelf(self);
+//        if (CD_Success([dic objectForKey:@"status"], 1)) {
+//            UserModel *user = [UserModel mj_objectWithKeyValues:dic[@"data"]];
+//            APP_MODEL.user = user;
+//            APP_MODEL.user.isLogined = YES;
+//            APP_MODEL.rongYunToken = nil;
+//            [self login];
+//            success(nil);
+//        }
+//        else if (CD_Success([dic objectForKey:@"status"], 0)){
+//            success (param);
+//        }
+//        else{
+//            failue(tipError(dic[@"msg"], 0));
+//        }
+//    } failure:^(NSError *error) {
+//        failue(error);
+//    }];
+//}
+//
+//+ (void)wxResterObj:(id)obj
+//            Success:(void (^)(NSDictionary *))success
+//            Failure:(void (^)(NSError *))failue{
+//    CDBaseNet *net = [CDBaseNet normalNet];
+//    net.param = obj;
+//    net.path = Line_wxRE;
+//    CDWeakSelf(self);
+//    [net doGetSuccess:^(NSDictionary *dic) {
+//        CDLog(@"%@",dic);
+//        CDStrongSelf(self);
+//        if (CD_Success([dic objectForKey:@"status"], 1)) {
+//            UserModel *user = [UserModel mj_objectWithKeyValues:dic[@"data"]];
+//            APP_MODEL.user = user;
+//            APP_MODEL.user.isLogined = YES;
+//            APP_MODEL.rongYunToken = nil;
+//            [self login];
+//            success(nil);
+//        }
+//        else{
+//            failue(tipError(dic[@"msg"], 0));
+//        }
+//    } failure:^(NSError *error) {
+//        failue(error);
+//    }];
+//}
 
-+ (void)getShareConfigObj:(id)obj
-                  Success:(void (^)(NSDictionary *))success
-                  Failure:(void (^)(NSError *))failue{
-    CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = obj;
-    net.path = Line_Share;
-    [net upLoadSuccess:^(NSDictionary *dic) {
-        success(dic);
-    } failure:^(NSError *error) {
-        failue(error);
-    }];
-}
+//+ (void)uploadIconObj:(UIImage *)icon
+//              Success:(void (^)(NSDictionary *))success
+//              Failure:(void (^)(NSError *))failue{
+//    CDBaseNet *net = [CDBaseNet normalNet];
+//    net.param = UIImagePNGRepresentation(icon);;
+//    net.path = Line_UpdateHeadMM;
+//    [net upLoadSuccess:^(NSDictionary *dic) {
+//        success(dic);
+//    } failure:^(NSError *error) {
+//        failue(error);
+//    }];
+//}
+
+//+ (void)getShareConfigObj:(id)obj
+//                  Success:(void (^)(NSDictionary *))success
+//                  Failure:(void (^)(NSError *))failue{
+//    CDBaseNet *net = [CDBaseNet normalNet];
+//    net.param = obj;
+//    net.path = Line_Share;
+//    [net upLoadSuccess:^(NSDictionary *dic) {
+//        success(dic);
+//    } failure:^(NSError *error) {
+//        failue(error);
+//    }];
+//}
 
 @end
