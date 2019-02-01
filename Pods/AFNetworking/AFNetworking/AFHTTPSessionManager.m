@@ -289,21 +289,6 @@
                           uploadProgress:uploadProgress
                         downloadProgress:downloadProgress
                        completionHandler:^(NSURLResponse * __unused response, id responseObject, NSError *error) {
-        //----------------------这边判断是自己加的，服务端把业务的状态也写到response.statusCode,所以这边优先判断有没有返回业务数据，有的话就是成功
-       if([responseObject isKindOfClass:[NSDictionary class]]){
-           NSDictionary *dic = responseObject;
-           if([dic objectForKey:@"code"])
-               error = nil;
-           else if([dic objectForKey:@"error"])
-               error = nil;
-       }
-       NSHTTPURLResponse *resp = (NSHTTPURLResponse *)response;
-       NSInteger statusCode = resp.statusCode;
-       if(statusCode == 401){
-           responseObject = @{@"code":@401,@"msg":@"用户不存在或密码错误"};
-       }else if(statusCode == 400){
-           responseObject = @{@"code":@400,@"msg":@"用户不存在或密码错误"};
-       }
         if (error) {
             if (failure) {
                 failure(dataTask, error);

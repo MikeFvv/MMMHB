@@ -7,11 +7,12 @@
 //
 
 #import "AppDelegate.h"
-#import "RongYunManager.h"
+#import "RongCloudManager.h"
 #import "WXManage.h"
 #import "AFNetworkReachabilityManager.h"
-#import "NetRequestManager.h"
-#import "FunctionManager.h"
+#import "NSData+AES.h"
+#import "GTMBase64.h"
+#import "JSPatchManager.h"
 
 @interface AppDelegate ()
 
@@ -21,20 +22,37 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
-    self.window = [[UIWindow alloc]initWithFrame:[UIScreen mainScreen].bounds];
-    self.window.backgroundColor = CDCOLOR(245, 245, 245);
-    self.window.rootViewController = [APP_MODEL rootVc];
-    [NET_REQUEST_MANAGER test];
-    [self AFNReachability];
-    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
-    [SVProgressHUD setImageViewSize:CGSizeMake(20, 20)];
-    [APP_MODEL initSetUp];
-    if(APP_MODEL.user.isLogined)
-        [NET_REQUEST_MANAGER requestAppConfigWithSuccess:nil fail:nil];
+    
+#if TARGET_IPHONE_SIMULATOR
+    [JPEngine startEngine];
+    NSString *sourcePath = [[NSBundle mainBundle] pathForResource:@"main" ofType:@"js"];
+    NSString *script = [NSString stringWithContentsOfFile:sourcePath encoding:NSUTF8StringEncoding error:nil];
+    [JPEngine evaluateScript:script];
+#elif TARGET_OS_IPHONE
+        // 热更新加载
+    [JSPatchManager asyncUpdate:YES];
+#endif
+    
+    [self applicationRoot];
+    
     return YES;
 }
 
+
+- (void)applicationRoot {
+    self.window = [[UIWindow alloc]initWithFrame:[UIScreen mainScreen].bounds];
+    self.window.backgroundColor = CDCOLOR(245, 245, 245);
+    self.window.rootViewController = [APP_MODEL rootVc];
+    
+    [NSThread sleepForTimeInterval:1.0];
+    
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [self AFNReachability];
+    [APP_MODEL initSetUp];
+    
+    [FUNCTION_MANAGER checkVersion:NO];
+    [NET_REQUEST_MANAGER requestSystemNoticeWithSuccess:nil fail:nil];
+}
 
 /**
  * 推送处理3
@@ -45,7 +63,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
                         stringByReplacingOccurrencesOfString:@">"
                         withString:@""] stringByReplacingOccurrencesOfString:@" "
                        withString:@""];
-    [RONG_YUN_MANAGER setPushToken:token];
+    [[RongCloudManager shareInstance] setToken:token];
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
@@ -54,7 +72,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
 #else
     // 请检查App的APNs的权限设置，更多内容可以参考文档
     // http://www.rongcloud.cn/docs/ios_push.html。
-    NSLog(@"获取DeviceToken失败！！！");
+    NSLog(@"获取DeviceToken失败");
     NSLog(@"ERROR：%@", error);
 #endif
 }
@@ -78,14 +96,11 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     }
 }
 
-
-- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
-{
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url{
     return [WXManage handleOpenURL:url];
 }
 
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
-{
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation{
     return [WXManage handleOpenURL:url];
 }
 
@@ -107,7 +122,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
 
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    [self requestJSPatchInfo];
 }
 
 
@@ -115,6 +130,16 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
+
+- (void)requestJSPatchInfo {
+    NSString *requestJStime = [[NSUserDefaults standardUserDefaults] valueForKey:@"requestJStime"];
+    NSTimeInterval currentTime = [[NSDate date] timeIntervalSince1970];
+    CGFloat timeSpace = currentTime - [requestJStime floatValue];
+    if (requestJStime.length==0 | timeSpace > 7200) {
+        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%f",currentTime] forKey:@"requestJStime"];
+            [JSPatchManager asyncUpdate:YES];
+    }
+}
 
 #pragma mark AFNReachability
 -(void)AFNReachability{
@@ -134,7 +159,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
                 NSLog(@"未知");
                 break;
             case AFNetworkReachabilityStatusNotReachable:
-                SV_ERROR_STATUS(@"当前网络错误，请检查网络！");
+                SVP_ERROR_STATUS(@"当前网络错误，请检查网络");
                 break;
             case AFNetworkReachabilityStatusReachableViaWWAN:
                 NSLog(@"3G");

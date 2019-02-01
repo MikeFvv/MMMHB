@@ -13,8 +13,8 @@
 "conversation_systemMessage_collection_title"="系统消息助手";
 "OK"="确定";
 "Cancel"="取消";
-"speakerAccessRight"="您没有麦克风访问权限，请前往“设置-隐私-麦克风”选项中，允许访问您的手机麦克风!";
-"cameraAccessRight"="您没有相机访问权限，请前往“设置-隐私-相机”选项中，允许访问您的手机相机!";
+"speakerAccessRight"="您没有麦克风访问权限，请前往“设置-隐私-麦克风”选项中，允许访问您的手机麦克风";
+"cameraAccessRight"="您没有相机访问权限，请前往“设置-隐私-相机”选项中，允许访问您的手机相机";
 "VoIP_Mute"="静音";
 "VoIP_Speaker"="免提";
 "VoIP_End"="结束";
@@ -68,9 +68,9 @@
 "Open"="开启";
 "Close"="关闭";
 "VoIP_Calling"="正在拨号...";
-"VoIP_Talking"="对方正在通话!";
-"VoIP_Offline"="对方不在线!";
-"VoIP_Net_busy"="网络繁忙，稍后再试！";
+"VoIP_Talking"="对方正在通话";
+"VoIP_Offline"="对方不在线";
+"VoIP_Net_busy"="网络繁忙，稍后再试";
 "VoIP_Not_Accept"="对方未接听";
 "VoIP_Rejected_By_Blacklist"="您的通话请求已发出，但被对方拒绝";
 "WaitingForAcceptInvitation"="正在等待对方接受邀请...";
@@ -213,8 +213,8 @@
 "whiteSpaceMessage"="不能发送空白消息";
 "OK"="确定";
 "Cancel"="取消";
-"speakerAccessRight"="您没有麦克风访问权限，请前往“设置-隐私-麦克风”选项中，允许访问您的手机麦克风!";
-"cameraAccessRight"="您没有相机访问权限，请前往“设置-隐私-相机”选项中，允许访问您的手机相机!";
+"speakerAccessRight"="您没有麦克风访问权限，请前往“设置-隐私-麦克风”选项中，允许访问您的手机麦克风";
+"cameraAccessRight"="您没有相机访问权限，请前往“设置-隐私-相机”选项中，允许访问您的手机相机";
 "Back"="返回";
 "Camera"="拍摄";
 "Photos"="照片";

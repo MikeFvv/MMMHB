@@ -58,7 +58,7 @@
 "%@的红包" = "The red packets of %@";
 "发了一个红包" = "Sent a red packet";
 "该红包已超过24小时。如已领取，可在“我的红包”中查看" = "The red packet has been more than 24 hours. If you have received it, you can view it in \"Red Packet\"";
-"手慢了，红包派完了" = "Better luck next time!";
+"手慢了，红包派完了" = "Better luck next time";
 "查看大家手气" = "View details";
 "红包SDK" = "Red packets SDK";
 "更新成功" = "Update completed";
@@ -153,7 +153,7 @@
 "两次密码输入不一致" = "Two password entered is inconsistent";
 "金融魔方用户协议" = "User Agreement";
 "请设置支付密码，用于支付验证" = "Please set the payment password for payment verification";
-"恭喜发财，大吉大利！" = "Best wishes！";
+"恭喜发财，大吉大利" = "Best wishes";
 "云红包" = "Cloud Red Packet";
 "总金额" = "Total";
 "个" = "";

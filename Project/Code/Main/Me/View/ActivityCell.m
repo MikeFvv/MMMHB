@@ -1,0 +1,148 @@
+//
+//  ActivityCell.m
+//  Project
+//
+//  Created by fy on 2019/1/17.
+//  Copyright © 2019 CDJay. All rights reserved.
+//
+
+#import "ActivityCell.h"
+
+@implementation ActivityCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+    
+}
+
+-(void)initView{
+    WEAK_OBJ(weakSelf, self);
+    UIView *conView = [[UIView alloc] init];
+    conView.backgroundColor = [UIColor whiteColor];
+    [self.contentView addSubview:conView];
+    [conView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(self.contentView);
+        make.top.equalTo(@2);
+        make.bottom.equalTo(@-2);
+    }];
+    
+    UILabel *titleLabel = [[UILabel alloc] init];
+    titleLabel.textColor = Color_0;
+    titleLabel.font = [UIFont systemFontOfSize2:15];
+    [conView addSubview:titleLabel];
+    [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(conView.mas_left).offset(15);
+        make.top.equalTo(conView.mas_top).offset(10);
+    }];
+    self.titleLabel = titleLabel;
+    
+    UIButton *numBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [numBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    numBtn.titleLabel.font = [UIFont systemFontOfSize:14];
+    [conView addSubview:numBtn];
+    [numBtn setBackgroundImage:[[UIImage imageNamed:@"activity4"] stretchableImageWithLeftCapWidth:5 topCapHeight:4] forState:UIControlStateNormal];
+    [numBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(conView.mas_left).offset(15);
+        make.centerY.equalTo(conView);
+        make.width.equalTo(@60);
+        make.height.equalTo(@20);
+    }];
+    self.numBtn = numBtn;
+    
+    UIImageView *progressBg = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"activity3"] stretchableImageWithLeftCapWidth:25 topCapHeight:5]];
+    [conView addSubview:progressBg];
+    [progressBg mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(numBtn.mas_right).offset(8);
+        make.centerY.equalTo(numBtn.mas_centerY);
+        make.height.equalTo(@10);
+        make.right.equalTo(conView.mas_right).offset(-20);
+    }];
+    self.progressBg = progressBg;
+    
+    UIImageView *progressBar = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"navBarBg"]];
+    [progressBg addSubview:progressBar];
+    progressBar.layer.masksToBounds = YES;
+    progressBar.layer.cornerRadius = 3;
+    progressBar.tag = 1;
+    [progressBar mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(progressBg.mas_left).offset(1);
+        make.centerY.equalTo(progressBg);
+        make.height.equalTo(@6);
+        make.width.equalTo(@0);
+    }];
+    
+    UIImageView *progressPot = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"activity7"]];
+    [progressBg addSubview:progressPot];
+    progressPot.tag = 2;
+    [progressPot mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(progressBg.mas_left).offset(1);
+        make.centerY.equalTo(progressBg);
+        make.width.height.equalTo(@8);
+    }];
+    
+    UIButton *lingQuBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [lingQuBtn setTitle:@" 领取" forState:UIControlStateNormal];
+    [lingQuBtn setTitle:@"已领取" forState:UIControlStateSelected];
+    [lingQuBtn setTitleColor:MBTNColor forState:UIControlStateNormal];
+    lingQuBtn.titleLabel.font = [UIFont systemFontOfSize2:14];
+    [lingQuBtn setTitleColor:Color_6 forState:UIControlStateSelected];
+    [lingQuBtn setImage:[UIImage imageNamed:@"activity2"] forState:UIControlStateNormal];
+    [lingQuBtn setImage:[UIImage imageNamed:@"activity1"] forState:UIControlStateSelected];
+    [conView addSubview:lingQuBtn];
+    [lingQuBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(conView).offset(-10);
+        make.width.equalTo(@70);
+        make.height.equalTo(@40);
+        make.centerY.equalTo(titleLabel.mas_centerY);
+    }];
+    self.getBtn = lingQuBtn;
+    
+    UIView *lineView = [[UIView alloc] init];
+    lineView.backgroundColor = COLOR_X(245, 245, 245);
+    [conView addSubview:lineView];
+    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo(@0.5);
+        make.left.right.equalTo(conView);
+        make.bottom.equalTo(conView.mas_bottom).offset(-36);
+    }];
+    
+    UIButton *xiangQingBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [xiangQingBtn setTitle:@"活动详情" forState:UIControlStateNormal];
+    xiangQingBtn.titleLabel.font = [UIFont systemFontOfSize2:14];
+    [xiangQingBtn setTitleColor:HexColor(@"#4976f2") forState:UIControlStateNormal];
+    [conView addSubview:xiangQingBtn];
+    [xiangQingBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(lineView.mas_bottom);
+        make.bottom.equalTo(conView.mas_bottom);
+        make.width.equalTo(@80);
+        make.centerX.equalTo(conView);
+    }];
+    self.xiangQingBtn = xiangQingBtn;
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+-(void)setRate:(float)rate{
+    if(rate > 1)
+        rate = 1;
+    UIImageView *pot = [self.progressBg viewWithTag:2];
+    UIImageView *progressBar = [self.progressBg viewWithTag:1];
+    [progressBar mas_remakeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.progressBg.mas_left).offset(2);
+        make.centerY.equalTo(self.progressBg);
+        make.height.equalTo(@6);
+        make.width.equalTo(self.progressBg).multipliedBy(rate).offset(-4);
+    }];
+    
+    [pot mas_remakeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(self.progressBg);
+        make.width.height.equalTo(@8);
+        make.centerX.equalTo(progressBar.mas_right).offset(-3);
+    }];
+}
+@end

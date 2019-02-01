@@ -15,6 +15,9 @@ PODS:
   - AFNetworking/UIKit (3.2.1):
     - AFNetworking/NSURLSession
   - IQKeyboardManager (6.1.1)
+  - JSPatch (1.1.3):
+    - JSPatch/Core (= 1.1.3)
+  - JSPatch/Core (1.1.3)
   - Masonry (1.1.0)
   - MJExtension (3.0.15.1)
   - MJRefresh (3.1.15.6)
@@ -35,10 +38,12 @@ PODS:
   - WHC_ModelSqliteKit (1.3.0):
     - WHC_ModelSqliteKit/standard (= 1.3.0)
   - WHC_ModelSqliteKit/standard (1.3.0)
+  - YYCache (1.0.4)
 
 DEPENDENCIES:
   - AFNetworking
   - IQKeyboardManager
+  - JSPatch
   - Masonry
   - MJExtension
   - MJRefresh
@@ -47,11 +52,13 @@ DEPENDENCIES:
   - SVProgressHUD
   - WechatOpenSDK
   - WHC_ModelSqliteKit
+  - YYCache
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - AFNetworking
     - IQKeyboardManager
+    - JSPatch
     - Masonry
     - MJExtension
     - MJRefresh
@@ -60,10 +67,12 @@ SPEC REPOS:
     - SVProgressHUD
     - WechatOpenSDK
     - WHC_ModelSqliteKit
+    - YYCache
 
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   IQKeyboardManager: 79c57795f5c2408d259d37b9da2ed07efcbb5225
+  JSPatch: 02cfed591cb907bbfe80a346666e5a35fc2d349d
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   MJExtension: 19bc33ce2eee2d319760f5622562cf581a6ff756
   MJRefresh: 0efa19656679d70a0f47cbe76e56c2271fe53a97
@@ -72,7 +81,8 @@ SPEC CHECKSUMS:
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   WechatOpenSDK: 676feec516a11173eafd1fe64b10d27babf28701
   WHC_ModelSqliteKit: dfafef3ee872dedd9823395291fc80bf37eac46d
+  YYCache: 8105b6638f5e849296c71f331ff83891a4942952
 
-PODFILE CHECKSUM: 29cae1d08b9ce686ce2b2a0d1dafe8213402b2c8
+PODFILE CHECKSUM: df0ed329c7a2d43f13dfc2f36fc87226631f1765
 
-COCOAPODS: 1.6.0.beta.1
+COCOAPODS: 1.5.3
