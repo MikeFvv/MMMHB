@@ -21,7 +21,7 @@
 @implementation RecommendedViewController
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = @"代理";
+    self.title = @"下级玩家";
     [self initData];
     [self initSubviews];
     [self initLayout];

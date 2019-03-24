@@ -15,11 +15,23 @@
 #import "MessageNet.h"
 #import "ScrollBarView.h"
 
+#import "FYMenu.h"
+
+#import "RechargeViewController.h"
+#import "ShareViewController.h"
+#import "BecomeAgentViewController.h"
+#import "HelpCenterWebController.h"
+#import "SystemAlertViewController.h"
+#import "VVAlertModel.h"
+
+
 @interface GroupViewController ()<UITableViewDelegate,UITableViewDataSource>
 
 @property(nonatomic,strong) UITableView *tableView;
 @property(nonatomic,strong) MessageNet *model;
 @property(nonatomic,strong) ScrollBarView *scrollBarView;
+
+@property(nonatomic, strong) NSMutableArray *menuItems;
 
 @end
 
@@ -33,6 +45,8 @@
     [self initLayout];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateScrollBarView) name:@"updateScrollBarView" object:nil];
 
+    UIBarButtonItem *rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"nav_add_r"] style:UIBarButtonItemStyleDone target:self action:@selector(rightBarButtonDown:)];
+    [self.navigationItem setRightBarButtonItem:rightBarButtonItem];
 }
 
 - (void)viewWillAppear:(BOOL)animated{
@@ -131,7 +145,6 @@
     } failureBlock:^(NSError *err) {
         [FUNCTION_MANAGER handleFailResponse:err];
     }];
-    
 }
 
 #pragma mark UITableViewDataSource
@@ -173,7 +186,7 @@
                 
                 if ([[dict objectForKey:@"code"] integerValue] == 0) {
                      [strongSelf groupChat:item];
-                } else if ([[dict objectForKey:@"code"] integerValue] == 1) {
+                } else if ([[dict objectForKey:@"code"] integerValue] == 19) {
                     SVP_ERROR_STATUS([dict objectForKey:@"msg"]);
                     [strongSelf groupChat:item];
                 } else {
@@ -193,13 +206,9 @@
     NSString *content = [NSString stringWithFormat:@"大家好，我是%@", [AppModel shareInstance].user.nick];
     RCTextMessage *txtMsg = [RCTextMessage messageWithContent:content];
     [[RCIM sharedRCIM] sendMessage:ConversationType_GROUP targetId:groupId content:txtMsg pushContent:nil pushData:nil success:^(long messageId) {
-        NSLog(@"1");
     } error:^(RCErrorCode nErrorCode, long messageId) {
-        NSLog(@"1");
     }];
 }
-
-
 
 - (void)groupChat:(id)obj{
     ChatViewController *vc = [ChatViewController groupChatWithObj:obj];
@@ -234,18 +243,38 @@
     }
     if(APP_MODEL.noticeArray.count > 0){
         ScrollBarView *view = [ScrollBarView createWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 40)];
+
+        UITapGestureRecognizer *tapGesturRecognizer = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(scrollBarViewAction)];
+        [view addGestureRecognizer:tapGesturRecognizer];
+        
+        view.tapBlock = ^(id object) {
+            
+        };
         [self.view addSubview:view];
         NSMutableArray *arr = [[NSMutableArray alloc] init];
+        NSInteger nu = 0;
         for (NSDictionary *dic in APP_MODEL.noticeArray) {
-            NSString *s = dic[@"title"];
+            NSString *title = dic[@"title"];
+            NSString *content = dic[@"content"];
+            NSMutableString *s = [[NSMutableString alloc] initWithString:@""];
+            if(title.length > 0)
+                [s appendString:title];
+            if(content.length > 0){
+                if(s.length > 0)
+                    [s appendString:@"："];
+                [s appendString:content];
+            }
             [arr addObject:s];
+            nu += 1;
+            if(nu == 2)
+                break;
         }
         view.textArray = arr;
         [view start];
         self.scrollBarView = view;
         [_tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
             make.left.right.bottom.equalTo(self.view);
-            make.top.equalTo(self.scrollBarView.mas_bottom).offset(0);
+            make.top.equalTo(self.scrollBarView.mas_bottom).offset(3);
         }];
     }else{
         [_tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
@@ -262,4 +291,91 @@
         self.scrollBarView = nil;
     }
 }
+
+#pragma mark - 下拉菜单
+- (NSMutableArray *)menuItems {
+    if (!_menuItems) {
+        
+        __weak __typeof(self)weakSelf = self;
+        
+        _menuItems = [[NSMutableArray alloc] initWithObjects:
+                      
+                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_recharge"]
+                                          title:@"快速充值"
+                                         action:^(FYMenuItem *item) {
+                                             UIViewController *vc = [[RechargeViewController alloc]init];
+                                             vc.hidesBottomBarWhenPushed = YES;
+                                             [weakSelf.navigationController pushViewController:vc animated:YES];
+                                         }],
+                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_share"]
+                                          title:@"分享赚钱"
+                                         action:^(FYMenuItem *item) {
+                                             ShareViewController *vc = [[ShareViewController alloc] init];
+                                             vc.hidesBottomBarWhenPushed = YES;
+                                             [weakSelf.navigationController pushViewController:vc animated:YES];
+                                         }],
+                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_agent"]
+                                          title:@"申请代理"
+                                         action:^(FYMenuItem *item) {
+                                             BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
+                                             vc.hidesBottomBarWhenPushed = YES;
+                                             vc.hiddenNavBar = YES;
+                                             vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
+                                             [weakSelf.navigationController pushViewController:vc animated:YES];
+                                         }],
+                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_help"]
+                                          title:@"帮助中心"
+                                         action:^(FYMenuItem *item) {
+                                             //                                              AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+                                             //                                              [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
+                                             
+                                             NSString *url = [NSString stringWithFormat:@"%@/dist/#/index/helpCenter?accesstoken=%@", [AppModel shareInstance].commonInfo[@"website.address"], [AppModel shareInstance].user.token];
+                                             HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:url];
+                                             vc.hidesBottomBarWhenPushed = YES;
+                                             [weakSelf.navigationController pushViewController:vc animated:YES];
+                                             
+                                         }], nil];
+    }
+    
+    return _menuItems;
+}
+
+
+//导航栏弹出
+- (void)rightBarButtonDown:(UIBarButtonItem *)sender
+{
+    FYMenu *menu = [[FYMenu alloc] initWithItems:self.menuItems];
+    menu.menuCornerRadiu = 5;
+    menu.showShadow = NO;
+    menu.minMenuItemHeight = 48;
+    menu.titleColor = [UIColor darkGrayColor];
+    menu.menuBackGroundColor = [UIColor whiteColor];
+    [menu showFromNavigationController:self.navigationController WithX:[UIScreen mainScreen].bounds.size.width-32];
+}
+
+#pragma mark - 系统公告栏
+- (void)announcementBar {
+    NSMutableArray *announcementArray = [NSMutableArray array];
+    if([AppModel shareInstance].noticeArray.count > 0){
+        for (NSDictionary *dic in [AppModel shareInstance].noticeArray) {
+            NSString *title = dic[@"title"];
+            NSString *content = dic[@"content"];
+            VVAlertModel *model = [[VVAlertModel alloc] init];
+            model.name = title;
+            if (content.length > 0) {
+                model.friends = @[content];
+            }
+            [announcementArray addObject:model];
+        }
+    } else {
+        return;
+    }
+    SystemAlertViewController *alertVC = [SystemAlertViewController alertControllerWithTitle:@"平台公告" dataArray:announcementArray];
+    [self presentViewController:alertVC animated:NO completion:nil];
+}
+
+- (void)scrollBarViewAction {
+    [self announcementBar];
+}
+
 @end

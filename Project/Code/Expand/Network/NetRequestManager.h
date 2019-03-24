@@ -47,6 +47,22 @@ typedef enum{
     ActRequestActivityList,//查询活动列表
     ActGetReward,//领取奖励
     ActGetFirstRewardInfo,//获取首充、二充数据
+    ActToBeAgent,//申请成为代理
+    ActGetLotteryList,//可抽奖列表
+    ActGetLotterys,//查询转盘奖品
+    ActLottery,//抽奖
+    ActAddBankCard,//添加银行卡
+    ActRequestMyBankList,//我添加的银行卡
+    ActRequestWithdrawHistory,//提现历史记录
+    ActRequestLastWithdrawInfo,//上次提现的信息
+    
+    ActRequestRechargeListFirst,//首先支付通道
+    ActRequestRechargeListAll,//所有支付通道
+    ActOrderRecharge,//提交订单
+    ActReOrderRecharge,//重新下单
+    ActSubmitRechargeInfo,//提交用户充值信息（去支付）
+    ActRequestShareUrl,//获取分享URL
+    ActRequestGuideImageList,//获取新手引导图片列表
 }Act;
 
 @interface RequestInfo : NSObject
@@ -126,10 +142,15 @@ typedef enum{
                              fail:(CallbackBlock)failBlock;
 
 #pragma mark 获取提现记录
+//弃用
 -(void)requestDrawRecordListWithSuccess:(CallbackBlock)successBlock
                                    fail:(CallbackBlock)failBlock;
 
+-(void)requestDrawRecordListWithPage:(NSInteger)page success:(CallbackBlock)successBlock
+                                   fail:(CallbackBlock)failBlock;
+
 #pragma mark 提现
+//弃用
 -(void)withDrawWithAmount:(NSString *)amount//金额
                   userName:(NSString *)name//名字
                   bankName:(NSString *)backName//银行名
@@ -139,6 +160,11 @@ typedef enum{
                     remark:(NSString *)remark//备注
                    success:(CallbackBlock)successBlock
                       fail:(CallbackBlock)failBlock;
+
+-(void)withDrawWithAmount:(NSString *)amount//金额
+                   bankId:(NSString *)bankId//银行id
+                  success:(CallbackBlock)successBlock
+                     fail:(CallbackBlock)failBlock;
 
 #pragma mark 编辑用户信息
 -(void)editUserInfoWithUserAvatar:(NSString *)url
@@ -220,4 +246,61 @@ typedef enum{
 #pragma mark 领取首充 二充奖励
 -(void)getFirstRewardWithUserId:(NSString *)userId rewardType:(NSInteger)rewardType success:(CallbackBlock)successBlock
                            fail:(CallbackBlock)failBlock;
+
+#pragma mark 申请成为代理
+-(void)askForToBeAgentWithSuccess:(CallbackBlock)successBlock
+                             fail:(CallbackBlock)failBlock;
+
+#pragma mark 查询可抽奖列表
+-(void)getLotteryListWithSuccess:(CallbackBlock)successBlock
+                            fail:(CallbackBlock)failBlock;
+
+#pragma mark 查询可抽奖具体信息
+-(void)getLotteryDetailWithId:(NSInteger)lId success:(CallbackBlock)successBlock
+                            fail:(CallbackBlock)failBlock;
+
+#pragma mark 抽奖
+-(void)lotteryWithId:(NSInteger)lId success:(CallbackBlock)successBlock
+                         fail:(CallbackBlock)failBlock;
+
+#pragma mark 添加银行卡
+-(void)addBankCardWithUserName:(NSString *)userName cardNO:(NSString *)cardNO bankId:(NSString *)bankId address:(NSString *)address success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 我的银行卡
+-(void)getMyBankCardListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 获取最后一次的提现信息
+-(void)getLastWithdrawInfoWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 获取首先支付通道列表
+-(void)requestFirstRechargeListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 获取所有支付通道列表
+-(void)requestAllRechargeListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 提交支付资料
+-(void)submitRechargeInfoWithBankId:(NSString *)bankId
+                           bankName:(NSString *)bankName
+                             bankNo:(NSString *)bankNo
+                                tId:(NSString *)tId//通道id
+                              money:(NSString *)money
+                               name:(NSString *)name
+                            orderId:(NSString *)orderId//无用
+                               type:(NSInteger)type
+                           typeCode:(NSInteger)typeCode//微信 银行卡
+                             userId:(NSString *)userId
+                            success:(CallbackBlock)successBlock
+                               fail:(CallbackBlock)failBlock;
+
+#pragma mark 重新下订单
+-(void)reOrderRechargeInfoWithId:(NSString *)orderId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 提交订单
+-(void)submitOrderRechargeInfoWithId:(NSString *)orderId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 获取分享url
+-(void)getShareUrlWithCode:(NSString *)code success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 获取新手引导图片列表
+-(void)getGuideImageListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
 @end

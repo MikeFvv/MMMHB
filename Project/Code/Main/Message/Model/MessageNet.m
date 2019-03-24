@@ -262,7 +262,6 @@
     
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
-        NSLog(@"get 请求数据结果： *** %@", response);
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         
         if ([[response objectForKey:@"code"] integerValue] == 0 || [[response objectForKey:@"code"] integerValue] == 1) {
@@ -280,9 +279,7 @@
 - (void)queryMyJoinGroup {
     
     [self getMyJoinedGroupListSuccessBlock:^(NSDictionary *dict) {
-        NSLog(@"%@", dict);
     } failureBlock:^(NSError *error) {
-        NSLog(@"%@", error);
     }];
     
 }

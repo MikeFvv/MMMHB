@@ -47,7 +47,7 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    self.navigationItem.title = @"推广海报";
+    self.navigationItem.title = @"分享赚钱";
     
     _tableView = [UITableView normalTable];
     [self.view addSubview:_tableView];
@@ -295,7 +295,7 @@
 - (void)action_shareWX{
     WXShareModel *model = [[WXShareModel alloc]init];
     model.title = WXShareTitle;
-    model.imageIcon = [UIImage imageNamed:@"shareIcon"];
+    model.imageIcon = [UIImage imageNamed:[FUNCTION_MANAGER getAppIconName]];;
     NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.user.invitecode];
     model.link = shareUrl;
     model.content = WXShareDescription;
@@ -310,7 +310,7 @@
 - (void)action_shareRand{
     WXShareModel *model = [[WXShareModel alloc]init];
     model.title = WXShareTitle;
-    model.imageIcon = [UIImage imageNamed:@"shareIcon"];
+    model.imageIcon = [UIImage imageNamed:[FUNCTION_MANAGER getAppIconName]];;
     NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.user.invitecode];
     model.link = shareUrl;
     model.content = WXShareDescription;
@@ -331,7 +331,7 @@
 }
 
 - (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo{
-    NSLog(@"image = %@, error = %@, contextInfo = %@", image, error, contextInfo);
+//    NSLog(@"image = %@, error = %@, contextInfo = %@", image, error, contextInfo);
     
     if(error != NULL){
         SVP_ERROR_STATUS(@"保存图片失败");

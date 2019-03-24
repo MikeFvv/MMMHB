@@ -216,7 +216,7 @@
     
     CDTableModel *model = _model.dataList[indexPath.section];
     self.sendPId = [model.obj[@"userId"] stringValue];
-    NSLog(@"%zd", indexPath.section);
+
     switch ([model.obj[@"billtId"] integerValue]) {
         case 3:
         case 4:
@@ -283,7 +283,6 @@
     //    NSInteger section = path.section;
     //    CDTableModel *model = _model.dataList[section];
     //    NSDictionary *dic = model.obj;
-    NSLog(@"去红包详情");
 }
 
 - (void)didReceiveMemoryWarning {

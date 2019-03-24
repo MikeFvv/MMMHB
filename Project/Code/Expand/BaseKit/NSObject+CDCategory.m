@@ -53,7 +53,7 @@
 + (UIFont *)vvFontOfSize:(CGFloat)scale {
     if(CDScreenWidth == 375)
         return [UIFont systemFontOfSize:scale];
-    else if(CDScreenWidth > 414)
+    else if(CDScreenWidth >= 414)
         return [UIFont systemFontOfSize:scale + 1];
     else if(CDScreenWidth <= 320)
         return [UIFont systemFontOfSize:scale - 1];
@@ -363,6 +363,9 @@ static const void *CDParamKEY = "CDParam";
         [self setObject:anObject forKey:(NSString *)aKey];
     }
     if ([anObject isKindOfClass:[NSNumber class]]) {
+        [self setValue:anObject forKey:(NSString *)aKey];
+    }
+    if ([anObject isKindOfClass:[NSDictionary class]]) {
         [self setValue:anObject forKey:(NSString *)aKey];
     }
 }

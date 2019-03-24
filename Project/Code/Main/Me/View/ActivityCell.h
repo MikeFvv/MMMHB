@@ -17,6 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic,strong)UIButton *getBtn;
 @property(nonatomic,assign)float rate;
 @property(nonatomic,strong)UIImageView *progressBg;
+@property(nonatomic,strong)UIImageView *progressPot;
+@property(nonatomic,strong)NSArray *pointDataArray;
 -(void)initView;
 @end
 

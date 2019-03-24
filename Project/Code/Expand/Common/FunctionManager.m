@@ -27,6 +27,10 @@
 #include <mach/host_info.h>
 #include <mach/mach_time.h>
 
+@interface FunctionManager()
+@property(nonatomic,assign)AppType appType;
+
+@end
 @implementation FunctionManager
 
 +(instancetype)sharedInstance{
@@ -41,6 +45,7 @@
 
 -(id)init{
     if(self = [super init]){
+        _appType = AppType_nil;
     }
     return self;
 }
@@ -404,7 +409,7 @@
             SVP_ERROR_STATUS(dd[@"msg"]);
         else if(dd[@"error"]){
             if([dd[@"error"] isEqualToString:@"unauthorized"]){
-                SVP_ERROR_STATUS(@"账号密码错误");
+                SVP_ERROR_STATUS(kAccountOrPasswordErrorMessage);
             }else
                 SVP_ERROR_STATUS(dd[@"error"]);
         }
@@ -435,9 +440,9 @@
         
         AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
         if(forceUpate == 0){
-            [view showWithText:desc button1:@"更新" button2:@"取消" callBack:^(id object) {
+            [view showWithText:desc button1:@"取消" button2:@"更新" callBack:^(id object) {
                 NSInteger tag = [object integerValue];
-                if(tag == 0){
+                if(tag == 1){
                     NSURL *url = [NSURL URLWithString:APP_MODEL.commonInfo[@"ios.download.path"]];
                     if([[UIApplication sharedApplication] canOpenURL:url])
                         [[UIApplication sharedApplication] openURL:url];
@@ -476,9 +481,60 @@
     }
 }
 
--(BOOL)testMode{
-    if([APP_MODEL.serverUrl rangeOfString:@"/api"].length > 0 || [APP_MODEL.serverUrl rangeOfString:@".com"].length > 0)
-        return NO;
-    return YES;
+
+-(AppType)appType{
+    if(_appType == AppType_nil){
+        NSString *bid = [[NSBundle mainBundle] bundleIdentifier];
+        if([bid isEqualToString:@"com.xmfx.tthb"])
+            _appType = AppType_TTHB;
+        else if([bid isEqualToString:@"com.xmfx.wwhb"])
+            _appType = AppType_WWHB;
+        else if([bid isEqualToString:@"com.xmfx.wbhb"])
+            _appType = AppType_WBHB;
+        else
+            _appType = AppType_XZHB;
+    }
+    return _appType;
+}
+
+-(NSArray *)orderBombArray:(NSArray *)bombArray{
+    if(bombArray.count < 2)
+        return bombArray;
+    NSArray *array = [bombArray sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+        NSInteger num1 = [obj1 integerValue];
+        NSInteger num2 = [obj2 integerValue];
+        return num1 > num2;
+    }];
+    if([bombArray isKindOfClass:[NSMutableArray class]])
+        return [NSMutableArray arrayWithArray:array];
+    else
+        return array;
+}
+
+-(NSString *)formatBombArrayToString:(NSArray *)bombArray{
+    NSMutableString *s = [[NSMutableString alloc] initWithString:@"["];
+    for (NSString *num in bombArray) {
+        NSString *ss = num;
+        if([num isKindOfClass:[NSNumber class]])
+            ss = [((NSNumber *)num) stringValue];
+//        if(s.length > 1)
+//            [s appendString:@","];
+        [s appendString:ss];
+    }
+    [s appendString:@"]"];
+    return s;
+}
+
+-(NSDictionary *)appConstants{
+    NSString *s = [[NSBundle mainBundle] pathForResource:@"AppConstants" ofType:@"plist"];
+    NSDictionary *dic = [NSDictionary dictionaryWithContentsOfFile:s];
+    return dic;
+}
+
+//获取appIconName
+-(NSString*)getAppIconName{
+    NSDictionary *infoPlist = [[NSBundle mainBundle] infoDictionary];
+    NSString *icon = [[infoPlist valueForKeyPath:@"CFBundleIcons.CFBundlePrimaryIcon.CFBundleIconFiles"] lastObject];
+    return icon;
 }
 @end

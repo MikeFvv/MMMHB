@@ -10,13 +10,15 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ImageDetailViewController : SuperViewController
+@interface ImageDetailViewController : UIViewController
 @property(nonatomic,strong)NSString *imageUrl;//图片url
 @property(nonatomic,strong)UIColor *bgColor;//背景色
 @property(nonatomic,assign)NSInteger insetsValue;//距离屏幕边框的距离
 
 @property(nonatomic,strong)UIImageView *imageView;
 @property(nonatomic,strong)UIScrollView *scrollView;
+
+@property(nonatomic,assign)BOOL hiddenNavBar;
 
 -(void)showImage;
 -(void)writeTitle;

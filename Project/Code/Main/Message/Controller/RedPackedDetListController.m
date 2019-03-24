@@ -132,6 +132,14 @@
     //    [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"navBarBg"] forBarMetrics:UIBarMetricsDefault];
 }
 
+
+/**
+ 设置颜色为背景图片
+
+ @param color <#color description#>
+ @param size <#size description#>
+ @return <#return value description#>
+ */
 - (UIImage *)createImageWithColor:(UIColor *)color size:(CGSize)size {
     CGRect rect = CGRectMake(0.0f, 0.0f, size.width, size.height);
     UIGraphicsBeginImageContext(rect.size);
@@ -196,7 +204,13 @@
     UIView *footView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 50)];
     
     UILabel *mesLabel = [[UILabel alloc] init];
-    mesLabel.text = [NSString stringWithFormat:@"未领取的红包，将于%0.f分钟后发起退款", self.returnPackageTime/60 <= 1 ? 1 : self.returnPackageTime/60]; 
+    
+    if ([self.model.redPackedInfoDetail[@"type"] integerValue] == 2) {
+        mesLabel.text =  kMessCowRefundMessage;
+    } else {
+        mesLabel.text = [NSString stringWithFormat:@"未领取的红包，将于%0.f分钟后发起退款", self.returnPackageTime/60 <= 1 ? 1 : self.returnPackageTime/60];
+    }
+    
     mesLabel.font = [UIFont systemFontOfSize:13];
     mesLabel.textColor = Color_6;
     [footView addSubview:mesLabel];
@@ -250,7 +264,7 @@
     
     
     _mineLabel = [UILabel new];
-    _mineLabel.font = [UIFont boldSystemFontOfSize2:15];
+    _mineLabel.font = [UIFont boldSystemFontOfSize2:16];
     _mineLabel.textColor = [UIColor darkGrayColor];
     [headView addSubview:_mineLabel];
     
@@ -399,16 +413,17 @@
         if ([[AppModel shareInstance].user.userId isEqualToString:self.bankerId]) {
             // ****** 庄、闲视图 ******
             [self HeadBottomView];
-            if ([self.model.redPackedInfoDetail[@"left"] integerValue] == 0) {
-                self.bankerLabel.text = [NSString stringWithFormat:@"%zd",  [self.model.redPackedInfoDetail[@"bankerWinCount"] integerValue] -1];
-                self.playerWinLabel.text = [NSString stringWithFormat:@"%zd",  [self.model.redPackedInfoDetail[@"playerWinCount"] integerValue]];
+            if ([self.model.redPackedInfoDetail[@"overFlag"] integerValue] == YES) {
+                self.bankerLabel.text = [self.model.redPackedInfoDetail[@"bankWin"] stringValue];
+                self.playerWinLabel.text = [self.model.redPackedInfoDetail[@"playerWin"] stringValue];
             } else {
                 self.bankerLabel.text = @"-";
                 self.playerWinLabel.text = @"-";
             }
         } else {
             // 自己抢的
-            if ([self.model.redPackedInfoDetail[@"itselfMoney"] floatValue] > 0 && [self.model.redPackedInfoDetail[@"left"] integerValue] == 0) {
+            if ([self.model.redPackedInfoDetail[@"itselfMoney"] floatValue] > 0 && [self.model.redPackedInfoDetail[@"overFlag"] boolValue] == YES) {
+                _bankerPlayerImageView.hidden = NO;
                 if ([self.model.redPackedInfoDetail[@"isItselfWin"] boolValue]) {
                     _bankerPlayerImageView.image = [UIImage imageNamed:@"cow_win"];
                 } else {
@@ -424,14 +439,41 @@
         NSInteger time = [self.model.redPackedInfoDetail[@"exceptOverdueTimes"] integerValue];
         
         if ([self.model.redPackedInfoDetail[@"left"] integerValue] == 0 || time <= 0) {
-            self.timeLabel.textColor = [UIColor blackColor];
-            self.timeLabel.text = @"已截止";
-            self.timeLabel.userInteractionEnabled = YES;
+            
+            if ([self.model.redPackedInfoDetail[@"overFlag"] boolValue]) {
+                self.timeLabel.textColor = [UIColor blackColor];
+                self.timeLabel.text = @"本包游戏已截止";
+            } else {
+                self.timeLabel.textColor = [UIColor redColor];
+                self.timeLabel.text = @"结算中...";
+            }
             self.isClosed = YES;
         } else {
-            [self startWithTime:time title:@"已截止" countDownTitle:@"秒" mainColor:[UIColor colorWithRed:84/255.0 green:180/255.0 blue:98/255.0 alpha:1.0f] countColor:[UIColor lightGrayColor]];
+            [self startWithTime:time title:@"结算中..." countDownTitle:@"秒" mainColor:[UIColor colorWithRed:84/255.0 green:180/255.0 blue:98/255.0 alpha:1.0f] countColor:[UIColor lightGrayColor]];
         }
         
+    } else if ([self.model.redPackedInfoDetail[@"type"] integerValue] == 3) {
+        NSDictionary *attrDict = [[self.model.redPackedInfoDetail objectForKey:@"attr"] mj_JSONObject];
+        NSString *type = attrDict[@"type"];
+        if([type isKindOfClass:[NSNumber class]])
+            type = [(NSNumber *)type stringValue];
+        NSArray *bombNumArray = (NSArray *)[(NSString *)attrDict[@"bombList"] mj_JSONObject];
+        bombNumArray = [FUNCTION_MANAGER orderBombArray:bombNumArray];
+        NSString *mineNumStr = [FUNCTION_MANAGER formatBombArrayToString:bombNumArray];
+//        NSString *mineNumStr = @"[";
+//
+//        for (NSInteger index = 0; index < bombNumArray.count; index++) {
+//            if (index == bombNumArray.count -1) {
+//                mineNumStr = [mineNumStr stringByAppendingString: [NSString stringWithFormat:@"%@]", bombNumArray[index]]];
+//            } else {
+//               mineNumStr = [mineNumStr stringByAppendingString: [NSString stringWithFormat:@"%@,", bombNumArray[index]]];
+//            }
+//        }
+        
+        
+        mineNumStr = [mineNumStr stringByAppendingString: [[NSString stringWithFormat:@"%ld",type.integerValue] isEqualToString:@"1"] ? @"" : @" 不"];
+        _mineLabel.text = [NSString stringWithFormat:@"￥%zd-%zd包-%@", [self.model.redPackedInfoDetail[@"money"] integerValue], [self.model.redPackedInfoDetail[@"total"] integerValue], mineNumStr];
+        _bankerPlayerImageView.hidden = YES;
     } else {
         _bankerPlayerImageView.hidden = YES;
         _mineLabel.text = kRedpackedGongXiFaCaiMessage;
@@ -464,9 +506,9 @@
             dispatch_source_cancel(_timer);
             dispatch_async(dispatch_get_main_queue(), ^{
                 //                self.timeLabel.backgroundColor = mColor;
-                self.timeLabel.textColor = [UIColor blackColor];
+                self.timeLabel.textColor = [UIColor redColor];
                 self.timeLabel.text = title;
-                self.timeLabel.userInteractionEnabled = YES;
+//                self.timeLabel.userInteractionEnabled = YES;
             });
             [self getData];
         } else {
@@ -477,7 +519,7 @@
                 if ([timeStr integerValue] <= [self.oldTimeStr integerValue] && !self.isClosed) {
                     self.timeLabel.textColor = [UIColor redColor];
                     self.timeLabel.text = [NSString stringWithFormat:@"剩余%@%@",timeStr,subTitle];
-                    self.timeLabel.userInteractionEnabled = NO;
+//                    self.timeLabel.userInteractionEnabled = NO;
                     self.oldTimeStr = timeStr;
                 }
                 
@@ -599,8 +641,6 @@
         [FUNCTION_MANAGER handleFailResponse:error];
     }];
 }
-
-
 
 - (void)setReLoadData {
     [self setHeadData];

@@ -13,6 +13,7 @@
 #import "NSData+AES.h"
 #import "GTMBase64.h"
 #import "JSPatchManager.h"
+#import <Bugtags/Bugtags.h>
 
 @interface AppDelegate ()
 
@@ -20,9 +21,9 @@
 
 @implementation AppDelegate
 
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
+    [Bugtags startWithAppKey:@"649128dfaa30636b9272ebbeb7d4838c" invocationEvent:BTGInvocationEventNone];
 #if TARGET_IPHONE_SIMULATOR
     [JPEngine startEngine];
     NSString *sourcePath = [[NSBundle mainBundle] pathForResource:@"main" ofType:@"js"];
@@ -33,8 +34,9 @@
     [JSPatchManager asyncUpdate:YES];
 #endif
     
+    [NSThread sleepForTimeInterval:2];
     [self applicationRoot];
-    
+
     return YES;
 }
 
@@ -135,7 +137,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     NSString *requestJStime = [[NSUserDefaults standardUserDefaults] valueForKey:@"requestJStime"];
     NSTimeInterval currentTime = [[NSDate date] timeIntervalSince1970];
     CGFloat timeSpace = currentTime - [requestJStime floatValue];
-    if (requestJStime.length==0 | timeSpace > 7200) {
+    if (requestJStime.length==0 | timeSpace > 3600) {
         [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%f",currentTime] forKey:@"requestJStime"];
             [JSPatchManager asyncUpdate:YES];
     }

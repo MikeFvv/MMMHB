@@ -231,7 +231,7 @@
 
 #pragma mark UIActionSheetDelegate
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
-    NSLog(@"%ld",buttonIndex);
+
     if (buttonIndex != 2) {
         _sexType = buttonIndex;
         _sexLabel.text = (_sexType == 1)?@"男":@"女";
@@ -291,7 +291,7 @@
 }
 
 -(void)feedback{
-    WebViewController *vc = [[WebViewController alloc] initWithUrl:ServiceLink];
+    WebViewController *vc = [[WebViewController alloc] initWithUrl:APP_MODEL.commonInfo[@"pop"]];
     vc.title = @"联系客服";
     [self.navigationController pushViewController:vc animated:YES];
 }

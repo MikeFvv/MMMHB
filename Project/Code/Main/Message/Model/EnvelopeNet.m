@@ -74,7 +74,6 @@ static dispatch_once_t predicate;
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
-        NSLog(@"get 请求数据结果： *** %@", response);
         //        [weakSelf handleGroupListData:response[@"data"] andIsMyJoined:YES];
         //        successBlock(response);
         [strongSelf processingData:response];
@@ -104,7 +103,6 @@ static dispatch_once_t predicate;
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
-        NSLog(@"get 请求数据结果： *** %@", response);
         //        [weakSelf handleGroupListData:response[@"data"] andIsMyJoined:YES];
         //        successBlock(response);
         [strongSelf processingData:response];
@@ -137,7 +135,6 @@ static dispatch_once_t predicate;
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
-        NSLog(@"get 请求数据结果： *** %@", response);
         //        [weakSelf handleGroupListData:response[@"data"] andIsMyJoined:YES];
         //        successBlock(response);
         [strongSelf processingData:response];
@@ -151,7 +148,7 @@ static dispatch_once_t predicate;
 
 
 - (void)processingData:(NSDictionary *)response {
-    if (([[response objectForKey:@"code"] integerValue] == 0)) {
+    if ([response objectForKey:@"code"] && ([[response objectForKey:@"code"] integerValue] == 0)) {
         NSDictionary *data = [response objectForKey:@"data"];
         if (data != NULL) {
             
@@ -162,8 +159,9 @@ static dispatch_once_t predicate;
             NSInteger luckMaxIndex = 0;
             CGFloat moneyMax = 0.0;
             
-            if ([self.redPackedInfoDetail[@"total"] integerValue] == self.redPackedListArray.count) {
+            if ([self.redPackedInfoDetail[@"total"] integerValue] == self.redPackedListArray.count || [self.redPackedInfoDetail[@"overFlag"] boolValue]) {
                 for (NSInteger i = 0; i < self.redPackedListArray.count; i++) {
+                    // 计算手气最佳
                     NSMutableDictionary *objDict = [NSMutableDictionary dictionaryWithDictionary:self.redPackedListArray[i]];
                     NSString *strMoney = [objDict[@"money"] stringByReplacingOccurrencesOfString:@"*" withString:@"0"];
                     CGFloat money = [strMoney floatValue];
@@ -182,7 +180,6 @@ static dispatch_once_t predicate;
                             [self.redPackedInfoDetail setObject:@(YES)forKey:@"isBanker"];
                         }
                         
-                        // 自己抢的点数
                         if ([userId isEqualToString:[AppModel shareInstance].user.userId]) {
                             [self.redPackedInfoDetail setObject:[objDict objectForKey:@"score"] forKey:@"itselfPointsNum"];
                         }
@@ -201,20 +198,36 @@ static dispatch_once_t predicate;
                 NSMutableDictionary *objDict = [NSMutableDictionary dictionaryWithDictionary:self.redPackedListArray[i]];
                 
                 if ([self.redPackedInfoDetail[@"type"] integerValue] == 1) {
-                    // 雷
                     NSString *moneyLei = [objDict objectForKey:@"money"];
                     NSString *last = [moneyLei substringFromIndex:moneyLei.length-1];
                     NSDictionary *attrDict = [[self.redPackedInfoDetail objectForKey:@"attr"] mj_JSONObject];
-                    NSString *bombNum = attrDict[@"bombNum"];
-                    if ([last isEqualToString:bombNum]) {
+                    NSString *bombNum = [NSString stringWithFormat:@"%ld", [attrDict[@"bombNum"] integerValue]];
+                    if ([last isEqualToString:bombNum] && [self.redPackedInfoDetail[@"freerId"] integerValue] != [[objDict objectForKey:@"userId"] integerValue]) {
                         [objDict setValue:@(YES) forKey:@"isMine"];
                     } else {
                         [objDict setValue:@(NO) forKey:@"isMine"];
                     }
+                } else if ([self.redPackedInfoDetail[@"type"] integerValue] == 3) {
+                    // 禁抢老板说不标雷
+//                    NSString *moneyLei = [objDict objectForKey:@"money"];
+//                    NSString *last = [moneyLei substringFromIndex:moneyLei.length-1];
+//                    NSDictionary *attrDict = [[self.redPackedInfoDetail objectForKey:@"attr"] mj_JSONObject];
+//
+//                    NSArray *bombListArray = (NSArray *)attrDict[@"bombList"];
+//
+//                    for (NSInteger index = 0; index < bombListArray.count; index++) {
+//                        NSString *bombNum = [NSString stringWithFormat:@"%ld", [bombListArray[index] integerValue]];
+//                        if ([last isEqualToString:bombNum]) {
+//                            [objDict setValue:@(YES) forKey:@"isMine"];
+//                            break;
+//                        } else {
+//                            [objDict setValue:@(NO) forKey:@"isMine"];
+//                        }
+//                    }
                 }
                 
+                
                 BOOL isItself = NO;
-                // 自己抢的钱
                 NSString *userId = [NSString stringWithFormat:@"%@",[objDict objectForKey:@"userId"]];
                 if ([userId isEqualToString:[AppModel shareInstance].user.userId]) {
                     [self.redPackedInfoDetail setObject:[objDict objectForKey:@"money"] forKey:@"itselfMoney"];
@@ -224,6 +237,7 @@ static dispatch_once_t predicate;
                     isItself = NO;
                 }
                 
+                
                 if ([self.redPackedInfoDetail[@"total"] integerValue] == self.redPackedListArray.count) {
                     // 手气最佳
                     if (luckMaxIndex == i) {
@@ -231,56 +245,40 @@ static dispatch_once_t predicate;
                     } else {
                         [objDict setValue:@(NO) forKey:@"isLuck"];
                     }
+                }
+                
+                if ([[self.redPackedInfoDetail objectForKey:@"type"] integerValue] == 2) {  // 庄 闲
+                    // 是
+                    NSString *sendUserId = [NSString stringWithFormat:@"%@",[self.redPackedInfoDetail objectForKey:@"userId"]];
+                    NSString *userId = [NSString stringWithFormat:@"%@",[objDict objectForKey:@"userId"]];
+                    if ([sendUserId isEqualToString:userId]) {
+                        [objDict setValue:@(YES) forKey:@"isBanker"];
+                    } else {
+                        [objDict setValue:@(NO) forKey:@"isBanker"];
+                    }
                     
-                    if ([[self.redPackedInfoDetail objectForKey:@"type"] integerValue] == 2) {  // 庄 闲
-                        // 是
-                        NSString *sendUserId = [NSString stringWithFormat:@"%@",[self.redPackedInfoDetail objectForKey:@"userId"]];
-                        NSString *userId = [NSString stringWithFormat:@"%@",[objDict objectForKey:@"userId"]];
-                        if ([sendUserId isEqualToString:userId]) {
-                            [objDict setValue:@(YES) forKey:@"isBanker"];
-                        } else {
-                            [objDict setValue:@(NO) forKey:@"isBanker"];
+                    // 判断庄闲 输-赢
+                    if ([[self.redPackedInfoDetail objectForKey:@"bankerPointsNum"] integerValue] > [[objDict objectForKey:@"score"] integerValue]) {
+                        if (isItself) {
+                            [self.redPackedInfoDetail setValue:@(NO) forKey:@"isItselfWin"];
                         }
+                    } else if ([[self.redPackedInfoDetail objectForKey:@"bankerPointsNum"] integerValue] == [[objDict objectForKey:@"score"] integerValue]) {
                         
-                        // 庄闲点数
-                        if ([[self.redPackedInfoDetail objectForKey:@"bankerPointsNum"] integerValue] > [[objDict objectForKey:@"score"] integerValue]) {
-                            
+                        if ([[self.redPackedInfoDetail objectForKey:@"bankerMoney"] floatValue] >= [[objDict objectForKey:@"money"] floatValue] ) {
                             if (isItself) {
-                                 [self.redPackedInfoDetail setValue:@(NO) forKey:@"isItselfWin"];
-                            }
-                           
-                            NSInteger num = [[self.redPackedInfoDetail objectForKey:@"bankerWinCount"] integerValue];
-                            num++;
-                            [self.redPackedInfoDetail setValue:@(num) forKey:@"bankerWinCount"];
-                        } else if ([[self.redPackedInfoDetail objectForKey:@"bankerPointsNum"] integerValue] == [[objDict objectForKey:@"score"] integerValue]) {
-                            
-                            if ([[self.redPackedInfoDetail objectForKey:@"bankerMoney"] floatValue] >= [[objDict objectForKey:@"money"] floatValue] ) {
-                                if (isItself) {
-                                    [self.redPackedInfoDetail setValue:@(NO) forKey:@"isItselfWin"];
-                                }
-                                
-                                NSInteger num = [[self.redPackedInfoDetail objectForKey:@"bankerWinCount"] integerValue];
-                                num++;
-                                [self.redPackedInfoDetail setValue:@(num) forKey:@"bankerWinCount"];
-                            } else {
-                                if (isItself) {
-                                    [self.redPackedInfoDetail setValue:@(YES) forKey:@"isItselfWin"];
-                                }
-                                NSInteger num = [[self.redPackedInfoDetail objectForKey:@"playerWinCount"] integerValue];
-                                num++;
-                                [self.redPackedInfoDetail setValue:@(num) forKey:@"playerWinCount"];
+                                [self.redPackedInfoDetail setValue:@(NO) forKey:@"isItselfWin"];
                             }
                         } else {
                             if (isItself) {
                                 [self.redPackedInfoDetail setValue:@(YES) forKey:@"isItselfWin"];
                             }
-                            NSInteger num = [[self.redPackedInfoDetail objectForKey:@"playerWinCount"] integerValue];
-                            num++;
-                            [self.redPackedInfoDetail setValue:@(num) forKey:@"playerWinCount"];
+                        }
+                    } else {
+                        if (isItself) {
+                            [self.redPackedInfoDetail setValue:@(YES) forKey:@"isItselfWin"];
                         }
                     }
                 }
-                
                 
                 
                 [objDict setValue:self.redPackedInfoDetail[@"type"] forKey:@"redpType"];

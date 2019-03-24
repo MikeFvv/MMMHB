@@ -6,7 +6,7 @@
 //  Copyright (c) 2014年 wc All rights reserved.
 //
 
-#import "Reachability.h"
+#define DEGREES_TO_RADIANS(angle) ((angle) / 180.0 * M_PI)
 
 #define SCREEN_HEIGHT [[UIScreen mainScreen] bounds].size.height//屏幕高
 #define SCREEN_WIDTH [[UIScreen mainScreen] bounds].size.width//屏幕宽
@@ -33,11 +33,17 @@ typedef NS_ENUM(NSUInteger, ResultCode) {
     ResultCodeSuccess = 0,//成功
 };
 
-extern NetworkStatus networkStatus;
-
+typedef NS_ENUM(NSInteger, AppType)
+{
+    AppType_nil,
+    AppType_XZHB,//小猪红包
+    AppType_TTHB,//天天红包
+    AppType_WWHB,//旺旺红包
+    AppType_WBHB,//旺旺红包
+};
 
 #define WXShareDescription [NSString stringWithFormat:@"我的邀请码是%@",APP_MODEL.user.invitecode]
-//static NSString* const WXShareDescription  = @"下载抢红包,每天签到领红包最高88.88，诚招代理0成本0门槛代理每天拉群抢最高8888元";
+
 
 #define PUSH_C(viewController,targetViewController,animation) targetViewController *vc = [[targetViewController alloc] init]; vc.hidesBottomBarWhenPushed = YES; [viewController.navigationController pushViewController:vc animated:animation];
 
@@ -67,3 +73,7 @@ extern NetworkStatus networkStatus;
 #define kBackgroundGrayColor [UIColor colorWithRed:250/255.0 green:250/255.0 blue:250/255.0 alpha:1.0]
 
 #define COLOR_X(R,G,B) [UIColor colorWithRed:R/255.0 green:G/255.0 blue:B/255.0 alpha:1]
+
+
+
+#define kSendRPTitleCellWidth 80

@@ -44,41 +44,53 @@
     [numBtn setBackgroundImage:[[UIImage imageNamed:@"activity4"] stretchableImageWithLeftCapWidth:5 topCapHeight:4] forState:UIControlStateNormal];
     [numBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(conView.mas_left).offset(15);
-        make.centerY.equalTo(conView);
+        make.centerY.equalTo(conView).offset(-5);
         make.width.equalTo(@60);
         make.height.equalTo(@20);
     }];
     self.numBtn = numBtn;
     
-    UIImageView *progressBg = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"activity3"] stretchableImageWithLeftCapWidth:25 topCapHeight:5]];
+    UIImageView *progressBg = [[UIImageView alloc] initWithImage:[FUNCTION_MANAGER imageWithColor:COLOR_X(255, 29, 89)]];
     [conView addSubview:progressBg];
+    progressBg.layer.masksToBounds = YES;
+    progressBg.layer.cornerRadius = 2.5;
     [progressBg mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(numBtn.mas_right).offset(8);
         make.centerY.equalTo(numBtn.mas_centerY);
-        make.height.equalTo(@10);
+        make.height.equalTo(@5);
         make.right.equalTo(conView.mas_right).offset(-20);
     }];
     self.progressBg = progressBg;
     
-    UIImageView *progressBar = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"navBarBg"]];
+    UIImageView *progressBar = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"activity10"]];
     [progressBg addSubview:progressBar];
     progressBar.layer.masksToBounds = YES;
     progressBar.layer.cornerRadius = 3;
     progressBar.tag = 1;
     [progressBar mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(progressBg.mas_left).offset(1);
+        make.left.equalTo(progressBg.mas_left);
         make.centerY.equalTo(progressBg);
         make.height.equalTo(@6);
         make.width.equalTo(@0);
     }];
     
-    UIImageView *progressPot = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"activity7"]];
-    [progressBg addSubview:progressPot];
-    progressPot.tag = 2;
+    UIImageView *progressPot = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"activity8"]];
+    progressPot.contentMode = UIViewContentModeScaleAspectFit;
+    [conView addSubview:progressPot];
+    self.progressPot = progressPot;
     [progressPot mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(progressBg.mas_left).offset(1);
-        make.centerY.equalTo(progressBg);
-        make.width.height.equalTo(@8);
+        make.centerY.equalTo(self.progressBg);
+        make.width.height.equalTo(@14);
+        make.centerX.equalTo(self.progressBg.mas_right).offset(-3);
+    }];
+    
+    UIView *lineView = [[UIView alloc] init];
+    lineView.backgroundColor = COLOR_X(245, 245, 245);
+    [conView addSubview:lineView];
+    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo(@0.5);
+        make.left.right.equalTo(conView);
+        make.bottom.equalTo(conView.mas_bottom).offset(-36);
     }];
     
     UIButton *lingQuBtn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -93,19 +105,10 @@
     [lingQuBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(conView).offset(-10);
         make.width.equalTo(@70);
-        make.height.equalTo(@40);
-        make.centerY.equalTo(titleLabel.mas_centerY);
+        make.top.equalTo(lineView.mas_bottom);
+        make.bottom.equalTo(conView.mas_bottom);
     }];
     self.getBtn = lingQuBtn;
-    
-    UIView *lineView = [[UIView alloc] init];
-    lineView.backgroundColor = COLOR_X(245, 245, 245);
-    [conView addSubview:lineView];
-    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.height.equalTo(@0.5);
-        make.left.right.equalTo(conView);
-        make.bottom.equalTo(conView.mas_bottom).offset(-36);
-    }];
     
     UIButton *xiangQingBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     [xiangQingBtn setTitle:@"活动详情" forState:UIControlStateNormal];
@@ -130,19 +133,23 @@
 -(void)setRate:(float)rate{
     if(rate > 1)
         rate = 1;
-    UIImageView *pot = [self.progressBg viewWithTag:2];
+    
     UIImageView *progressBar = [self.progressBg viewWithTag:1];
     [progressBar mas_remakeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.progressBg.mas_left).offset(2);
+        make.left.equalTo(self.progressBg.mas_left);
         make.centerY.equalTo(self.progressBg);
-        make.height.equalTo(@6);
+        make.height.equalTo(@2);
         make.width.equalTo(self.progressBg).multipliedBy(rate).offset(-4);
     }];
     
-    [pot mas_remakeConstraints:^(MASConstraintMaker *make) {
-        make.centerY.equalTo(self.progressBg);
-        make.width.height.equalTo(@8);
-        make.centerX.equalTo(progressBar.mas_right).offset(-3);
-    }];
+    if(self.pointDataArray == nil){
+        self.progressPot.hidden = NO;
+        [self.progressPot mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.equalTo(self.progressBg);
+            make.width.height.equalTo(@14);
+            make.centerX.equalTo(self.progressBg.mas_right).offset(-3);
+        }];
+    }else
+        self.progressPot.hidden = YES;
 }
 @end

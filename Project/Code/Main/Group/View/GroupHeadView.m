@@ -10,7 +10,6 @@
 #import "UserCollectionViewCell.h"
 #import "GroupNet.h"
 
-#define ALLTAG 1000
 
 @interface GroupHeadView()<UICollectionViewDelegate,UICollectionViewDataSource>{
     UICollectionView *_collectionView;
@@ -18,19 +17,26 @@
     
 }
 @property (nonatomic ,strong) NSArray *dataList;
-
+@property (nonatomic ,assign) BOOL isGroupLord;
 @end
 
 @implementation GroupHeadView
 
 
-+ (GroupHeadView *)headViewWithModel:(GroupNet *)model {
++ (GroupHeadView *)headViewWithModel:(GroupNet *)model isGroupLord:(BOOL)isGroupLord {
    
-    NSInteger l = (model.dataList.count == 0)?0:model.dataList.count /6+ 1;
-    CGFloat h = l*CD_Scal(82, 667)+50;
-    l = (l>5)?5:l;
-    GroupHeadView *view = [[GroupHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, h)];
+    NSInteger lorow = 0;
+    if (isGroupLord) {
+        lorow = (model.dataList.count + 2 == 0)?0: (model.dataList.count + 2)/5 + ((model.dataList.count + 2) % 5 > 0 ? 1: 0);
+    } else {
+       lorow = (model.dataList.count == 0)?0: model.dataList.count/5 + (model.dataList.count % 5 > 0 ? 1: 0);
+    }
+    
+    CGFloat height = lorow*CD_Scal(82, 667)+50;
+//    lorow = (lorow>5)?5:lorow;
+    GroupHeadView *view = [[GroupHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, height)];
     view.dataList = model.dataList;
+    view.isGroupLord = isGroupLord;
     [view updateList:model];
     return view;
 }
@@ -54,7 +60,7 @@
      _dataList = model.dataList;
     [_collectionView reloadData];
     
-    NSString *count = [NSString stringWithFormat:@"查看全部群成员(%ld)>",model.total];
+    NSString *count = [NSString stringWithFormat:@"全部群成员(%ld)>",model.total];
     NSMutableAttributedString *AttributedStr = [[NSMutableAttributedString alloc]initWithString:count];
     NSRange rang = NSMakeRange(0, count.length);
     [AttributedStr addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize2:14] range:rang];
@@ -105,12 +111,21 @@
 
 #pragma mark UICollectionViewDelegate,UICollectionViewDataSource
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
+    if (self.isGroupLord) {
+         return _dataList.count + 2;
+    }
     return _dataList.count;
 }
 
 - (__kindof UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     UserCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"UserCollectionViewCell" forIndexPath:indexPath];
-    [cell update:_dataList[indexPath.row]];
+    
+    if (indexPath.row > _dataList.count - 1) {
+        [cell addOrDeleteIndex:indexPath.row - (_dataList.count -1)];
+    } else {
+        [cell update:_dataList[indexPath.row]];
+    }
+    
     return cell;
 }
 
@@ -123,7 +138,7 @@
 #pragma mark action
 - (void)action_allClick{
     if (self.click) {
-        self.click(ALLTAG);
+        self.click(0);
     }
 }
 

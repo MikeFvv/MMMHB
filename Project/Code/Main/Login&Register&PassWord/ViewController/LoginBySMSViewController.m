@@ -124,6 +124,7 @@
             _textField[indexPath.row].keyboardType = UIKeyboardTypePhonePad;
         else{
             _textField[indexPath.row].returnKeyType = UIReturnKeyDone;
+            _textField[indexPath.row].keyboardType = UIKeyboardTypeNamePhonePad;
 
         }
     }
@@ -160,7 +161,8 @@
     
     SVP_SHOW;
 //    WEAK_OBJ(weakSelf, self);
-    [NET_REQUEST_MANAGER requestTockenWithPhone:_textField[0].text smsCode:_textField[1].text success:^(id object) {
+    NSString *sms = _textField[1].text;
+    [NET_REQUEST_MANAGER requestTockenWithPhone:_textField[0].text smsCode:sms success:^(id object) {
         SVP_DISMISS;
     } fail:^(id object) {
         [FUNCTION_MANAGER handleFailResponse:object];

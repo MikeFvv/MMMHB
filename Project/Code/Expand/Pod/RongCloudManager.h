@@ -12,7 +12,7 @@
 @interface RongCloudManager : NSObject <RCIMUserInfoDataSource, RCIMGroupInfoDataSource, RCIMGroupUserInfoDataSource,
 RCIMGroupMemberDataSource,RCIMReceiveMessageDelegate,RCIMConnectionStatusDelegate>//RCCallGroupMemberDataSource语音通话 RCCCContactsDataSource RCCCGroupDataSource
 
-@property (nonatomic ,assign) BOOL isConnect;
+@property (nonatomic ,assign) BOOL isConnectRC;
 + (RongCloudManager *)shareInstance;
 - (void)initWithMode;
 - (void)setToken:(NSString *)token;

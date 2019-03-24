@@ -9,11 +9,14 @@
 #import "AllUserViewController.h"
 #import "UserTableViewCell.h"
 #import "GroupNet.h"
+#import "BANetManager_OC.h"
 
 // 群成员控制器
 @interface AllUserViewController ()<UITableViewDataSource,UITableViewDelegate>{
-    UITableView *_tableView;
+    
 }
+
+@property (nonatomic ,strong)  UITableView *tableView;
 @property (nonatomic ,strong) GroupNet *model;
 
 @end
@@ -50,9 +53,10 @@
 }
 
 #pragma mark ----- subView
-- (void)initSubviews{
+- (void)initSubviews {
     self.view.backgroundColor = BaseColor;
-    self.navigationItem.title = @"所有成员";
+//    self.navigationItem.title = self.title;
+//    self.navigationItem.title = @"所有成员";
     
     _tableView = [UITableView groupTable];
     [self.view addSubview:_tableView];
@@ -83,15 +87,17 @@
     }];
 }
 
+#pragma mark -  获取群组成员数据
 - (void)getGroupUsersData {
     __weak __typeof(self)weakSelf = self;
     [_model queryGroupUserGroupId:self.groupId successBlock:^(NSDictionary *info) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         
-         [strongSelf->_tableView.mj_header endRefreshing];
-         [strongSelf->_tableView.mj_footer endRefreshing];
-         [strongSelf->_tableView reloadData];
-        
+        if ([info objectForKey:@"code"] && [[info objectForKey:@"code"] integerValue] == 0) {
+            [strongSelf->_tableView.mj_header endRefreshing];
+            [strongSelf->_tableView.mj_footer endRefreshing];
+            [strongSelf->_tableView reloadData];
+        }
     } failureBlock:^(NSError *error) {
         SVP_ERROR(error);
     }];
@@ -108,9 +114,67 @@
     if (cell == nil) {
         cell = [[UserTableViewCell alloc]initWithStyle:0 reuseIdentifier:@"user"];
     }
+    cell.isDelete = self.isDelete;
     cell.obj = _model.dataList[indexPath.row];
+    __weak __typeof(self)weakSelf = self;
+    cell.deleteBtnBlock = ^{
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        
+        [strongSelf exit_group:[strongSelf.model.dataList[indexPath.row] objectForKey:@"userId"]];
+        return;
+    };
+    
     return cell;//[tableView CDdequeueReusableCellWithIdentifier:_dataList[indexPath.row]];
 }
+
+
+
+#pragma mark -  移除群组确认
+/**
+ 移除群组确认
+ */
+-(void)exit_group:(NSString *)userId {
+    WEAK_OBJ(weakSelf, self);
+    
+    [[AlertViewCus createInstanceWithView:nil] showWithText:@"确认移除该玩家？" button1:@"取消" button2:@"确认" callBack:^(id object) {
+        NSInteger tag = [object integerValue];
+        if(tag == 1)
+            [weakSelf action_exitGroup:userId];
+    }];
+}
+
+
+
+/**
+ 删除群成员
+ */
+- (void)action_exitGroup:(NSString *)userId {
+    
+    BADataEntity *entity = [BADataEntity new];
+    entity.urlString = [NSString stringWithFormat:@"%@%@?groupId=%@&userId=%@",APP_MODEL.serverUrl,@"social/skChatGroup/delgroupMember",self.groupId, userId];
+
+    entity.needCache = NO;
+//    NSDictionary *parameters = @{
+//                                 @"groupId":self.groupId,
+//                                 @"userId":userId,
+//                                 };
+//    entity.parameters = parameters;
+    
+    __weak __typeof(self)weakSelf = self;
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        if ([response objectForKey:@"code"] && [[response objectForKey:@"code"] integerValue] == 0) {
+            SVP_ERROR_STATUS([response objectForKey:@"msg"]);
+            strongSelf.model.page = 1;
+            [strongSelf getGroupUsersData];
+        } else {
+            SVP_ERROR_STATUS([response objectForKey:@"msg"]);
+        }
+    } failureBlock:^(NSError *error) {
+        [FUNCTION_MANAGER handleFailResponse:error];
+    } progressBlock:nil];
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

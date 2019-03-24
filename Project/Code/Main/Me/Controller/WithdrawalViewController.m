@@ -9,7 +9,7 @@
 #import "WithdrawalViewController.h"
 #import "WithHisListTableViewCell.h"
 
-@interface WithdrawalViewController ()<UITextFieldDelegate,UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate>{
+@interface WithdrawalViewController ()<UITextFieldDelegate,UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate,ActionSheetDelegate>{
     UITextField *_textField[6];
     NSArray *_rowList;
     UILabel *_typeLabel;
@@ -49,7 +49,7 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    self.navigationItem.title = @"提现";
+    self.navigationItem.title = @"提现中心";
     self.view.backgroundColor = BaseColor;
     WEAK_OBJ(weakSelf, self);
     
@@ -332,14 +332,15 @@
 
 #pragma mark action
 - (void)selectBank{
-    UIActionSheet *sheet = [[UIActionSheet alloc]initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:nil, nil];
+    NSMutableArray *arr = [NSMutableArray array];
     for (NSDictionary *dic in self.bankList) {
         NSString *bankName = dic[@"title"];
-        NSInteger bankId = [dic[@"id"] integerValue];
-        self.bankId = INT_TO_STR(bankId);
-        [sheet addButtonWithTitle:bankName];
+        [arr addObject:bankName];
     }
-    [sheet showInView:self.view];
+    ActionSheetCus *sheet = [[ActionSheetCus alloc] initWithArray:arr];
+    sheet.titleLabel.text = @"请选择银行";
+    sheet.delegate = self;
+    [sheet showWithAnimationWithAni:YES];
 }
 
 - (void)action_submit{
@@ -412,4 +413,13 @@
     return YES;
 }
 
+-(void)actionSheetDelegateWithActionSheet:(ActionSheetCus *)actionSheet index:(NSInteger)index{
+    if(index == self.bankList.count)
+        return;
+    NSDictionary *dic = self.bankList[index];
+    NSString *bankName = dic[@"title"];
+    NSInteger bankId = [dic[@"id"] integerValue];
+    self.bankId = INT_TO_STR(bankId);
+    _textField[3].text = bankName;
+}
 @end

@@ -138,7 +138,8 @@
 
 #pragma mark action
 - (void)action_getCode{
-    if (_textField[0].text.length < 8) {
+    NSString *phone = _textField[0].text;
+    if (phone.length < 8 || ![FUNCTION_MANAGER checkIsNum:phone]) {
         SVP_ERROR_STATUS(@"请输入正确的手机号");
         return;
     }

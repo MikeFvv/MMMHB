@@ -40,6 +40,12 @@
         label.textColor = Color_3;
         self.textLabel = label;
         [view addSubview:label];
+        
+//        UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+//        btn.frame = self.bounds;
+//        btn.backgroundColor = [UIColor clearColor];
+//        [btn addTarget:self action:@selector(btnAction) forControlEvents:UIControlEventTouchUpInside];
+//        [self addSubview:btn];
     }
     return self;
 }
@@ -94,6 +100,11 @@
         if(finished)
             [weakSelf update];
     }];
+}
+
+-(void)btnAction{
+    if(self.tapBlock)
+        self.tapBlock(nil);
 }
 
 -(void)stop{

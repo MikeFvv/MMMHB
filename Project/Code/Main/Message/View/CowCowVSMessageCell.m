@@ -2,14 +2,12 @@
 //  CowCowVSMessageCell.m
 //  Project
 //
-//  Created by 罗耀生 on 2019/1/28.
+//  Created by Mike on 2019/1/28.
 //  Copyright © 2019 CDJay. All rights reserved.
 //
 
 #import "CowCowVSMessageCell.h"
 #import "CowCowVSMessageModel.h"
-
-#define CowBackImageHeight (UIScreen.mainScreen.bounds.size.height <= 568.0 ? 90 : 120)
 
 @interface CowCowVSMessageCell()
 
@@ -19,6 +17,8 @@
 @property (nonatomic,strong) UILabel *nameLabel;
 @property (nonatomic,strong) UIImageView *pointNumImageView;
 
+// 通杀  通赔
+@property (nonatomic,strong) UIImageView *passKillPayIcon;
 //
 @property (nonatomic, strong) RCMessageModel *messageModel;
 
@@ -31,7 +31,7 @@
       withCollectionViewWidth:(CGFloat)collectionViewWidth
          referenceExtraHeight:(CGFloat)extraHeight
 {
-    CGFloat __messagecontentview_height = CowBackImageHeight+60 + 10;
+    CGFloat __messagecontentview_height = CowBackImageHeight+ 40 + 10;
     __messagecontentview_height += extraHeight;
     return CGSizeMake(collectionViewWidth, __messagecontentview_height);
 }
@@ -65,11 +65,15 @@
     [backView addGestureRecognizer:tapGesturRecognizer];
     
     backView.layer.cornerRadius = 8;
+    backView.layer.masksToBounds = YES;
+//    backView.layer.borderColor = [UIColor colorWithRed:1 green:0 blue:0 alpha:0.1].CGColor;
+//    backView.layer.borderWidth = 0.5;
     [self.baseContentView addSubview:backView];
     
+    NSInteger xx = CD_WidthScal(60, 320);
     [backView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.mas_equalTo(self.baseContentView.mas_left).offset(55);
-        make.right.mas_equalTo(self.baseContentView.mas_right).offset(-55);
+        make.left.mas_equalTo(self.baseContentView.mas_left).offset(xx);
+        make.right.mas_equalTo(self.baseContentView.mas_right).offset(-xx);
         make.top.mas_equalTo(self.baseContentView.mas_top).offset(10);
         make.bottom.mas_equalTo(self.baseContentView.mas_bottom);
     }];
@@ -82,6 +86,17 @@
         make.top.left.right.equalTo(backView);
         make.height.equalTo(@(CowBackImageHeight));
     }];
+    
+    UIImageView *passKillPayIcon = [[UIImageView alloc] init];
+    [backView addSubview:passKillPayIcon];
+    _passKillPayIcon = passKillPayIcon;
+    
+    [passKillPayIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(backView.mas_left).offset(12);
+        make.top.mas_equalTo(backView.mas_top).offset(15);
+        make.size.mas_equalTo(CGSizeMake(45, 40));
+    }];
+    
     
     // 庄闲点数视图
     UIView *bankerPlayerWinView = [[UIView alloc] init];
@@ -105,7 +120,7 @@
         make.left.mas_equalTo(backView.mas_left);
         make.right.mas_equalTo(backView.mas_right);
         make.top.mas_equalTo(backImageView.mas_bottom);
-        make.height.mas_equalTo(@(60));
+        make.height.mas_equalTo(@(40));
     }];
     
     
@@ -116,19 +131,19 @@
     bankerHeadImageView.layer.masksToBounds = YES;
     
     [bankerHeadImageView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.size.equalTo(@(40));
-        make.left.equalTo(bottomView.mas_left).offset(10);
+        make.size.equalTo(@(34));
+        make.left.equalTo(bottomView.mas_left).offset(6);
         make.centerY.equalTo(bottomView);
     }];
     
     UILabel *nameLabel = [UILabel new];
     [bottomView addSubview:nameLabel];
     _nameLabel = nameLabel;
-    nameLabel.font = [UIFont systemFontOfSize:15];
+    nameLabel.font = [UIFont systemFontOfSize:13];
     nameLabel.textColor = Color_0;
     
     [nameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(bankerHeadImageView.mas_top).offset(1);
+        make.top.equalTo(bankerHeadImageView.mas_top);
         make.left.equalTo(bankerHeadImageView.mas_right).offset(8);
     }];
     
@@ -138,8 +153,8 @@
     
     [iconImageView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(bankerHeadImageView.mas_right).offset(8);
-        make.bottom.equalTo(bankerHeadImageView.mas_bottom).offset(-1);
-        make.size.mas_equalTo(CGSizeMake(36, 18));
+        make.bottom.equalTo(bankerHeadImageView.mas_bottom);
+        make.size.mas_equalTo(CGSizeMake(34, 16));
     }];
     
     UIImageView *pointNumImageView = [[UIImageView alloc] init];
@@ -168,7 +183,7 @@
     [desBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerY.mas_equalTo(bottomView.mas_centerY);
         make.right.mas_equalTo(bottomView.mas_right);
-        make.width.equalTo(@90);
+        make.width.equalTo(@80);
     }];
     
     
@@ -177,11 +192,11 @@
     /******************/
     
     UIView *leftView = [[UIView alloc] init];
-    leftView.backgroundColor = ApHexColor(@"#FFFFFF", 0.4);
+    leftView.backgroundColor = ApHexColor(@"#FFFFFF", 0.5);
     [bankerPlayerWinView addSubview:leftView];
     
     UIView *rightView = [[UIView alloc] init];
-    rightView.backgroundColor = ApHexColor(@"#FFFFFF", 0.4);
+    rightView.backgroundColor = ApHexColor(@"#FFFFFF", 0.5);
     [bankerPlayerWinView addSubview:rightView];
     
     [leftView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -201,7 +216,7 @@
     bankerTitleLabel.text = @"庄赢";
     [leftView addSubview:bankerTitleLabel];
     bankerTitleLabel.textColor = Color_3;
-    bankerTitleLabel.font = [UIFont vvBoldFontOfSize:17];
+    bankerTitleLabel.font = [UIFont vvBoldFontOfSize:16];
     
     [bankerTitleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerY.equalTo(leftView.mas_centerY);
@@ -211,11 +226,11 @@
     _bankerLabel = [[UILabel alloc] init];
     [leftView addSubview:_bankerLabel];
     _bankerLabel.textColor = [UIColor redColor];
-    _bankerLabel.font = [UIFont vvBoldFontOfSize:17];
+    _bankerLabel.font = [UIFont vvBoldFontOfSize:16];
     
     [_bankerLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerY.equalTo(bankerTitleLabel.mas_centerY);
-        make.left.equalTo(bankerTitleLabel.mas_right).offset(5);
+        make.left.equalTo(bankerTitleLabel.mas_right).offset(3);
     }];
     
     
@@ -223,7 +238,7 @@
     playerWinTitleLabel.text = @"闲赢";
     [rightView addSubview:playerWinTitleLabel];
     playerWinTitleLabel.textColor = Color_3;
-    playerWinTitleLabel.font = [UIFont vvBoldFontOfSize:17];
+    playerWinTitleLabel.font = [UIFont vvBoldFontOfSize:16];
     [playerWinTitleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerY.equalTo(rightView.mas_centerY);
         make.centerX.equalTo(rightView.mas_centerX).offset(-10);;
@@ -232,11 +247,11 @@
     _playerWinLabel = [[UILabel alloc] init];
     [rightView addSubview:_playerWinLabel];
     _playerWinLabel.textColor = [UIColor redColor];
-    _playerWinLabel.font = [UIFont vvBoldFontOfSize:17];
+    _playerWinLabel.font = [UIFont vvBoldFontOfSize:16];
     
     [_playerWinLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerY.equalTo(playerWinTitleLabel.mas_centerY);
-        make.left.equalTo(playerWinTitleLabel.mas_right).offset(5);
+        make.left.equalTo(playerWinTitleLabel.mas_right).offset(3);
     }];
     
 }
@@ -246,6 +261,18 @@
     CowCowVSMessageModel *cow = (CowCowVSMessageModel *)model.content;
     NSDictionary *dict = (NSDictionary *)cow.content.mj_JSONObject;
     self.messageModel = model;
+    
+    
+    if ([[dict objectForKey:@"bankWin"] integerValue] > 0 && [[dict objectForKey:@"playerWin"] integerValue] == 0) {
+        self.passKillPayIcon.image = [UIImage imageNamed:@"cow_will"];
+        self.passKillPayIcon.hidden = NO;
+    } else if ([[dict objectForKey:@"bankWin"] integerValue] == 0 && [[dict objectForKey:@"playerWin"] integerValue] > 0) {
+        self.passKillPayIcon.image = [UIImage imageNamed:@"cow_pay"];
+        self.passKillPayIcon.hidden = NO;
+    } else {
+        self.passKillPayIcon.hidden = YES;
+    }
+    
     
     self.bankerLabel.text = [[dict objectForKey:@"bankWin"] stringValue];
     self.playerWinLabel.text = [[dict objectForKey:@"playerWin"] stringValue];

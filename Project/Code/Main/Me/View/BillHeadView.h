@@ -11,7 +11,7 @@
 typedef void (^TimeBlock)(id);
 typedef void (^TypeBlock)(NSInteger type);
 
-@interface BillHeadView : UIView<UIActionSheetDelegate>
+@interface BillHeadView : UIView<ActionSheetDelegate>
 
 + (BillHeadView *)headView;
 

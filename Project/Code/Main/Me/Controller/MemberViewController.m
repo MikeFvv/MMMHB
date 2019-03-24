@@ -22,6 +22,14 @@
 #import "ReportFormsViewController.h"
 #import "ActivityViewController.h"
 #import "AlertViewCus.h"
+#import "BecomeAgentViewController.h"
+#import "WheelViewController.h"
+#import "AddBankCardViewController.h"
+#import "WithdrawMainViewController.h"
+#import "RechargeViewController.h"
+#import "DepositOrderController.h"
+#import "WebViewController.h"
+#import "HelpCenterWebController.h"
 
 @implementation CellData
 
@@ -67,27 +75,42 @@
 
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
-    [NET_REQUEST_MANAGER requestUserInfoWithSuccess:nil fail:nil];
+    [self getUserInfo];
 }
 
 #pragma mark ----- Data
 - (void)initData{
     self.dataArray = [[NSMutableArray alloc] init];
     NSMutableArray *sectionArray1 = [[NSMutableArray alloc] init];
-    CellData *cellData1 = [[CellData alloc] initWithTitle:@"邀请码" subTitle:APP_MODEL.user.invitecode icon:@"my-code" showArrow:NO tag:1];
-    [sectionArray1 addObject:cellData1];
-    CellData *cellData2 = [[CellData alloc] initWithTitle:@"充值" subTitle:nil icon:@"my-recharge" showArrow:NO tag:2];
-    [sectionArray1 addObject:cellData2];
-    CellData *cellData3 = [[CellData alloc] initWithTitle:@"提现" subTitle:nil icon:@"my-withdrawals" showArrow:NO tag:3];
-    [sectionArray1 addObject:cellData3];
-    CellData *cellData9 = [[CellData alloc] initWithTitle:@"活动" subTitle:nil icon:@"my-huodong" showArrow:NO tag:9];
-    [sectionArray1 addObject:cellData9];
-    CellData *cellData4 = [[CellData alloc] initWithTitle:@"代理" subTitle:nil icon:@"my-player" showArrow:NO tag:4];
+    
+//    CellData *cellData1 = [[CellData alloc] initWithTitle:@"邀请码" subTitle:APP_MODEL.user.invitecode icon:@"my-code" showArrow:NO tag:1];
+//    [sectionArray1 addObject:cellData1];
+
+    CellData *cellData13 = [[CellData alloc] initWithTitle:@"保存下载页" subTitle:nil icon:@"me_down" showArrow:NO tag:13];
+    [sectionArray1 addObject:cellData13];
+    CellData *cellData14 = [[CellData alloc] initWithTitle:@"账单记录" subTitle:nil icon:@"my-zdjl" showArrow:NO tag:14];
+    [sectionArray1 addObject:cellData14];
+    
+//    CellData *cellData12 = [[CellData alloc] initWithTitle:@"幸运大转盘" subTitle:nil icon:@"my-lottery" showArrow:NO tag:12];
+//    [sectionArray1 addObject:cellData12];
+    CellData *cellData10 = [[CellData alloc] initWithTitle:@"申请代理" subTitle:nil icon:@"my-2b" showArrow:NO tag:10];
+    [sectionArray1 addObject:cellData10];
+    CellData *cellData4 = [[CellData alloc] initWithTitle:@"下级玩家" subTitle:nil icon:@"my-player" showArrow:NO tag:4];
     [sectionArray1 addObject:cellData4];
-    if(APP_MODEL.user.agentFlag){
-        CellData *cellData8 = [[CellData alloc] initWithTitle:@"报表" subTitle:nil icon:@"my-report" showArrow:NO tag:8];
+    //if(APP_MODEL.user.agentFlag)
+    {
+        CellData *cellData8 = [[CellData alloc] initWithTitle:@"我的报表" subTitle:nil icon:@"my-report" showArrow:NO tag:8];
         [sectionArray1 addObject:cellData8];
     }
+//    CellData *cellData9 = [[CellData alloc] initWithTitle:@"活动中心" subTitle:nil icon:@"my-huodong" showArrow:NO tag:9];
+//    [sectionArray1 addObject:cellData9];
+    CellData *cellData2 = [[CellData alloc] initWithTitle:@"充值中心" subTitle:nil icon:@"my-recharge" showArrow:NO tag:2];
+    [sectionArray1 addObject:cellData2];
+    CellData *cellData3 = [[CellData alloc] initWithTitle:@"提现中心" subTitle:nil icon:@"my-withdrawals" showArrow:NO tag:3];
+    [sectionArray1 addObject:cellData3];
+    
+//    CellData *cellData11 = [[CellData alloc] initWithTitle:@"游戏介绍" subTitle:nil icon:@"my-withdrawals" showArrow:NO tag:11];
+//    [sectionArray1 addObject:cellData11];
     
     [self.dataArray addObject:sectionArray1];
     
@@ -127,7 +150,7 @@
     _headView = [[MemberHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, _headHeight)];
     [_headView addTarget:self action:@selector(action_info) forControlEvents:UIControlEventTouchUpInside];
     [_headView.zuanQianBtn addTarget:self action:@selector(zuanQian) forControlEvents:UIControlEventTouchUpInside];
-    [_headView.zhangDanBtn addTarget:self action:@selector(zhangDan) forControlEvents:UIControlEventTouchUpInside];
+    [_headView.zhangDanBtn addTarget:self action:@selector(helpCenter) forControlEvents:UIControlEventTouchUpInside];
     _headView.backgroundColor = [UIColor clearColor];
 
     _tableView = [UITableView groupTable];
@@ -225,7 +248,8 @@
         else
             cell.accessoryType = UITableViewCellAccessoryNone;
         
-        if(indexPath.section == 0 && indexPath.row == 0){
+        if(cellData.tag == 1){
+            cell.rightArrowImage.hidden = YES;
             UILabel *copyLabel = [[UILabel alloc] init];
             copyLabel.textColor = COLOR_X(245, 116, 35);
             copyLabel.layer.masksToBounds = YES;
@@ -242,10 +266,13 @@
                 make.width.equalTo(@60);
                 make.height.equalTo(@26);
             }];
-            
+
             [cell.rightLabel mas_updateConstraints:^(MASConstraintMaker *make) {
                 make.right.equalTo(cell.contentView).offset(-83);
             }];
+        }
+        if(indexPath.section == 1 && indexPath.row == 0){
+            cell.rightArrowImage.hidden = YES;
         }
     }
     cell.rightLabel.text = cellData.subTitle;
@@ -266,34 +293,24 @@
     CellData *data = self.dataArray[indexPath.section][indexPath.row];
     if (data.tag == 1){
         UIPasteboard * pastboard = [UIPasteboard generalPasteboard];
-        
         pastboard.string = APP_MODEL.user.invitecode;
         SVP_SUCCESS_STATUS(@"复制成功");
-    }else if(data.tag == 2){
-        PUSH_C(self, TopupViewController, YES);
-    }
-    else if (data.tag == 3){
-        PUSH_C(self, WithdrawalViewController, YES);
-    }
-    else if(data.tag == 4){
+    } else if(data.tag == 2){
+        PUSH_C(self, RechargeViewController, YES);
+    } else if (data.tag == 3){
+        PUSH_C(self, WithdrawMainViewController, YES);
+    } else if(data.tag == 4){
         PUSH_C(self, RecommendedViewController, YES);
-    }else if(data.tag == 5){
+    } else if(data.tag == 5){
         SVP_SHOW;
         [FUNCTION_MANAGER checkVersion:YES];
-    }else if(data.tag == 6){
+    } else if(data.tag == 6){
         PUSH_C(self, SettingViewController, YES);
-    }else if(data.tag == 8){
-        ReportFormsViewController *vc = [[ReportFormsViewController alloc] init];
-        vc.hidesBottomBarWhenPushed = YES;
-        vc.userId = APP_MODEL.user.userId;
-        [self.navigationController pushViewController:vc animated:YES];
-    }
-    else if(data.tag == 7){
-        
+    }  else if(data.tag == 7){
         AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
-        [view showWithText:@"是否退出？" button1:@"退出" button2:@"取消" callBack:^(id object) {
+        [view showWithText:@"是否退出？" button1:@"取消" button2:@"退出" callBack:^(id object) {
             NSInteger tag = [object integerValue];
-            if(tag == 0){
+            if(tag == 1){
                 [self logout];
             }
         }];
@@ -309,12 +326,41 @@
 //        [cancelAction setValue:Color_0 forKey:@"_titleTextColor"];
 //        [alertController addAction:cancelAction];
 //        [self presentViewController:alertController animated:YES completion:nil];
-    }else if(data.tag == 9){
+        
+    } else if(data.tag == 8){
+        ReportFormsViewController *vc = [[ReportFormsViewController alloc] init];
+        vc.hidesBottomBarWhenPushed = YES;
+        vc.userId = APP_MODEL.user.userId;
+        [self.navigationController pushViewController:vc animated:YES];
+    } else if(data.tag == 9){
         ActivityViewController *vc = [[ActivityViewController alloc] init];
+        vc.vcTitle = @"活动中心";
         vc.userId = APP_MODEL.user.userId;
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
-    }
+    } else if(data.tag == 10){
+        BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
+        vc.hidesBottomBarWhenPushed = YES;
+        vc.hiddenNavBar = YES;
+        vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
+        [self.navigationController pushViewController:vc animated:YES];
+    } else if(data.tag == 11){
+        GuideView *guideView = [[GuideView alloc] initWithArray:@[@"guide0",@"guide1",@"guide2"] target:nil selector:nil];
+        [guideView showWithAnimationWithAni:YES];
+    } else if(data.tag == 12){
+        WheelViewController *vc = [[WheelViewController alloc] init];
+        vc.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:vc animated:YES];
+    } else if(data.tag == 13){
+        NSString *url = [NSString stringWithFormat:@"%@%@",kDownloadPageURL,APP_MODEL.user.invitecode];
+        if([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:url]])
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+//        WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+//        vc.title = @"下载页";
+//        vc.hidesBottomBarWhenPushed = YES;
+//        [self.navigationController pushViewController:vc animated:YES];
+    }else if(data.tag == 14)
+        [self zhangDan];
 }
 
 -(void)logout{
@@ -348,16 +394,28 @@
     PUSH_C(self, BillViewController, YES);
 }
 
+-(void)helpCenter{
+//    AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+//    [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
+//    return;
+    
+    NSString *url = [NSString stringWithFormat:@"%@/dist/#/index/helpCenter?accesstoken=%@", [AppModel shareInstance].commonInfo[@"website.address"], [AppModel shareInstance].user.token];
+    HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:url];
+    vc.hidesBottomBarWhenPushed = YES;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
     NSInteger offsetY = scrollView.contentOffset.y;
     CGRect rect = self.imageBgView.frame;
     //NSInteger width = SCREEN_WIDTH * (1 - offsetY/SCREEN_WIDTH);
-    rect.size.height = _headHeight + 20 - offsetY;
+    rect.size.height = _headHeight + 20 - offsetY + 35;
 //    if(width < SCREEN_WIDTH)
 //        width = SCREEN_WIDTH;
 //    rect.size.width = width;
 //    NSInteger a = SCREEN_WIDTH - width;
 //    rect.origin.x = a;
+    rect.origin.y = -35;
     self.imageBgView.frame = rect;
 }
 @end

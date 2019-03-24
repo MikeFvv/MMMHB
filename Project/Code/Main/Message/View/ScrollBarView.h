@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ScrollBarView : UIView
 @property(nonatomic,strong)UILabel *textLabel;
 @property(nonatomic,strong)NSArray *textArray;
+@property(nonatomic,copy)CallbackBlock tapBlock;
 
 +(ScrollBarView *)createWithFrame:(CGRect)rect;
 -(void)start;

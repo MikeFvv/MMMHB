@@ -135,7 +135,7 @@
         make.center.mas_equalTo(bgView.center);
     }];
     
-    UIButton *btn1 = [self createBtnWithIcon:@"make-money" title:@"推广海报"];
+    UIButton *btn1 = [self createBtnWithIcon:@"make-money" title:@"分享赚钱"];
     [bgView addSubview:btn1];
     [btn1 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.top.bottom.equalTo(bgView);
@@ -143,7 +143,7 @@
     }];
     self.zuanQianBtn = btn1;
 
-    UIButton *btn2 = [self createBtnWithIcon:@"bill" title:@"账单记录"];
+    UIButton *btn2 = [self createBtnWithIcon:@"my-bzzx" title:@"帮助中心"];
     [bgView addSubview:btn2];
     [btn2 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.top.bottom.equalTo(bgView);

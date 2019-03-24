@@ -55,7 +55,7 @@
     _backControl = [[UIControl alloc]initWithFrame:self.bounds];
     [self addSubview:_backControl];
     _backControl.backgroundColor = ApHexColor(@"#000000", 0.6);
-    [_backControl addTarget:self action:@selector(disMissRedView) forControlEvents:UIControlEventTouchUpInside];
+    [_backControl addTarget:self action:@selector(onbackControl) forControlEvents:UIControlEventTouchUpInside];
     
     CGFloat marginWidth = 30;
     
@@ -259,7 +259,7 @@
 - (NSString *)typeString:(NSInteger)type{
     switch (type) {
         case 0:
-            return @"福利包";
+            return @"福利红包";
             break;
         case 1:
             return @"扫雷红包";
@@ -267,13 +267,15 @@
         case 2:
             return @"牛牛红包";
             break;
+        case 3:
+            return @"禁抢红包";
         default:
             break;
     }
     return nil;
 }
 
-- (void)updateView:(id)obj response:(id)response {
+- (void)updateView:(id)obj response:(id)response rpOverdueTime:(NSString *)rpOverdueTime {
     self.isClickedDisappear = NO;
     if (response != nil) {
         [self responseNull:response];
@@ -319,7 +321,12 @@
             }
         }
     } else { // 过期
-        [self contentShow:kRedpackedExpiredMessage];
+        if (type == 2) {
+            [self contentShow:@"本包游戏已截止"];
+        } else {
+            [self contentShow:[NSString stringWithFormat:@"该红包已超过%0.f分钟，如已领取，可在<账单>中查询", [rpOverdueTime floatValue]/60 <= 1 ? 1 : [rpOverdueTime floatValue]/60]];
+        }
+        
         [self setDetaiButton];
         
     }
@@ -353,6 +360,13 @@
     _detailButton.hidden = NO;
     [_detailButton setTitle:kLookLuckDetailsMessage forState:UIControlStateNormal];
     _small_iconImageView.hidden = YES;
+}
+
+
+- (void)onbackControl {
+    if (!IS_IPHONE_Xr || self.isClickedDisappear) {
+       [self disMissRedView];
+    }
 }
 
 - (void)disMissRedView {

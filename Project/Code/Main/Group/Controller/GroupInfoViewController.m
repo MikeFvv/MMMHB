@@ -13,18 +13,20 @@
 #import "AllUserViewController.h"
 #import "BANetManager_OC.h"
 #import "RCDBaseSettingTableViewCell.h"
+#import "AddMemberController.h"
+#import "NSString+Size.h"
 
 static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 
-@interface GroupInfoViewController ()<UITableViewDelegate,UITableViewDataSource>{
-    UITableView *_tableView;
-    GroupNet *_model;
-    GroupHeadView *_headView;
-    BOOL enableNotification;
-    RCConversation *currentConversation;
-}
+@interface GroupInfoViewController ()<UITableViewDelegate,UITableViewDataSource>
 
+@property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) GroupNet *model;
+@property (nonatomic, strong) GroupHeadView *headView;
+@property (nonatomic, assign) BOOL enableNotification;
+@property (nonatomic, strong)  RCConversation *currentConversation;
 @property (nonatomic, strong) MessageItem *groupInfo;
+
 @end
 
 
@@ -38,9 +40,9 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self initData];
+//    [self initData];
     [self initSubviews];
-    [self getGroupUsersData];
+//    [self getGroupUsersData];
     [self initLayout];
 
 }
@@ -51,15 +53,53 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     
 }
 
-- (void)update{
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self initData];
+    [self getGroupUsersData];
+}
+
+- (void)update {
     CDWeakSelf(self);
-    _headView = [GroupHeadView headViewWithModel:_model];
+    
+    if ([self.groupInfo.userId isEqualToString:AppModel.shareInstance.user.userId] ) {
+        _headView = [GroupHeadView headViewWithModel:_model isGroupLord:YES];
+    } else {
+        _headView = [GroupHeadView headViewWithModel:_model isGroupLord:NO];
+    }
     _headView.click = ^(NSInteger index) {
         CDStrongSelf(self);
+        
+        if (index - (self.model.dataList.count -1) == 1) {
+            // 添加群员
+            [self addGroupMember];
+            return;
+        } else if (index - (self.model.dataList.count-1) == 2) {
+            // 删减群员
+            [self deleteGroupMember];
+            return;
+        }
+        
         [self gotoAllGroupUsers];
     };
     _tableView.tableHeaderView = _headView;
     
+}
+
+- (void)addGroupMember {
+    AddMemberController *vc = [[AddMemberController alloc] init];
+    vc.title = @"添加群成员";
+    vc.groupId = self.groupInfo.groupId;
+    [self.navigationController pushViewController:vc animated:YES];
+    
+    
+}
+- (void)deleteGroupMember {
+    AllUserViewController *vc = [AllUserViewController allUser:_model];
+    vc.title = @"删除成员";
+    vc.groupId = self.groupInfo.groupId;
+    vc.isDelete = YES;
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 
@@ -74,15 +114,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
         if(tag == 1)
             [weakSelf action_exitGroup];
     }];
-//    UIAlertController *vc = [UIAlertController alertControllerWithTitle:@"提示" message:@"是否退出该群？" preferredStyle:UIAlertControllerStyleAlert];
-//    UIAlertAction *cancle = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-//
-//    }];
-//    [vc addAction:cancle];
-//    UIAlertAction *make = [UIAlertAction actionWithTitle:@"退出" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-//    }];
-//    [vc addAction:make];
-//    [self presentViewController:vc animated:YES completion:nil];
+
 }
 
 
@@ -92,6 +124,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
  */
 - (void)action_exitGroup {
 
+    SVP_SHOW;
     BADataEntity *entity = [BADataEntity new];
     entity.urlString = [NSString stringWithFormat:@"%@%@/%@",APP_MODEL.serverUrl,@"social/skChatGroup/quit", _groupInfo.groupId];
     
@@ -100,8 +133,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
          __strong __typeof(weakSelf)strongSelf = weakSelf;
-        NSLog(@"get 请求数据结果： *** %@", response);
-        if ([[response objectForKey:@"code"] integerValue] == 0) {
+        if ([response objectForKey:@"code"] && [[response objectForKey:@"code"] integerValue] == 0) {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"ReloadMyMessageGroupList" object:nil];
             SVP_ERROR_STATUS([response objectForKey:@"msg"]);
             
@@ -152,8 +184,10 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     
     
     UIView *footView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 100)];
-    UIButton *exitBtn = [UIButton new];
+    
+    UIButton *exitBtn = [[UIButton alloc] init];
     [footView addSubview:exitBtn];
+    
     exitBtn.layer.cornerRadius = 8;
     exitBtn.layer.masksToBounds = YES;
     exitBtn.backgroundColor = MBTNColor;
@@ -163,10 +197,9 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     [exitBtn addTarget:self action:@selector(exit_group) forControlEvents:UIControlEventTouchUpInside];
     
     [exitBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.mas_equalTo(footView.mas_left).offset(30);
-        make.right.mas_equalTo(footView.mas_right).offset(-30);
-        make.centerY.mas_equalTo(footView.mas_centerY);
-        make.height.mas_equalTo(@(44));
+        make.centerY.equalTo(footView.mas_centerY);
+        make.centerX.equalTo(footView.mas_centerX);
+        make.size.mas_equalTo(CGSizeMake(SCREEN_WIDTH -30*2, 44));
     }];
     
     _tableView.tableFooterView = footView;
@@ -205,6 +238,18 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     return (section == 0)?3:1;
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.row == 1) {
+        CGFloat height =  [_groupInfo.notice heightWithFont:[UIFont systemFontOfSize2:14] constrainedToWidth:SCREEN_WIDTH-(85+15)];
+        return height + 15*2;
+    } else if (indexPath.row == 2) {
+        CGFloat height =  [_groupInfo.know heightWithFont:[UIFont systemFontOfSize2:14] constrainedToWidth:SCREEN_WIDTH-(85+15)];
+        return height + 15*2;
+    }
+    return 48;
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"group"];
     RCDBaseSettingTableViewCell *cellee = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -225,7 +270,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 cell.accessoryType = 0;
                 [label mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.left.equalTo(cell.contentView).offset(15);
-                    make.height.equalTo(@(48));
+//                    make.height.equalTo(@(48));
                     make.top.bottom.equalTo(cell.contentView);
                 }];
                 
@@ -255,13 +300,19 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 right.font = [UIFont systemFontOfSize2:14];
                 right.text = _groupInfo.notice;
                 right.textColor = Color_6;
+                right.textAlignment = NSTextAlignmentRight;
                 right.numberOfLines = 0;
+                CGFloat height =  [_groupInfo.notice heightWithFont:[UIFont systemFontOfSize2:14] constrainedToWidth:SCREEN_WIDTH-(85+15)];
+                if (height > 20) {
+                    right.textAlignment = NSTextAlignmentLeft;
+                } else {
+                    right.textAlignment = NSTextAlignmentRight;
+                }
                 
                 [right mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.right.equalTo(cell.contentView.mas_right).offset(-15);
-                    make.top.equalTo(cell.contentView.mas_top).offset(16);
-                    make.bottom.equalTo(cell.contentView.mas_bottom).offset(-16);
-                    make.left.greaterThanOrEqualTo(label.mas_right).offset(20);
+                    make.left.equalTo(cell.contentView.mas_left).offset(85);
+                    make.centerY.equalTo(label.mas_centerY);
                 }];
             } else if (indexPath.row == 2){
                 UILabel *label = [UILabel new];
@@ -279,11 +330,19 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 [cell.contentView addSubview:bot];
                 bot.font = [UIFont systemFontOfSize2:14];
                 bot.text = _groupInfo.know;
-                bot.textColor = Color_6;
                 bot.numberOfLines = 0;
                 
+                CGFloat height =  [_groupInfo.know heightWithFont:[UIFont systemFontOfSize2:14] constrainedToWidth:SCREEN_WIDTH-(85+15)];
+                if (height > 20) {
+                    bot.textAlignment = NSTextAlignmentLeft;
+                } else {
+                    bot.textAlignment = NSTextAlignmentRight;
+                }
+                bot.textColor = Color_6;
+
                 [bot mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.right.equalTo(cell.contentView.mas_right).offset(-15);
+                    make.left.equalTo(cell.contentView.mas_left).offset(85);
                     make.centerY.equalTo(label.mas_centerY);
                 }];
             }
@@ -342,8 +401,9 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 }
 
 #pragma mark - gotoAllGroupUsers
-- (void)gotoAllGroupUsers{
+- (void)gotoAllGroupUsers {
     AllUserViewController *vc = [AllUserViewController allUser:_model];
+    vc.title = @"所有成员";
     vc.groupId = self.groupInfo.groupId;
     [self.navigationController pushViewController:vc animated:YES];
 }
@@ -363,10 +423,8 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                                                             targetId:APP_MODEL.user.userId
                                                            isBlocked:swch.on
                                                              success:^(RCConversationNotificationStatus nStatus) {
-                                                                 NSLog(@"111");
                                                              }
                                                                error:^(RCErrorCode status){
-                                                                   NSLog(@"111");
                                                                }];
 }
 

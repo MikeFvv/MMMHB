@@ -80,13 +80,24 @@ static NSMutableArray *tasks;
     AFJSONRequestSerializer *request = [AFJSONRequestSerializer serializer];
     BANetManagerShare.sessionManager.requestSerializer = request;
     /*! 设置apikey ------类似于自己应用中的tokken---此处仅仅作为测试使用*/
-    NSString *token = APP_MODEL.user.fullToken;
-    [BANetManagerShare.sessionManager.requestSerializer setValue:APP_MODEL.user.fullToken forHTTPHeaderField:@"Authorization"];
+    NSString *token = [AppModel shareInstance].user.fullToken; // 后台Token
+    [BANetManagerShare.sessionManager.requestSerializer setValue:token forHTTPHeaderField:@"Authorization"];
     
     /*! 复杂的参数类型 需要使用json传值-设置请求内容的类型*/
     //        [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     
     [BANetManagerShare.sessionManager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    
+    
+    NSString *iosVersion = [FUNCTION_MANAGER getIosVersion];
+    NSString *model = [FUNCTION_MANAGER getDeviceModel];
+    NSString *appVersion = [FUNCTION_MANAGER getApplicationVersion];
+    if(iosVersion)
+        [BANetManagerShare.sessionManager.requestSerializer setValue:iosVersion forHTTPHeaderField:@"systemVersion"];
+    if(model)
+        [BANetManagerShare.sessionManager.requestSerializer setValue:model forHTTPHeaderField:@"deviceModel"];
+    if(appVersion)
+        [BANetManagerShare.sessionManager.requestSerializer setValue:appVersion forHTTPHeaderField:@"appVersion"];
     
     /*! 设置响应数据的基本类型 */
     BANetManagerShare.sessionManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", @"text/css", @"text/xml", @"text/plain", @"application/javascript", @"application/x-www-form-urlencoded", @"image/*", nil];

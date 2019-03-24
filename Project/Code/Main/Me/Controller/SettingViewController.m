@@ -96,6 +96,10 @@
                 }];
             }
         }
+        if(indexPath.section == 1){
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        }else
+            cell.accessoryType = UITableViewCellAccessoryNone;
       }
     cell.textLabel.text = _rowList[indexPath.section][indexPath.row];
     return cell;
@@ -110,7 +114,7 @@
 #pragma mark action
 - (void)action_setSound{
     APP_MODEL.turnOnSound = (_sw.on== NO)?YES:NO;;
-    [APP_MODEL save];
+    [APP_MODEL saveAppModel];
 }
 
 - (void)didReceiveMemoryWarning {

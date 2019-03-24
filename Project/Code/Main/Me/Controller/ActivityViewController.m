@@ -17,8 +17,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = @"活动";
-    
+    self.navigationItem.title = self.vcTitle;
+    if(self.userId == nil)
+        self.userId = APP_MODEL.user.userId;
     ActivityView *view = [[ActivityView alloc] init];
     view.userId = self.userId;
     [self.view addSubview:view];

@@ -15,6 +15,8 @@ MJCodingImplementation
 
 ///消息是否存储，是否计入未读数
 + (RCMessagePersistent)persistentFlag {
+
+
     return MessagePersistent_ISCOUNTED;
 }
 
@@ -34,11 +36,13 @@ MJCodingImplementation
         [extra CDSetNOTNULLObject:[obj objectForKey:@"type"] forKey:@"type"];
         [extra CDSetNOTNULLObject:[obj objectForKey:@"username"] forKey:@"username"];
         [extra CDSetNOTNULLObject:APP_MODEL.user.userId forKey:@"userId"];
+        
+        [extra CDSetNOTNULLObject:[obj objectForKey:@"nograbContent"] forKey:@"nograbContent"]; // 禁抢红包属性
         [extra CDSetNOTNULLObject:[NSString cdImageLink:obj[@"headImg"]] forKey:@"headImg"];
 
         self.content = extra.mj_JSONString;
         NSDictionary *dic = @{@"content":self.content};
-        NSLog(@"%@",[dic mj_JSONString]);
+//        NSLog(@"%@",[dic mj_JSONString]);
     }
     return self;
 }

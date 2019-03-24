@@ -37,6 +37,10 @@
 @property (nonatomic ,copy) NSString *img; // 群图片
 @property (nonatomic ,copy) NSString *ruleImg; // 群规
 
+@property (nonatomic ,assign) NSInteger talkTime; // 说话时间
+@property (nonatomic ,assign) NSInteger chatWord; // 信息的长度
+
+
 
 // 是否正常
 @property (nonatomic ,copy) NSString *activeFlag;
@@ -62,13 +66,14 @@
 @property (nonatomic,copy) NSString *minCount;
 // 最小金额
 @property (nonatomic,copy) NSString *minMoney;
+@property (nonatomic,strong) NSString *attr;
 
 
 // 最后更新人
 @property (nonatomic,copy) NSString *lastUpdateBy;
 // 最后更新时间
 @property (nonatomic,copy) NSString *lastUpdateTime;
-// 群类型  1、扫雷群；2、牛牛群
+// 群类型 0 福利  1、扫雷群；2、牛牛群 
 @property (nonatomic ,assign) NSInteger type;
 
 @property (nonatomic ,assign) BOOL isMyJoined;

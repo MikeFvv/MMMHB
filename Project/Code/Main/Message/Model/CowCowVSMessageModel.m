@@ -2,7 +2,7 @@
 //  CowCowVSMessageModel.m
 //  Project
 //
-//  Created by 罗耀生 on 2019/1/28.
+//  Created by Mike on 2019/1/28.
 //  Copyright © 2019 CDJay. All rights reserved.
 //
 
@@ -16,8 +16,8 @@
         NSMutableDictionary *dic9 = [NSMutableDictionary dictionary];
         dic9 = obj;
         self.content = dic9.mj_JSONString;
-        NSDictionary *dic = @{@"content":self.content};
-        NSLog(@"%@",[dic mj_JSONString]);
+//        NSDictionary *dic = @{@"content":self.content};
+//        NSLog(@"%@",[dic mj_JSONString]);
     }
     return self;
 }

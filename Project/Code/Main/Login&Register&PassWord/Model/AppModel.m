@@ -56,7 +56,7 @@ MJCodingImplementation
     [RCIM sharedRCIM].disableMessageAlertSound = Sound;
 }
 
-- (void)save{
+- (void)saveAppModel {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString* filename = [[paths objectAtIndex:0] stringByAppendingPathComponent:Path];
     [NSKeyedArchiver archiveRootObject:self toFile:filename];
@@ -72,7 +72,7 @@ MJCodingImplementation
     self.user = [UserModel new];
     APP_MODEL.unReadCount = 0;
     APP_MODEL.rongYunToken = nil;
-    [APP_MODEL save];
+    [APP_MODEL saveAppModel];
     [self reSetRootAnimation:YES];
     [[RongCloudManager shareInstance] disConnect];
 }
@@ -85,6 +85,9 @@ MJCodingImplementation
     
     //开启消息撤回功能
     [RCIM sharedRCIM].enableMessageRecall = YES;
+    //开启消息@功能（只支持群聊和讨论组, App需要实现群成员数据源groupMemberDataSource）
+//    [RCIM sharedRCIM].enableMessageMentioned = YES;
+    
     //svp
     [SVProgressHUD setMinimumDismissTimeInterval:1.2f];
     [SVProgressHUD setMaximumDismissTimeInterval:1.2f];
@@ -97,7 +100,7 @@ MJCodingImplementation
     
     [[UIWindow appearance]setBackgroundColor:BaseColor];
     [[UIButton appearance]setExclusiveTouch:YES];
-    [[UIBarButtonItem appearance]setBackButtonBackgroundImage:[UIImage imageNamed:@"fanhui"] forState:UIControlStateNormal barMetrics:UIBarMetricsCompact];
+    [[UIBarButtonItem appearance]setBackButtonBackgroundImage:[UIImage imageNamed:@"nav_back"] forState:UIControlStateNormal barMetrics:UIBarMetricsCompact];
     [[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(-1000,0)
                                                          forBarMetrics:UIBarMetricsDefault];
     
@@ -108,7 +111,7 @@ MJCodingImplementation
     [[UINavigationBar appearance] setShadowImage:[UIImage new]];
     [[UINavigationBar appearance] setTitleTextAttributes:@{NSFontAttributeName:[UIFont boldSystemFontOfSize2:18],NSForegroundColorAttributeName:Color_F}];
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
-    if(![FUNCTION_MANAGER testMode])
+    if(![AppModel shareInstance].isReleaseOrBeta)
         [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"navBarBg"] forBarMetrics:UIBarMetricsDefault];
     else
         [[UINavigationBar appearance] setBarTintColor:COLOR_X(70, 70, 70)];
@@ -156,34 +159,59 @@ MJCodingImplementation
     return animation;
 }
 
--(NSString *)serverUrl{
-    if(_serverUrl == nil)
+-(NSString *)serverUrl {
+    if(_serverUrl == nil) {
 #if TARGET_IPHONE_SIMULATOR
-        _serverUrl = serverUrlTest;
+        if ([AppModel shareInstance].testVersionIndex <= 0) {
+            [AppModel shareInstance].testVersionIndex = 1;
+        }
+        NSDictionary *dict = self.ipArray[[AppModel shareInstance].testVersionIndex];
+//        _serverUrl = kServerUrlTest1;
+//        _rongYunKey = kRongfYunKeyTest1;
+        
+        _serverUrl = dict[@"url"];
+        _rongYunKey = dict[@"rongYunKey"];
+        self.isReleaseOrBeta = YES;
 #elif TARGET_OS_IPHONE
-        _serverUrl = serverUrl;
+        _serverUrl = kServerUrl;
+        _rongYunKey = kRongYunKey;
+        self.isReleaseOrBeta = NO;
 #endif
-    
+    } else {
+        if([_serverUrl rangeOfString:@"/api"].length > 0 || [_serverUrl rangeOfString:@".com"].length > 0) {
+            self.isReleaseOrBeta = NO;
+        } else {
+            self.isReleaseOrBeta = YES;
+        }
+        
+        if (self.isReleaseOrBeta && ![_rongYunKey isEqualToString:kRongfYunKeyTest1]) {
+            if ([AppModel shareInstance].testVersionIndex <= 0) {
+                [AppModel shareInstance].testVersionIndex = 1;
+            }
+            NSDictionary *dict = self.ipArray[[AppModel shareInstance].testVersionIndex];
+            _rongYunKey = dict[@"rongYunKey"];
+//            _rongYunKey = kRongfYunKeyTest1;
+        } else {
+            if (!self.isReleaseOrBeta && ![_rongYunKey isEqualToString:kRongYunKey]) {
+                _rongYunKey = kRongYunKey;
+            }
+        }
+    }
     return _serverUrl;
 }
 
--(NSString *)rongYunKey{
-    if(_rongYunKey == nil)
-#if TARGET_IPHONE_SIMULATOR
-    _rongYunKey = rongfYunKeyTest;
-#elif TARGET_OS_IPHONE
-    _rongYunKey = rongYunKey;
-#endif
+-(NSString *)rongYunKey {
+    [self serverUrl];
     return _rongYunKey;
 }
 
 -(NSArray *)ipArray{
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSArray *arr = [ud objectForKey:@"ipArray"];
-    
-    NSDictionary *dic1 = @{@"url":serverUrl,@"rongYunKey":rongYunKey};
-    NSDictionary *dic2 = @{@"url":serverUrlTest,@"rongYunKey":rongfYunKeyTest};
-    NSDictionary *dic3 = @{@"url":serverUrlTest2,@"rongYunKey":rongfYunKeyTest};
+    NSDictionary *dic1 = @{@"url":kServerUrl,@"rongYunKey":kRongYunKey, @"isReleaseOrBeta":@(NO)};
+    NSDictionary *dic2 = @{@"url":kServerUrlTest1,@"rongYunKey":kRongfYunKeyTest1, @"isReleaseOrBeta":@(YES)};
+    NSDictionary *dic3 = @{@"url":kServerUrlTest2,@"rongYunKey":kRongfYunKeyTest2, @"isReleaseOrBeta":@(YES)};
+
     NSMutableArray *array = [NSMutableArray arrayWithObjects:dic1,dic2,dic3, nil];
     if(arr)
         [array addObjectsFromArray:arr];

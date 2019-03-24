@@ -68,4 +68,14 @@
     [_icon cd_setImageWithURL:[NSURL URLWithString:[NSString cdImageLink:[obj objectForKey:@"avatar"]]] placeholderImage:[UIImage imageNamed:@"user-default"]];
     _name.text = [NSString stringWithFormat:@"%@",[obj objectForKey:@"nick"]];
 }
+
+- (void)addOrDeleteIndex:(NSInteger)index {
+    if (index == 1) {
+         _icon.image = [UIImage imageNamed:@"group_+"];
+    } else {
+        _icon.image = [UIImage imageNamed:@"group_-"];
+    }
+   
+}
+
 @end

@@ -28,8 +28,15 @@
 #import "CowCowVSMessageCell.h"
 #import "CowCowVSMessageModel.h"
 #import "ImageDetailViewController.h"
-
-#define CowBackImageHeight (UIScreen.mainScreen.bounds.size.height <= 568.0 ? 90 : 120)
+#import "NotificationMessageModel.h"
+#import "NotificationMessageCell.h"
+#import "WithdrawMainViewController.h"
+#import "BecomeAgentViewController.h"
+#import "ShareViewController.h"
+#import "AlertViewCus.h"
+#import "RechargeViewController.h"
+#import "HelpCenterWebController.h"
+#import "CustomerServiceAlertView.h"
 
 @interface ChatViewController ()<RCPluginBoardViewDelegate,RCMessageCellDelegate>
 
@@ -46,11 +53,16 @@
 @property (nonatomic, assign) long messageId;
 // 定时器
 @property (nonatomic,strong) NSTimer *timerView;
+// 聊天定时器
+@property (nonatomic,strong) NSTimer *chatTimer;
+@property (nonatomic,assign) BOOL isChatTimer;
+
 
 @property(nonatomic, strong) UIBarButtonItem *leftBtn;
 @property(nonatomic, strong) NSArray *rightBtnArray;
 //
 @property (nonatomic,assign) BOOL isCreateRpView;
+@property (nonatomic,assign) BOOL isVSViewClick;
 // 播放音乐
 @property (nonatomic,strong) AVAudioPlayer *player;
 
@@ -124,19 +136,30 @@ static ChatViewController *_chatVC;
     self.leftBtn = self.navigationItem.leftBarButtonItem;
     self.rightBtnArray = self.navigationItem.rightBarButtonItems;
     self.isCreateRpView = NO;
-    
+    self.isVSViewClick = NO;
     
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(action_VSViewSeeDetails:) name:@"VSViewSeeDetailsNoticafication" object:nil];
+    
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(scrollToBottom) name:@"scrollToBottom" object:nil];
 }
 
 -(void)dealloc {
     [[NSNotificationCenter defaultCenter]removeObserver:self];
 }
 
+-(void)scrollToBottom{
+    [self scrollToBottomAnimated:NO];
+}
+
+#pragma mark - VS 视图查看详情 goto
 /**
  VS 视图查看详情
  */
 - (void)action_VSViewSeeDetails:(NSNotification *)notification {
+    if (self.isVSViewClick) {
+        return;
+    }
+    self.isVSViewClick = YES;
     NSDictionary *infoDic = [notification object];
     RCMessageModel *model = (RCMessageModel *)[infoDic objectForKey:@"VS_messageModel"];
     CowCowVSMessageModel *cow = (CowCowVSMessageModel *)model.content;
@@ -165,6 +188,7 @@ static ChatViewController *_chatVC;
     
     [[NSNotificationCenter defaultCenter]postNotificationName:@"CDReadNumberChange" object:nil];
     self.isCreateRpView = NO;
+    self.isVSViewClick = NO;
 }
 
 
@@ -186,9 +210,15 @@ static ChatViewController *_chatVC;
 - (void)chatBarControl {
     self.conversationMessageCollectionView.backgroundColor = BaseColor;
     self.chatSessionInputBarControl.pluginBoardView.pluginBoardDelegate = self;
+    
+    [self.chatSessionInputBarControl setInputBarType:RCChatSessionInputBarControlDefaultType style:RC_CHAT_INPUT_BAR_STYLE_CONTAINER_EXTENTION];
+    
     [self registerClass:[RedPackedCollectionViewCell class] forMessageClass:[EnvelopeMessage class]];
     [self registerClass:[EnvelopeTipCell class] forMessageClass:[EnvelopeTipMessage class]];
     [self registerClass:[CowCowVSMessageCell class] forMessageClass:[CowCowVSMessageModel class]];
+    [self registerClass:[NotificationMessageCell class] forMessageClass:[NotificationMessageModel class]];
+    
+    
     
     
 #pragma mark pluginBoardView
@@ -210,10 +240,10 @@ static ChatViewController *_chatVC;
     [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_welfare"] title:@"福利" atIndex:0 tag:2000];
     [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_rule"] title:@"群规" atIndex:1 tag:2001];
     [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_tuo_redpocket"] title:@"红包" atIndex:2 tag:2002];
-    [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_Lord"] title:@"群主" atIndex:3 tag:2003];
-    [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_tuo_bill"] title:@"账单" atIndex:4 tag:2004];
-    [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_refill"] title:@"充值" atIndex:5 tag:2005];
-    [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_extract"] title:@"提现" atIndex:6 tag:2006];
+    [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_refill"] title:@"充值" atIndex:3 tag:2003];
+    [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_make_money"] title:@"赚钱" atIndex:4 tag:2004];
+    [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_join"] title:@"加盟" atIndex:5 tag:2005];
+    [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_help"] title:@"帮助" atIndex:6 tag:2006];
     [self.chatSessionInputBarControl.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"csb_tuo_customer_service"] title:@"客服" atIndex:7 tag:2007];
     
     [self.chatSessionInputBarControl.pluginBoardView updateItemAtIndex:8 image:[UIImage imageNamed:@"csb_photo_album"] title:@"照片"];
@@ -244,7 +274,7 @@ static ChatViewController *_chatVC;
 
 #pragma mark RCPluginBoardViewDelegate 聊天功能扩展拦
 - (void)pluginBoardView:(RCPluginBoardView *)pluginBoardView clickedItemWithTag:(NSInteger)tag{
-    NSLog(@"%ld",tag);
+    //    NSLog(@"%ld",tag);
     [self.view endEditing:YES];
     if (tag == 2000) { //福利红包
         SendRedPacketController *vc = [[SendRedPacketController alloc] init];
@@ -255,37 +285,48 @@ static ChatViewController *_chatVC;
         
     } else if (tag == 2001){ // 群规
         [self groupRuleView];
-    } else if (tag == 2002){
-        UINavigationController *vc = [[UINavigationController alloc]initWithRootViewController:CDPVC(@"SendRedPacketController", _messageItem)];
+    } else if (tag == 2002){  // 红包
+        UINavigationController *vc;
+        if (_messageItem.type == 3) {
+            vc = [[UINavigationController alloc]initWithRootViewController:CDPVC(@"NoRobSendRPController", _messageItem)];
+        } else {
+            vc = [[UINavigationController alloc]initWithRootViewController:CDPVC(@"SendRedPacketController", _messageItem)];
+        }
         [self presentViewController:vc animated:YES completion:nil];
     } else if (tag == 2003){
-        WebViewController *vc = [[WebViewController alloc]initWithUrl:ServiceLink];
-        vc.title = @"在线客服";
+        UIViewController *vc = [[RechargeViewController alloc]init];
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
         
-    } else if (tag == 2004){
-        UIViewController *vc = [[NSClassFromString(@"BillViewController")alloc]init];
+    } else if (tag == 2004){   // 赚钱
+        PUSH_C(self, ShareViewController, YES);
+    } else if (tag == 2005){  // 加盟
+        BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
+        vc.hidesBottomBarWhenPushed = YES;
+        vc.hiddenNavBar = YES;
+        vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
+        [self.navigationController pushViewController:vc animated:YES];
+    } else if (tag == 2006){  // 帮助
+        NSString *url = [NSString stringWithFormat:@"%@/dist/#/index/helpCenter?accesstoken=%@", [AppModel shareInstance].commonInfo[@"website.address"], [AppModel shareInstance].user.token];
+        HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:url];
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
         
-    } else if (tag == 2005){
-        UIViewController *vc = [[NSClassFromString(@"TopupViewController")alloc]init];
-        vc.hidesBottomBarWhenPushed = YES;
-        [self.navigationController pushViewController:vc animated:YES];
-    } else if (tag == 2006){
-        UIViewController *vc = [[NSClassFromString(@"WithdrawalViewController")alloc]init];
-        vc.hidesBottomBarWhenPushed = YES;
-        [self.navigationController pushViewController:vc animated:YES];
+//        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+//        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
     } else if (tag == 2007){
-        WebViewController *vc = [[WebViewController alloc]initWithUrl:ServiceLink];
-        vc.title = @"在线客服";
-        vc.hidesBottomBarWhenPushed = YES;
-        [self.navigationController pushViewController:vc animated:YES];
+//        WebViewController *vc = [[WebViewController alloc] initWithUrl:APP_MODEL.commonInfo[@"pop"]];
+//        vc.title = @"在线客服";
+//        vc.hidesBottomBarWhenPushed = YES;
+//        [self.navigationController pushViewController:vc animated:YES];
+        
+        [self actionShowCustomerServiceAlertView:nil];
     } else if (tag == 1001){
-        SVP_ERROR_STATUS(@"此功能暂停使用");
+        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
     } else if (tag == 1002){
-        SVP_ERROR_STATUS(@"此功能暂停使用");
+        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
     } else {
         [super pluginBoardView:pluginBoardView clickedItemWithTag:tag];
     }
@@ -294,12 +335,13 @@ static ChatViewController *_chatVC;
 
 #pragma mark -  群规
 - (void)groupRuleView {
-//    GroupRuleView *view = [[GroupRuleView alloc]initWithFrame:self.view.bounds];
-//    [view updateView:self.messageItem];
-//    [view showInView:self.view];
+    //    GroupRuleView *view = [[GroupRuleView alloc]initWithFrame:self.view.bounds];
+    //    [view updateView:self.messageItem];
+    //    [view showInView:self.view];
     
     ImageDetailViewController *vc = [[ImageDetailViewController alloc] init];
     vc.imageUrl = self.messageItem.ruleImg;
+    vc.hiddenNavBar = YES;
     vc.title = @"群规";
     [self.navigationController pushViewController:vc animated:YES];
 }
@@ -329,7 +371,7 @@ static ChatViewController *_chatVC;
         [self getRedPacketDetailsData:model cellStatus:cellStatus];
     } else if ([model.content isKindOfClass:[CowCowVSMessageModel class]]) {
         // 查看详情
-        NSLog(@"1111");
+        //        NSLog(@"1111");
     }
 }
 
@@ -344,7 +386,7 @@ static ChatViewController *_chatVC;
     
     EnvelopeMessage *enveMessageModel = (EnvelopeMessage*)messageModel.content;
     NSDictionary *dict = enveMessageModel.content.mj_JSONObject;
-    NSLog(@"-----------%@", [NSThread currentThread]);
+    //    NSLog(@"-----------%@", [NSThread currentThread]);
     SVP_SHOW;
     __weak __typeof(self)weakSelf = self;
     [_enveModel getRedpDetSendId:[dict objectForKey:@"redpacketId"] successBlock:^(NSDictionary *success) {
@@ -386,6 +428,7 @@ static ChatViewController *_chatVC;
         }
     } failureBlock:^(NSError *error) {
         SVP_DISMISS;
+        weakSelf.isVSViewClick = NO;
         //        __strong __typeof(weakSelf)strongSelf = weakSelf;
         SVP_ERROR_STATUS(kSystemBusyMessage);
     }];
@@ -413,13 +456,19 @@ static ChatViewController *_chatVC;
     
 }
 
+
+
+
 #pragma mark - 点击头像事件
 // 点击头像事件
 - (void)didTapCellPortrait:(NSString *)userId {
     [self.view endEditing:YES];
-    ChatUserInfoController *vc = [[ChatUserInfoController alloc] init];
-    vc.userId = userId;
-    [self.navigationController pushViewController:vc animated:YES];
+    [self didLongPressCellPortrait:userId];
+    
+    
+    //    ChatUserInfoController *vc = [[ChatUserInfoController alloc] init];
+    //    vc.userId = userId;
+    //    [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -528,12 +577,13 @@ static ChatViewController *_chatVC;
     }
     
     NSInteger code = [[response objectForKey:@"code"] integerValue];
-    if (code == 0) {
+    if ([response objectForKey:@"code"] && code == 0) {
         // 正常
         [self.redpView disMissRedView];
         [self goto_RedPackedDetail:self.enveModel];
         [self updateRedPackedStatus:messageId cellStatus:@"1"];
         
+        #pragma mark - 声音
         NSString *switchKeyStr = [NSString stringWithFormat:@"%@-%@", APP_MODEL.user.userId,_messageItem.groupId];
         // 读取
         BOOL  isSwitch = [[NSUserDefaults standardUserDefaults] boolForKey:switchKeyStr];
@@ -546,31 +596,31 @@ static ChatViewController *_chatVC;
         
     } else if (code == 11) {
         // 红包已抢完
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response];
+        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
         [self updateRedPackedStatus:messageId cellStatus:@"2"];
         
     } else if (code == 12) {
         // 已抢过红包
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response];
+        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
         [self updateRedPackedStatus:messageId cellStatus:@"1"];
         
     } else if (code == 13) {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response];
+        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
         // 余额不足
     } else if (code == 14) {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response];
+        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
         // 通讯异常，请重试
     } else if (code == 15) {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response];
+        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
         // 单个红包金额不足0.01
     } else if (code == 16) {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response];
+        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
         // 红包已逾期
         [self updateRedPackedStatus:messageId cellStatus:@"3"];
     } else if (code == 17) {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response];
+        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
     } else {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response];
+        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
     }
     
 }
@@ -585,7 +635,7 @@ static ChatViewController *_chatVC;
 - (void)actionShowRedPackedView:(RCMessageModel *)messageModel packetId:(NSString *)packetId {
     self.isAnimationEnd = NO;
     RedPackedAnimationView *view = [[RedPackedAnimationView alloc]initWithFrame:self.view.bounds];
-    [view updateView:_enveModel.redPackedInfoDetail response:nil];
+    [view updateView:_enveModel.redPackedInfoDetail response:nil rpOverdueTime:self.messageItem.rpOverdueTime];
     self.redpView = view;
     
     __weak __typeof(self)weakSelf = self;
@@ -657,7 +707,7 @@ static ChatViewController *_chatVC;
 - (void)goto_RedPackedDetail:(id)obj{
     [self.view endEditing:YES];
     //    CDPush(self.navigationController, CDPVC(@"RedPackedDetListController", obj), YES);
-    
+    self.isVSViewClick = NO;
     RedPackedDetListController *vc = [[RedPackedDetListController alloc] init];
     vc.isRightBarButton = YES;
     vc.objPar = obj;
@@ -674,9 +724,14 @@ static ChatViewController *_chatVC;
  */
 -(void)goto_sendRedpiconEnt {
     [self.view endEditing:YES];
-    UINavigationController *vc = [[UINavigationController alloc]initWithRootViewController:CDPVC(@"SendRedPacketController", _messageItem)];
-    [self presentViewController:vc animated:YES completion:nil];
     
+    UINavigationController *vc;
+    if (_messageItem.type == 3) {
+        vc = [[UINavigationController alloc]initWithRootViewController:CDPVC(@"NoRobSendRPController", _messageItem)];
+    } else {
+        vc = [[UINavigationController alloc]initWithRootViewController:CDPVC(@"SendRedPacketController", _messageItem)];
+    }
+    [self presentViewController:vc animated:YES completion:nil];
 }
 
 
@@ -696,7 +751,7 @@ static ChatViewController *_chatVC;
 
 - (void)didMoveToParentViewController:(UIViewController*)parent{
     [super didMoveToParentViewController:parent];
-    NSLog(@"%s,%@",__FUNCTION__,parent);
+    //    NSLog(@"%s,%@",__FUNCTION__,parent);
     if(!parent){
         _chatVC = nil;
         
@@ -710,7 +765,7 @@ static ChatViewController *_chatVC;
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
     CGSize size = [super collectionView:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
-    NSLog(@"size = %@",NSStringFromCGSize(size));
+    //    NSLog(@"size = %@",NSStringFromCGSize(size));
     RCMessageModel *model = self.conversationDataRepository[indexPath.row];
     RCTextMessage *textMessage = (RCTextMessage *)model.content;
     RCUserInfo *user = textMessage.senderUserInfo;
@@ -735,20 +790,39 @@ static ChatViewController *_chatVC;
         }
     }
     if([model.content isKindOfClass:[EnvelopeMessage class]]){
-        NSInteger height = 94;
+        NSInteger height = 10 + 88;
         model.content.senderUserInfo.userId = model.senderUserId;
         if(model.isDisplayMessageTime)
             height += 45;
         if(model.isDisplayNickname)
-            height += 22;
+            height += 12 + 4;
         return CGSizeMake([[UIScreen mainScreen] bounds].size.width, height);
     } else if([model.content isKindOfClass:[CowCowVSMessageModel class]]){
-        NSInteger height = 60 + 10;
+        NSInteger height = 40 + 10;
         model.content.senderUserInfo.userId = model.senderUserId;
         if(model.isDisplayMessageTime) {
             height += 45;
         }
         return CGSizeMake([[UIScreen mainScreen] bounds].size.width, CowBackImageHeight + height);
+    } else if ([model.objectName isEqualToString:kRCNotificationMessage]) {
+
+        if(![model.content isKindOfClass:[NotificationMessageModel class]]){
+            NSString *extra = model.extra;
+            if (extra != nil && extra.length > 0) {
+                NSDictionary *dict = [extra mj_JSONObject];
+                NotificationMessageModel *modelNoti = [[NotificationMessageModel alloc] init];
+                modelNoti.messagetype = [[dict objectForKey:@"messagetype"] integerValue];
+                modelNoti.talkTime = [[dict objectForKey:@"talkTime"] integerValue];
+                model.content = modelNoti;
+            } else {
+                model.content = [[NotificationMessageModel alloc] init];
+            }
+            
+        } else {
+            NotificationMessageModel *notiModel = (NotificationMessageModel *)model.content;
+            model.extra = [NSString stringWithFormat:@"{\"messagetype\":%ld,\"talkTime\" : %ld}", notiModel.messagetype, notiModel.talkTime];
+        }
+        
     }
     return size;
 }
@@ -791,6 +865,74 @@ static ChatViewController *_chatVC;
     return CGSizeMake(size.width, 100);
 }
 
+/*!
+ 准备发送消息的回调
+ 
+ @param messageContent 消息内容
+ 
+ @return 修改后的消息内容
+ 
+ @discussion 此回调在消息准备向外发送时会回调，您可以在此回调中对消息内容进行过滤和修改等操作。
+ 如果此回调的返回值不为nil，SDK会对外发送返回的消息内容。
+ */
+- (RCMessageContent *)willSendMessage:(RCMessageContent *)messageContent {
+    
+    if([messageContent isKindOfClass:[RCTextMessage class]]){
+        RCTextMessage *textMessage = (RCTextMessage *)messageContent;
+        NSString *conten = textMessage.content;
+        
+        if (self.messageItem.userId != [AppModel shareInstance].user.userId) {
+            if (self.isChatTimer == NO) {
+                
+                if (self.messageItem.chatWord > 0 && textMessage.content.length <= self.messageItem.chatWord) {
+                    self.isChatTimer = YES;
+                    _chatTimer = [NSTimer scheduledTimerWithTimeInterval:self.messageItem.talkTime target:self selector:@selector(chatTimer:) userInfo:nil repeats:YES];
+                }
+                
+                if (self.messageItem.chatWord > 0 && textMessage.content.length > self.messageItem.chatWord) {
+                    textMessage.content = [textMessage.content substringToIndex:self.messageItem.chatWord];
+                    
+                    NotificationMessageModel *model = [[NotificationMessageModel alloc] init];
+                    model.messagetype = 1;
+                    
+                    [[RCIM sharedRCIM] sendMessage:ConversationType_GROUP targetId:self.messageItem.groupId content:model pushContent:nil pushData:nil success:^(long messageId) {
+                    } error:^(RCErrorCode nErrorCode, long messageId) {
+                    }];
+                    return nil;
+                } else if (self.messageItem.chatWord == 0) {
+                    NSLog(@"字符串最大为零：%ld", self.messageItem.chatWord);
+                }
+                
+            } else {
+                NotificationMessageModel *model = [[NotificationMessageModel alloc] init];
+                model.messagetype = 2;
+                model.talkTime = self.messageItem.talkTime;
+                
+                [[RCIM sharedRCIM] sendMessage:ConversationType_GROUP targetId:self.messageItem.groupId content:model pushContent:nil pushData:nil success:^(long messageId) {
+                } error:^(RCErrorCode nErrorCode, long messageId) {
+                }];
+                
+                return nil;
+            }
+        }
+    }
+    
+    return messageContent;
+}
+
+-(void)chatTimerStop {
+    if (_chatTimer!=nil) {
+        [_chatTimer invalidate];
+        self.isChatTimer = NO;
+    }
+}
+
+
+-(void)chatTimer:(NSTimer*)timer {
+    //    NSLog(@"test......name=%@",timer.userInfo);
+    [self chatTimerStop];
+}
+
 
 
 - (RCMessage *)willAppendAndDisplayMessage:(RCMessage *)message {
@@ -816,9 +958,46 @@ static ChatViewController *_chatVC;
             messageCus.senderUserInfo = user;
             message.content = messageCus;
         }
+    } else if ([message.objectName isEqualToString:kRCNotificationMessage]) {
+        if([message.content isKindOfClass:[NotificationMessageModel class]]){
+            NotificationMessageModel *notiModel = (NotificationMessageModel *)message.content;
+            message.extra = [NSString stringWithFormat:@"{\"messagetype\":%ld,\"talkTime\" : %ld}", notiModel.messagetype, notiModel.talkTime];
+        }
     }
+    
     return message;
 }
+
+
+#pragma mark - 客服弹框
+- (void)actionShowCustomerServiceAlertView:(NSString *)messageModel {
+    
+    NSString *imageUrl = [AppModel shareInstance].commonInfo[@"customer.service.window"];
+    if (imageUrl.length == 0) {
+        [self webCustomerService];
+        return;
+    }
+    CustomerServiceAlertView *view = [[CustomerServiceAlertView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)];
+    
+    
+    [view updateView:@"常见问题" imageUrl:imageUrl];
+    
+    __weak __typeof(self)weakSelf = self;
+    
+    // 查看详情
+    view.customerServiceBlock = ^{
+        [weakSelf webCustomerService];
+    };
+    [view showInView:self.view];
+}
+- (void)webCustomerService {
+    WebViewController *vc = [[WebViewController alloc] initWithUrl:[AppModel shareInstance].commonInfo[@"pop"]];
+    vc.title = @"在线客服";
+    vc.hidesBottomBarWhenPushed = YES;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+
 @end
 
 

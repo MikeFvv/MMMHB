@@ -10,5 +10,7 @@
 
 @interface UserCollectionViewCell : UICollectionViewCell
 
+- (void)addOrDeleteIndex:(NSInteger)index;
+
 - (void)update:(id)obj;
 @end

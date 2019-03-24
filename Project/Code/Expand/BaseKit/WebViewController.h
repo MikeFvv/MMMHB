@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface WebViewController : UIViewController
+@interface WebViewController : SuperViewController
 
 - (instancetype)initWithUrl:(NSString *)url;
 - (instancetype)initWithHtmlString:(NSString *)string;

@@ -41,6 +41,7 @@
     [imageView sd_setImageWithURL:[NSURL URLWithString:self.shareInfo[@"firstAvatar"]] placeholderImage:nil completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
         [weakSelf resetImageView];
     }];
+
     [self createShareMenu];
     
     [NET_REQUEST_MANAGER addShareCountWithId:[[self.shareInfo objectForKey:@"id"] integerValue] success:nil fail:nil];
@@ -53,32 +54,69 @@
     if(img == nil)
         return;
     self.imageView.frame = CGRectMake(0, 0,img.size.width, img.size.height);
-    float qrWith = img.size.width * 0.202;
+    float qrWith = img.size.width * 0.250;
     UIImageView *qrImage = [UIImageView new];
     qrImage.contentMode = UIViewContentModeScaleAspectFit;
-    NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.user.invitecode];
-    qrImage.image = CD_QrImg(shareUrl, 400);
+    NSString *shareUrl = self.shareUrl;
+    qrImage.image = CD_QrImg(shareUrl, qrWith);
     qrImage.layer.masksToBounds = YES;
     qrImage.layer.borderColor = [UIColor colorWithWhite:1.0 alpha:0.5].CGColor;
     qrImage.layer.borderWidth = 2.0;
-    qrImage.frame = CGRectMake(self.imageView.frame.size.width - qrWith - qrWith/7.0, self.imageView.frame.size.height - qrWith - qrWith/7.0, qrWith, qrWith);
+    NSString *qrCodeFrame = self.shareInfo[@"codeImageFrame"];
+    if(qrCodeFrame){
+        NSArray *arr = [qrCodeFrame componentsSeparatedByString:@","];
+        CGRect rect = CGRectMake([arr[0] integerValue], [arr[1] integerValue], [arr[2] integerValue], [arr[3] integerValue]);
+        qrImage.frame = rect;
+    }else
+        qrImage.frame = CGRectMake((self.imageView.frame.size.width - qrWith)/2.0, 1010, qrWith, qrWith);
+    [self.imageView addSubview:qrImage];
+    
+    UILabel *label = [[UILabel alloc] init];
+    label.textColor = [UIColor whiteColor];
+    label.backgroundColor = [UIColor clearColor];
+    label.font = [UIFont systemFontOfSize2:54];
+    [self.imageView addSubview:label];
+    label.text = [NSString stringWithFormat:@"邀请码   %@",APP_MODEL.user.invitecode];
+    label.shadowColor = [UIColor blackColor];
+    label.shadowOffset = CGSizeMake(1, 1);
+    NSString *codeFrame = self.shareInfo[@"codeFrame"];
+    if(codeFrame){
+        NSArray *arr = [qrCodeFrame componentsSeparatedByString:@","];
+        CGRect rect = CGRectMake([arr[0] integerValue], [arr[1] integerValue], [arr[2] integerValue], [arr[3] integerValue]);
+        label.frame = rect;
+    }else
+        label.frame = CGRectMake(170, 1330, 700, 60);
     [self.imageView addSubview:qrImage];
     
     self.shareImage = [self imageWithUIView:self.imageView];
     self.imageView.image = self.shareImage;
-    [qrImage removeFromSuperview];
     float rate = img.size.width/img.size.height;
     float x = 15;
     float width = SCREEN_WIDTH - x * 2;
     float height = width/rate;
+    float xRate = width/self.shareImage.size.width;
+    float yRate = height/self.shareImage.size.height;
     self.imageView.frame = CGRectMake(x, 15,width, height);
-    
-    
+    CGPoint point = CGPointMake(label.frame.origin.x * xRate + self.imageView.frame.origin.x, (label.frame.origin.y + label.frame.size.height/2.0) * yRate + self.imageView.frame.origin.y);
+
     NSInteger mm = self.view.frame.size.height - height;
     NSInteger h = self.view.frame.size.height - mm + 150 + 30;
     if(h <= self.scrollView.frame.size.height)
         h = self.scrollView.frame.size.height + 1;
     self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width, h);
+    [qrImage removeFromSuperview];
+    [label removeFromSuperview];
+    
+    
+    NSInteger btnWidth = 90;
+    NSInteger btnHeight = 40;
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    btn.frame = CGRectMake(self.scrollView.frame.size.width - btnWidth - point.x, point.y - btnHeight/2.0, btnWidth, btnHeight);
+    btn.backgroundColor = [UIColor clearColor];
+    btn.contentEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
+    [btn setImage:[UIImage imageNamed:@"copyBtn"] forState:UIControlStateNormal];
+    [btn addTarget:self action:@selector(copyCode) forControlEvents:UIControlEventTouchUpInside];
+    [self.scrollView addSubview:btn];
 }
 
 -(void)createShareMenu{
@@ -173,13 +211,13 @@
     WXShareModel *model = [[WXShareModel alloc]init];
     model.WXShareType = scene;//WXSceneTimeline;
     model.title = self.shareInfo[@"title"];
-    model.imageIcon = [UIImage imageNamed:@"shareIcon"];
+    model.imageIcon = [UIImage imageNamed:[FUNCTION_MANAGER getAppIconName]];
     model.content = WXShareDescription;
     //CGSize size = self.shareImage.size;
     if(mediaType == MediaType_url){
         NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.user.invitecode];
         model.link = shareUrl;
-        model.imageData = UIImageJPEGRepresentation([UIImage imageNamed:@"shareIcon"],1.0);
+        model.imageData = UIImageJPEGRepresentation([UIImage imageNamed:[FUNCTION_MANAGER getAppIconName]],1.0);
     }
     else{
         model.imageData = UIImageJPEGRepresentation(self.shareImage, 1.0);
@@ -221,4 +259,9 @@
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
 }
 
+-(void)copyCode{
+    UIPasteboard *pastboard = [UIPasteboard generalPasteboard];
+    pastboard.string = APP_MODEL.user.invitecode;
+    SVP_SUCCESS_STATUS(@"复制成功");
+}
 @end

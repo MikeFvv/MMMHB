@@ -13,6 +13,7 @@
 
 // 群ID
 @property (nonatomic,copy) NSString *groupId;
+@property (nonatomic,assign) BOOL isDelete;
 + (AllUserViewController *)allUser:(id)obj;
 
 @end

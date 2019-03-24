@@ -112,7 +112,7 @@
         make.centerY.equalTo(self->_name.mas_centerY);
         make.right.equalTo(conView).offset(-10);
     }];
-    _total.text = @"分成总计：0";
+    _total.text = @"流水佣金：0";
     
     UIView *lineView = [[UIView alloc] init];
     lineView.backgroundColor = COLOR_X(245, 245, 245);
@@ -148,7 +148,7 @@
     _name.text = model.nick;
     _sexIcon.image = (model.gender == 0)?[UIImage imageNamed:@"male"]:[UIImage imageNamed:@"female"];
     _account.text = [NSString stringWithFormat:@"账号：%@   代理数：%@   总玩家数：%@",model.userId,model.childAgentCount,model.childPlayerCount];
-    _total.text = [NSString stringWithFormat:@"分成总计：%@",model.profitCommission];
+    _total.text = [NSString stringWithFormat:@"流水佣金：%@",model.profitCommission];
     
 }
 

@@ -7,7 +7,7 @@
 //
 
 #import "BillHeadView.h"
-#import "WithdrawalViewController.h"
+#import "WithdrawMainViewController.h"
 
 #define BIMGTAG 1000
 #define BClickTAG 1000
@@ -27,7 +27,7 @@
 + (BillHeadView *)headView{
     CGFloat w = (CDScreenWidth-1)/2;
     CGFloat h = w / BSCAL;
-    BillHeadView *headView = [[BillHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, h*3+2)];
+    BillHeadView *headView = [[BillHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, h*2+2)];
     return headView;
 }
 
@@ -56,8 +56,8 @@
     UserModel *user = APP_MODEL.user;
     CGFloat w = (CDScreenWidth-1)/2;
     CGFloat h = w / BSCAL;
-    NSArray *list = @[@"my-icon1",@"my-icon2",@"my-icon3",@"my-icon4",@"my-icon6",@"withdraw"];
-    NSArray *titles = @[[NSString stringWithFormat:@"余额：%@元",user.balance],[NSString stringWithFormat:@"提现中：%@元",user.frozenMoney],@"",@"",@"全部",@"提现"];
+    NSArray *list = @[@"my-icon1",@"my-icon6",@"my-icon3",@"my-icon4"];
+    NSArray *titles = @[[NSString stringWithFormat:@"余额：%@元",user.balance],@"全部",@"",@""];
     for (int i = 0; i<list.count; i++) {
         UIButton *b = [self item:list[i] title:titles[i] frame:CGRectMake((1+w)*(i%2), (1+h)*(i/2), w, h)];//[[UIButton alloc]initWithFrame:];
         b.tag = BClickTAG + i;
@@ -122,15 +122,18 @@
             self.endChange(nil);
         }
     }
-    else if (sender.tag == BClickTAG+4) {//类型
-        UIActionSheet *sheet = [[UIActionSheet alloc]initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:nil, nil];
+    else if (sender.tag == BClickTAG+1) {//类型
+        NSMutableArray *arr = [NSMutableArray array];
         for (NSInteger i = 0; i < self.billTypeList.count; i ++) {
             NSDictionary *dic = self.billTypeList[i];
-            [sheet addButtonWithTitle:dic[@"title"]];
+            [arr addObject:dic[@"title"]];
         }
-        [sheet showInView:[UIApplication sharedApplication].keyWindow.rootViewController.view];
+        ActionSheetCus *sheet = [[ActionSheetCus alloc] initWithArray:arr];
+        sheet.titleLabel.text = @"请选择类型";
+        sheet.delegate = self;
+        [sheet showWithAnimationWithAni:YES];
     }else if(sender.tag == BClickTAG + 5){
-        WithdrawalViewController *vc = [[WithdrawalViewController alloc] init];
+        WithdrawMainViewController *vc = [[WithdrawMainViewController alloc] init];
         [[FUNCTION_MANAGER currentViewController].navigationController pushViewController:vc animated:YES];
     }
 }
@@ -151,13 +154,13 @@
     label.text = content;
 }
 
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
-    if(buttonIndex == 0)
+-(void)actionSheetDelegateWithActionSheet:(ActionSheetCus *)actionSheet index:(NSInteger)index{
+    if(index == self.billTypeList.count)
         return;
-    [self update:BClickTAG+4 content:[actionSheet buttonTitleAtIndex:buttonIndex]];
+    NSDictionary *dic = self.billTypeList[index];
+    [self update:BClickTAG+1 content:dic[@"title"]];
     if (self.TypeChange) {
-        self.TypeChange(buttonIndex - 1);
+        self.TypeChange(index);
     }
 }
-
 @end

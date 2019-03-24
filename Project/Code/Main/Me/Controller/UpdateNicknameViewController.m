@@ -57,7 +57,7 @@
     headView.backgroundColor = [UIColor whiteColor];
     _textField = [UITextField new];
     [headView addSubview:_textField];
-    _textField.placeholder = @"10字以内（只能输入中文、数字、字母）";
+    _textField.placeholder = @"5字以内（只能输入中文、数字、字母）";
     _textField.text = APP_MODEL.user.nick;
     _textField.font = [UIFont systemFontOfSize2:16];
 //    _textField.delegate = self;
@@ -74,7 +74,7 @@
     if(_textField.text.length <= 0){
         SVP_ERROR_STATUS(@"请输入昵称");
         return;
-    }else if(_textField.text.length > 10){
+    }else if(_textField.text.length > 5){
         SVP_ERROR_STATUS(@"昵称太长");
         return;
     }

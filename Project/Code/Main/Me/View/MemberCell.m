@@ -11,6 +11,8 @@
 @interface MemberCell(){
     
 }
+
+
 @end
 
 @implementation MemberCell
@@ -67,15 +69,29 @@
     
     _itemIcon = [UIImageView new];
     [self.contentView addSubview:_itemIcon];
+    
     _itemIcon.contentMode = UIViewContentModeCenter;
     _itemLabel = [UILabel new];
-    [self.contentView addSubview:_itemLabel];
     _itemLabel.font = [UIFont systemFontOfSize2:16];
     _itemLabel.textColor = Color_0;
+    [self.contentView addSubview:_itemLabel];
     
     _rightLabel = [UILabel new];
-    [self.contentView addSubview:_rightLabel];
     _rightLabel.font = [UIFont systemFontOfSize2:14];
     _rightLabel.textColor = Color_6;
+    [self.contentView addSubview:_rightLabel];
+    
+    
+    UIImageView *rightArrowImage = [[UIImageView alloc] init];
+    rightArrowImage.image = [UIImage imageNamed:@"common_right_arrow"];
+    [self.contentView addSubview:rightArrowImage];
+    _rightArrowImage = rightArrowImage;
+    
+    [rightArrowImage mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.mas_equalTo(self.contentView.mas_right).offset(-15);
+        make.centerY.equalTo(self.contentView.mas_centerY);
+        make.size.mas_equalTo(CGSizeMake(16, 16));
+    }];
+    
 }
 @end

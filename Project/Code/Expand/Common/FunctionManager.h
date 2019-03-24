@@ -86,5 +86,12 @@ typedef NS_ENUM(NSInteger, FixTypes)
 
 - (void)exitApp;
 
--(BOOL)testMode;
+-(AppType)appType;
+
+-(NSArray *)orderBombArray:(NSArray *)bombArray;//给禁抢的雷数排序
+-(NSString *)formatBombArrayToString:(NSArray *)bombArray;//将雷数格式化成字符串显示
+
+-(NSDictionary *)appConstants;//一些保存在文件里的常量数据
+
+-(NSString*)getAppIconName;
 @end

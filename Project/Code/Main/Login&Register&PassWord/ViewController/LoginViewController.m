@@ -45,18 +45,18 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    if(![FUNCTION_MANAGER testMode])
+    if(![AppModel shareInstance].isReleaseOrBeta)
         self.navigationItem.title = @"登录";
     else
         self.navigationItem.title = APP_MODEL.serverUrl;
     
-    UIButton *regisBtn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
-    regisBtn.titleLabel.font = [UIFont systemFontOfSize:15];
-    [regisBtn setTitle:@"注册" forState:UIControlStateNormal];
-    [regisBtn addTarget:self action:@selector(action_register) forControlEvents:UIControlEventTouchUpInside];
-    [regisBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    UIBarButtonItem *rightItem = [[UIBarButtonItem alloc]initWithCustomView:regisBtn];
-    self.navigationItem.rightBarButtonItem = rightItem;
+//    UIButton *regisBtn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
+//    regisBtn.titleLabel.font = [UIFont systemFontOfSize:15];
+//    [regisBtn setTitle:@"注册" forState:UIControlStateNormal];
+//    [regisBtn addTarget:self action:@selector(action_register) forControlEvents:UIControlEventTouchUpInside];
+//    [regisBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//    UIBarButtonItem *rightItem = [[UIBarButtonItem alloc]initWithCustomView:regisBtn];
+//    self.navigationItem.rightBarButtonItem = rightItem;
     
     _tableView = [UITableView groupTable];
     [self.view addSubview:_tableView];
@@ -98,9 +98,9 @@
     yzmBtn.layer.masksToBounds = YES;
     yzmBtn.backgroundColor = COLOR_X(254, 254, 254);
     yzmBtn.titleLabel.font = [UIFont boldSystemFontOfSize2:16];
-    [yzmBtn setTitle:@"验证码登录" forState:UIControlStateNormal];
+    [yzmBtn setTitle:@"注册" forState:UIControlStateNormal];
     [yzmBtn setTitleColor:COLOR_X(120, 120, 120) forState:UIControlStateNormal];
-    [yzmBtn addTarget:self action:@selector(action_loginBySMS) forControlEvents:UIControlEventTouchUpInside];
+    [yzmBtn addTarget:self action:@selector(action_register) forControlEvents:UIControlEventTouchUpInside];
     [yzmBtn delayEnable];
     [yzmBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.view.mas_left).offset(16);
@@ -132,15 +132,15 @@
     UIView *thirdView = [UIView new];
     [fotView addSubview:thirdView];
     thirdView.hidden = YES;
-//    BOOL b = [WXManage isWXAppInstalled];
-//
-//    thirdView.hidden = [WXManage isWXAppInstalled];///<yes安装
+    //    BOOL b = [WXManage isWXAppInstalled];
+    //
+    //    thirdView.hidden = [WXManage isWXAppInstalled];///<yes安装
     
     [thirdView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.bottom.equalTo(fotView);
         make.top.equalTo(forGot.mas_bottom).offset(50);
     }];
-        
+    
     UILabel *thirdLabel = [UILabel new];
     [thirdView addSubview:thirdLabel];
     thirdLabel.font = [UIFont systemFontOfSize2:14];
@@ -181,7 +181,18 @@
         make.centerX.equalTo(thirdView);
         make.top.equalTo(thirdLabel.mas_bottom).offset(25);
     }];
-
+    
+    UILabel *versionLabel = [UILabel new];
+    [self.view addSubview:versionLabel];
+    versionLabel.font = [UIFont systemFontOfSize:13];
+    versionLabel.textAlignment = NSTextAlignmentCenter;
+    versionLabel.text = [NSString stringWithFormat:@"v%@",[FUNCTION_MANAGER getApplicationVersion]];
+    versionLabel.textColor = COLOR_X(200, 200, 200);
+    
+    [versionLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.view.mas_centerX);
+        make.bottom.equalTo(self.view.mas_bottom).offset(-15);
+    }];
 }
 
 
@@ -197,7 +208,7 @@
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *mobile = [ud objectForKey:@"mobile"];
     _textField[0].text = mobile;
-    if([FUNCTION_MANAGER testMode])
+    if([AppModel shareInstance].isReleaseOrBeta)
         _textField[1].text = @"123456";
     if(_textField[0].text.length == 0)
         [_textField[0] becomeFirstResponder];
@@ -227,7 +238,7 @@
             _textField[indexPath.row].keyboardType = UIKeyboardTypePhonePad;
             _textField[indexPath.row].returnKeyType = UIReturnKeyNext;
             cell.imageView.image = [UIImage imageNamed:@"icon_phone"];
-
+            
         }
         else{
             _textField[indexPath.row].returnKeyType = UIReturnKeyDone;
@@ -252,37 +263,10 @@
     __weak __typeof(self)weakSelf = self;
     
     if([account isEqualToString:@"88866610"]){
-        [self.view endEditing:YES];
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"请选择服务器地址" preferredStyle:UIAlertControllerStyleActionSheet];
-        NSArray *arr = [APP_MODEL ipArray];
-        for (NSDictionary *dic in arr) {
-            UIAlertAction *action = [UIAlertAction actionWithTitle:dic[@"url"] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                APP_MODEL.serverUrl = dic[@"url"];
-                APP_MODEL.rongYunKey = dic[@"rongYunKey"];
-                APP_MODEL.authKey = dic[@"authKey"];
-                [APP_MODEL save];
-                SVP_SUCCESS_STATUS(@"切换成功，重启生效");
-                [FUNCTION_MANAGER performSelector:@selector(exitApp) withObject:nil afterDelay:1.0];
-            }];
-            [alertController addAction:action];
-        }
-        UIAlertAction *action = [UIAlertAction actionWithTitle:@"添加ip" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            __strong __typeof(weakSelf)strongSelf = weakSelf;
-            AddIpViewController *vc = [[AddIpViewController alloc] init];
-            [strongSelf.navigationController pushViewController:vc animated:YES];
-        }];
-        [alertController addAction:action];
-        action = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        }];
-        [alertController addAction:action];
-
-        [alertController modifyColor];
-
-        [self presentViewController:alertController animated:YES completion:^{
-            
-        }];
+        [self accountSwitch];
         return;
     }
+    
     if (account.length < 8) {
         SVP_ERROR_STATUS(@"请输入正确的手机号");
         return;
@@ -293,11 +277,51 @@
     }
     [self.view endEditing:YES];
     SVP_SHOW;
-    [NET_REQUEST_MANAGER requestTockenWithAccount:_textField[0].text password:_textField[1].text success:^(id object) {
-        NSLog(@"111");
-    } fail:^(id object) {
+    [NET_REQUEST_MANAGER requestTockenWithAccount:_textField[0].text password:_textField[1].text success:nil fail:^(id object) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         [strongSelf failData:object];
+        
+    }];
+}
+
+
+- (void)accountSwitch {
+    __weak __typeof(self)weakSelf = self;
+    [self.view endEditing:YES];
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"请选择服务器地址" preferredStyle:UIAlertControllerStyleActionSheet];
+    NSArray *arr = [APP_MODEL ipArray];
+    
+    NSInteger index = 0;
+    for (NSDictionary *dic in arr) {
+        
+        UIAlertAction *action = [UIAlertAction actionWithTitle:dic[@"url"] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            APP_MODEL.serverUrl = dic[@"url"];
+            APP_MODEL.rongYunKey = dic[@"rongYunKey"];
+            APP_MODEL.isReleaseOrBeta = [dic[@"isReleaseOrBeta"] boolValue];
+            APP_MODEL.testVersionIndex = index;
+            APP_MODEL.authKey = dic[@"authKey"];
+            [APP_MODEL saveAppModel];
+            SVP_SUCCESS_STATUS(@"切换成功，重启生效");
+            [FUNCTION_MANAGER performSelector:@selector(exitApp) withObject:nil afterDelay:1.0];
+        }];
+        [alertController addAction:action];
+        index++;
+    }
+    
+    
+    UIAlertAction *action = [UIAlertAction actionWithTitle:@"添加ip" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        AddIpViewController *vc = [[AddIpViewController alloc] init];
+        [strongSelf.navigationController pushViewController:vc animated:YES];
+    }];
+    [alertController addAction:action];
+    action = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    }];
+    [alertController addAction:action];
+    
+    [alertController modifyColor];
+    
+    [self presentViewController:alertController animated:YES completion:^{
         
     }];
 }
@@ -305,10 +329,10 @@
 - (void)failData:(id)object {
     if([object isKindOfClass:[NSDictionary class]]){
         if ([[object objectForKey:@"error"] isEqualToString:@"unauthorized"]) {
-            SVP_ERROR_STATUS(@"没有此用户");
+            SVP_ERROR_STATUS(kAccountOrPasswordErrorMessage);
             return;
         } else if ([[object objectForKey:@"error"] isEqualToString:@"invalid_grant"]) {
-            SVP_ERROR_STATUS(@"密码错误");
+            SVP_ERROR_STATUS(kAccountOrPasswordErrorMessage);
             return;
         }
     }

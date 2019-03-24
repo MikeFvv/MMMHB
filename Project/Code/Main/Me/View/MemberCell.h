@@ -9,7 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @interface MemberCell : UITableViewCell
-@property(nonatomic,strong)UIImageView *itemIcon;
-@property(nonatomic,strong)UILabel *itemLabel;
-@property(nonatomic,strong)UILabel *rightLabel;
+
+@property(nonatomic,strong) UIImageView *itemIcon;
+@property(nonatomic,strong) UILabel *itemLabel;
+@property(nonatomic,strong) UILabel *rightLabel;
+@property(nonatomic,strong) UIImageView *rightArrowImage;
+
 @end

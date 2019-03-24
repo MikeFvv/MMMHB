@@ -16,7 +16,7 @@ typedef void (^DisMissRedBlock)(void);
 
 @interface RedPackedAnimationView : UIView
 
-- (void)updateView:(id)obj response:(id)response;
+- (void)updateView:(id)obj response:(id)response rpOverdueTime:(NSString *)rpOverdueTime;
 - (void)showInView:(UIView *)view;
 @property (nonatomic ,copy) AnimationBlock animationBlock;
 @property (nonatomic ,copy) DetailBlock detailBlock;

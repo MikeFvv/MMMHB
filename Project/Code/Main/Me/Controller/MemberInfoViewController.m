@@ -9,7 +9,7 @@
 #import "MemberInfoViewController.h"
 #import "RongCloudManager.h"
 
-@interface MemberInfoViewController ()<UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate>{
+@interface MemberInfoViewController ()<UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate,ActionSheetDelegate>{
     UITableView *_tableView;
     UIImageView *_headIcon;
     UILabel *_nickName;
@@ -158,41 +158,26 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     if (indexPath.row == 0) {
-        UIActionSheet *sheet = [[UIActionSheet alloc]initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"图片库",@"相机",@"相册", nil];
+        ActionSheetCus *sheet = [[ActionSheetCus alloc] initWithArray:@[@"图片库",@"相机",@"相册"]];
+        sheet.titleLabel.text = @"请选择来源";
         sheet.tag = 1;
-        [sheet showInView:self.view];
+        sheet.delegate = self;
+        [sheet showWithAnimationWithAni:YES];
     }
     if (indexPath.row == 1) {
         CDPush(self.navigationController, CDVC(@"UpdateNicknameViewController"), YES);
     }
     
     if (indexPath.row == 2) {
-        UIActionSheet *sheet = [[UIActionSheet alloc]initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"男",@"女", nil];
+        ActionSheetCus *sheet = [[ActionSheetCus alloc] initWithArray:@[@"男",@"女"]];
+        sheet.titleLabel.text = @"请选择性别";
         sheet.tag = 2;
-        [sheet showInView:self.view];
+        sheet.delegate = self;
+        [sheet showWithAnimationWithAni:YES];
+//        UIActionSheet *sheet = [[UIActionSheet alloc]initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"男",@"女", nil];
+//        sheet.tag = 2;
+//        [sheet showInView:self.view];
     }
-}
-
-#pragma mark UIActionSheetDelegate
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
-    if (actionSheet.tag == 1) {//头像
-        if (buttonIndex == 3) {
-            return;
-        }
-        UIImagePickerController *pick = [[UIImagePickerController alloc]init];
-        pick.sourceType = buttonIndex;
-        pick.delegate = self;
-        pick.allowsEditing = YES;
-        [self presentViewController:pick animated:YES completion:nil];
-    }
-    if (actionSheet.tag == 2) {//性别
-        if (buttonIndex == 2) {
-            return;
-        }
-        _sexType = buttonIndex;
-        _sexLabel.text = (_sexType == 1)?@"女":@"男";
-    }
-    NSLog(@"%ld",buttonIndex);
 }
 
 #pragma mark UIImagePickerControllerDelegate
@@ -213,7 +198,7 @@
     if(_nickName.text.length <= 0){
         SVP_ERROR_STATUS(@"请输入昵称");
         return;
-    }else if(_nickName.text.length > 10){
+    }else if(_nickName.text.length > 5){
         SVP_ERROR_STATUS(@"昵称太长");
         return;
     }
@@ -233,7 +218,7 @@
     APP_MODEL.user.avatar = _headUrl;
     APP_MODEL.user.nick = _nickName.text;
     APP_MODEL.user.gender = _sexType;
-    [APP_MODEL save];
+    [APP_MODEL saveAppModel];
     
     [[RongCloudManager shareInstance] refreshUserInfo];
 }
@@ -276,4 +261,21 @@
  }
  */
 
+-(void)actionSheetDelegateWithActionSheet:(ActionSheetCus *)actionSheet index:(NSInteger)index{
+    if(actionSheet.tag == 2){
+        if(index == 2)
+            return;
+        _sexType = index;
+        _sexLabel.text = (_sexType == 1)?@"女":@"男";
+    }else if(actionSheet.tag == 1){
+        if (index == 3) {
+            return;
+        }
+        UIImagePickerController *pick = [[UIImagePickerController alloc]init];
+        pick.sourceType = index;
+        pick.delegate = self;
+        pick.allowsEditing = YES;
+        [self presentViewController:pick animated:YES completion:nil];
+    }
+}
 @end

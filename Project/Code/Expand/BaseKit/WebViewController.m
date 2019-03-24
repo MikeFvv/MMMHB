@@ -46,6 +46,14 @@
     [self initData];
     [self initSubviews];
     [self initLayout];
+    
+    UIButton *openBySafariBtn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
+    [openBySafariBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    openBySafariBtn.titleLabel.font = [UIFont systemFontOfSize2:15];
+    [openBySafariBtn setTitle:@"Safari" forState:UIControlStateNormal];
+    [openBySafariBtn addTarget:self action:@selector(openBySafari) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:openBySafariBtn];
+    self.navigationItem.rightBarButtonItems = @[item];
 }
 
 
@@ -109,7 +117,7 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqualToString:@"estimatedProgress"]) {
-        NSLog(@"%.2f",_webView.estimatedProgress);
+//        NSLog(@"%.2f",_webView.estimatedProgress);
         [_progress setProgress:_webView.estimatedProgress animated:YES];
     }
 }
@@ -127,7 +135,7 @@
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
     [_progress setProgress:0 animated:NO];
     self.navigationItem.title = webView.title;
-    NSLog(@"%@",webView.title);
+//    NSLog(@"%@",webView.title);
 }
 
 // 页面加载失败时调用
@@ -151,4 +159,9 @@
  }
  */
 
+-(void)openBySafari{
+    if([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:_url]]){
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:_url]];
+    }
+}
 @end

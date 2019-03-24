@@ -89,10 +89,12 @@
     if(btn.selected){
         [btn setTitle:@"内网" forState:UIControlStateNormal];
         _netType = 1;
+        [AppModel shareInstance].isReleaseOrBeta = YES;
     }
     else{
         [btn setTitle:@"外网" forState:UIControlStateNormal];
         _netType = 0;
+        [AppModel shareInstance].isReleaseOrBeta = NO;
     }
 }
 
@@ -108,9 +110,9 @@
     NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
     [dic setObject:ip forKey:@"url"];
     if(_netType == 0)
-        [dic setObject:rongYunKey forKey:@"rongYunKey"];
+        [dic setObject:kRongYunKey forKey:@"rongYunKey"];
     else
-        [dic setObject:rongfYunKeyTest forKey:@"rongYunKey"];
+        [dic setObject:kRongfYunKeyTest1 forKey:@"rongYunKey"];
 
     [mArr addObject:dic];
     [ud setObject:mArr forKey:@"ipArray"];

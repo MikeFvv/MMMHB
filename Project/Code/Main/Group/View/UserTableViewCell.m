@@ -9,11 +9,15 @@
 #import "UserTableViewCell.h"
 
 @interface UserTableViewCell(){
-    UIImageView *_icon;
-    UILabel *_name;
-    UIImageView *_sexIcon;
-    UILabel *_count;
+    
 }
+
+@property (nonatomic,strong) UIImageView *icon;
+@property (nonatomic,strong) UILabel *name;
+@property (nonatomic,strong) UIImageView *sexIcon;
+@property (nonatomic,strong) UILabel *count;
+@property (nonatomic,strong) UIButton *deleteBtn;
+
 @end
 
 @implementation UserTableViewCell
@@ -102,16 +106,40 @@
     [_sexIcon mas_makeConstraints:^(MASConstraintMaker *make) {
         make.center.equalTo(sexBack);
     }];
+    
+    
+    
+    _deleteBtn = [UIButton new];
+    [self.contentView addSubview:_deleteBtn];
+    [_deleteBtn setBackgroundImage:[UIImage imageNamed:@"group_delete"] forState:UIControlStateNormal];
+    [_deleteBtn addTarget:self action:@selector(deleteBtnAction) forControlEvents:UIControlEventTouchUpInside];
+//    _deleteBtn.image = [UIImage imageNamed:@"group_delete"];
+//    _deleteBtn.backgroundColor = [UIColor redColor];
+
+    [_deleteBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(self.contentView);
+        make.right.equalTo(self.contentView.mas_right).offset(-30);
+        make.size.mas_equalTo(CGSizeMake(30, 30));
+    }];
+    
+    
 }
 
-- (void)setObj:(id)obj{
+- (void)setObj:(id)obj {
     [_icon cd_setImageWithURL:[NSURL URLWithString:[NSString cdImageLink:[obj objectForKey:@"avatar"]]] placeholderImage:[UIImage imageNamed:@"user-default"]];
     _name.text = [NSString stringWithFormat:@"%@",[obj objectForKey:@"nick"]];
     _count.text = [NSString stringWithFormat:@"账号：%@",[obj objectForKey:@"userId"]];
     NSInteger sex = [[obj objectForKey:@"gender"] integerValue];
     _sexIcon.image = (sex==1)?[UIImage imageNamed:@"female"]:[UIImage imageNamed:@"male"];
+    
+     _deleteBtn.hidden = !self.isDelete;
 }
 
+- (void)deleteBtnAction {
+    if (self.deleteBtnBlock) {
+        self.deleteBtnBlock();
+    }
+}
 
 
 @end

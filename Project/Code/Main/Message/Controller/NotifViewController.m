@@ -70,15 +70,7 @@
 }
 
 - (void)getData{
-//    [_model getNotifMessageObj:@{@"uid":APP_MODEL.user.userId,@"is_read":@"0",@"page":@(_model.page)} Success:^(NSDictionary *dic) {
-//        SVP_DISMISS;
-//        [self->_tableView.mj_header endRefreshing];
-//        [self->_tableView.mj_footer endRefreshing];
-//        [self->_tableView reloadData];
-//    } Failure:^(NSError *error) {
-//        [self->_tableView.mj_header endRefreshing];
-//        [FUNCTION_MANAGER handleFailResponse:error];
-//    }];
+
 }
 
 
@@ -102,14 +94,5 @@
     // Dispose of any resources that can be recreated.
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end

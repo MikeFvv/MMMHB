@@ -141,7 +141,8 @@
                       success:(CallbackBlock)successBlock
                          fail:(CallbackBlock)failBlock{
     RequestInfo *info = [self requestInfoWithAct:ActRequestTokenBySMS];
-    NSString *url = [NSString stringWithFormat:@"%@?mobile=%@&code=%@&grant_type=mobile&scope=server",info.url,phone,smsCode];
+    NSString *par = [NSString stringWithFormat:@"mobile=%@&code=%@&grant_type=mobile&scope=server",phone,smsCode];
+    NSString *url = [NSString stringWithFormat:@"%@?%@",info.url,par];
     info.url = url;
     [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
 }
@@ -213,6 +214,14 @@
     [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
 }
 
+-(void)requestDrawRecordListWithPage:(NSInteger)page success:(CallbackBlock)successBlock
+                                fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActRequestWithdrawHistory];
+    NSString *url = [NSString stringWithFormat:@"%@?page=%d&limit=50&orderByField=operator_time&isAsc=0",info.url,page];
+    info.url = url;
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
 #pragma mark 提现
 -(void)withDrawWithAmount:(NSString *)amount//金额
                  userName:(NSString *)name//名字
@@ -232,6 +241,18 @@
     [bodyDic setObject:address forKey:@"uppayAddress"];
     [bodyDic setObject:uppayNO forKey:@"uppayNo"];
     [bodyDic setObject:remark forKey:@"remark"];
+    [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
+}
+
+-(void)withDrawWithAmount:(NSString *)amount//金额
+                   bankId:(NSString *)bankId//银行id
+                  success:(CallbackBlock)successBlock
+                     fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActDraw];
+    NSMutableDictionary *bodyDic = [self createDicWithHead];
+    [bodyDic setObject:amount forKey:@"amount"];
+    [bodyDic setObject:bankId forKey:@"userPaymentId"];
+    [bodyDic setObject:@"无" forKey:@"remark"];
     [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
 }
 
@@ -270,7 +291,7 @@
     NSString *auth = APP_MODEL.user.fullToken;
     if(auth == nil)
         return;
-    NSLog(@"%@",requestInfo.url);
+//    NSLog(@"%@",requestInfo.url);
     AFHTTPSessionManager2 *httpSessionManager = [self createHttpSessionManager];
     httpSessionManager.successBlock = successBlock;
     httpSessionManager.failBlock = failBlock;
@@ -312,7 +333,6 @@
     [bodyDic setObject:url forKey:@"userAvatar"];
     [bodyDic setObject:nickName forKey:@"userNick"];
     [bodyDic setObject:INT_TO_STR(gender) forKey:@"userGender"];
-    
     [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
 }
 
@@ -426,6 +446,137 @@
     [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
 }
 
+#pragma mark 申请成为代理
+-(void)askForToBeAgentWithSuccess:(CallbackBlock)successBlock
+                             fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActToBeAgent];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 查询可抽奖列表
+-(void)getLotteryListWithSuccess:(CallbackBlock)successBlock
+                            fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActGetLotteryList];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 查询可抽奖具体信息
+-(void)getLotteryDetailWithId:(NSInteger)lId success:(CallbackBlock)successBlock
+                         fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActGetLotterys];
+    NSString *url = [NSString stringWithFormat:@"%@/%ld",info.url,(long)lId];
+    info.url = url;
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 抽奖
+-(void)lotteryWithId:(NSInteger)lId success:(CallbackBlock)successBlock
+                fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActLottery];
+    NSString *url = [NSString stringWithFormat:@"%@/%ld",info.url,(long)lId];
+    info.url = url;
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 添加银行卡
+-(void)addBankCardWithUserName:(NSString *)userName cardNO:(NSString *)cardNO bankId:(NSString *)bankId address:(NSString *)address success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActAddBankCard];
+    NSMutableDictionary *bodyDic = [self createDicWithHead];
+    [bodyDic setObject:userName forKey:@"user"];
+    [bodyDic setObject:bankId forKey:@"upaytId"];
+    [bodyDic setObject:cardNO forKey:@"upayNo"];
+    [bodyDic setObject:address forKey:@"bankRegion"];
+    [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 我的银行卡
+-(void)getMyBankCardListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActRequestMyBankList];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 获取最后一次的提现信息
+-(void)getLastWithdrawInfoWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActRequestLastWithdrawInfo];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 获取首先支付通道列表
+-(void)requestFirstRechargeListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActRequestRechargeListFirst];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 获取所有支付通道列表
+-(void)requestAllRechargeListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActRequestRechargeListAll];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 提交支付资料
+-(void)submitRechargeInfoWithBankId:(NSString *)bankId
+                           bankName:(NSString *)bankName
+                             bankNo:(NSString *)bankNo
+                                tId:(NSString *)tId
+                              money:(NSString *)money
+                               name:(NSString *)name
+                            orderId:(NSString *)orderId
+                               type:(NSInteger)type
+                           typeCode:(NSInteger)typeCode
+                             userId:(NSString *)userId
+                            success:(CallbackBlock)successBlock
+                               fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActSubmitRechargeInfo];
+    NSMutableDictionary *bodyDic = [self createDicWithHead];
+    if(bankId)
+        [bodyDic setObject:bankId forKey:@"bankId"];
+    if(bankName)
+        [bodyDic setObject:bankName forKey:@"bankName"];
+    [bodyDic setObject:bankNo forKey:@"bankNo"];
+    [bodyDic setObject:tId forKey:@"id"];
+    [bodyDic setObject:money forKey:@"money"];
+    [bodyDic setObject:name forKey:@"name"];
+//    [bodyDic setObject:orderId forKey:@"orderId"];
+    [bodyDic setObject:INT_TO_STR(type) forKey:@"type"];
+    [bodyDic setObject:userId forKey:@"userId"];
+    [bodyDic setObject:INT_TO_STR(typeCode) forKey:@"typeCode"];
+
+
+    [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 重新下订单
+-(void)reOrderRechargeInfoWithId:(NSString *)orderId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActReOrderRecharge];
+    NSMutableDictionary *bodyDic = [self createDicWithHead];
+    [bodyDic setObject:orderId forKey:@"orderId"];
+    [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 提交订单
+-(void)submitOrderRechargeInfoWithId:(NSString *)orderId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActOrderRecharge];
+    NSMutableDictionary *bodyDic = [self createDicWithHead];
+    [bodyDic setObject:orderId forKey:@"orderId"];
+    [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 获取分享url
+-(void)getShareUrlWithCode:(NSString *)code success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActRequestShareUrl];
+    NSString *url = [NSString stringWithFormat:@"%@/%@",info.url,code];
+    info.url = url;
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 获取新手引导图片列表
+-(void)getGuideImageListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActRequestGuideImageList];
+    NSMutableDictionary *bodyDic = [self createDicWithHead];
+    [bodyDic setObject:@"6" forKey:@"helpType"];
+    [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
+}
+
 #pragma mark act
 -(RequestInfo *)requestInfoWithAct:(Act)act{
     RequestInfo *info = [[RequestInfo alloc] init];
@@ -524,6 +675,53 @@
             break;
         case ActGetFirstRewardInfo:
             urlTail = @"social/promotReward/getRechargeReward";
+            break;
+        case ActToBeAgent:
+            urlTail = @"social/proxy/applyAgent";
+            break;
+        case ActGetLotterys:
+            urlTail = @"social/userLottery/lotteryItems";
+            break;
+        case ActGetLotteryList:
+            urlTail = @"social/userLottery/lotteryUserList";
+            break;
+        case ActLottery:
+            urlTail = @"social/userLottery/startLottery";
+            break;
+        case ActAddBankCard:
+            urlTail = @"finance/skUserPayment";
+            break;
+        case ActRequestMyBankList:
+            urlTail = @"finance/skUserPayment/list";
+            break;
+        case ActRequestWithdrawHistory:
+            info.requestType = RequestType_get;
+            urlTail = @"finance/skBillCashDraws/page";
+            break;
+        case ActRequestLastWithdrawInfo:
+            urlTail = @"finance/skUserPayment/getSkUserPaymentModel";
+            break;
+        case ActRequestRechargeListFirst:
+            urlTail = @"finance/skPayChannel/page";
+            break;
+        case ActRequestRechargeListAll:
+            urlTail = @"finance/skPayChannel/querPromotionShares";
+            break;
+        case ActSubmitRechargeInfo:
+            urlTail = @"finance/transfer/info";
+            break;
+        case ActReOrderRecharge:
+            urlTail = @"finance/transfer/cancelpay";
+            break;
+        case ActOrderRecharge:
+            urlTail = @"finance/transfer/pay";
+            break;
+        case ActRequestShareUrl:
+            info.requestType = RequestType_get;
+            urlTail = @"bms/skAgentDomain/get/domain";
+            break;
+        case ActRequestGuideImageList:
+            urlTail = @"promotion/skHelpCenter/querySkHelpCenter";
             break;
         case ActNil:
             urlTail = @"";

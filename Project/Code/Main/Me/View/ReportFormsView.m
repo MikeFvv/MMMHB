@@ -10,6 +10,7 @@
 #import "ReportCell.h"
 #import "ReportHeaderView.h"
 #import "SelectTimeView.h"
+#import "CDAlertViewController.h"
 
 @implementation ReportFormsItem
 @end
@@ -121,50 +122,51 @@
     item.desc = @"二充金额/笔数";
     [arr addObject:item];
     
-    
-    categoryDic = [[NSMutableDictionary alloc] init];
-    [self.dataArray addObject:categoryDic];
-    
-    [categoryDic setObject:@"充值与提现" forKey:@"categoryName"];
-    arr = [[NSMutableArray alloc] init];
-    [categoryDic setObject:arr forKey:@"list"];
-    
-    item = [[ReportFormsItem alloc] init];
-    item.icon = @"fdefdsv";
-    item.title = NUMBER_TO_STR(dict[@"rechargeMoneySum"]);
-    item.desc = @"充值总额";
-    [arr addObject:item];
-    
-    item = [[ReportFormsItem alloc] init];
-    item.icon = @"Totalrecharge";
-    item.title = NUMBER_TO_STR(dict[@"cashDrawsMoneySum"]);
-    item.desc = @"提现总额";
-    [arr addObject:item];
-    [self.collectionView reloadData];
-    
-    item = [[ReportFormsItem alloc] init];
-    item.icon = @"Startingamount";
-    item.title = NUMBER_TO_STR(dict[@"beginMoney"]);
-    item.desc = @"起始余额";
-    [arr addObject:item];
-    
-    item = [[ReportFormsItem alloc] init];
-    item.icon = @"Asofbalance";
-    item.title = NUMBER_TO_STR(dict[@"endMoney"]);
-    item.desc = @"截至余额";
-    [arr addObject:item];
-    
-    item = [[ReportFormsItem alloc] init];
-    item.icon = @"Profitandloss";
-    item.title = NUMBER_TO_STR(dict[@"profit"]);
-    item.desc = @"盈亏";
-    [arr addObject:item];
-    
-    item = [[ReportFormsItem alloc] init];
-    item.icon = @"fc";
-    item.title = NUMBER_TO_STR(dict[@"profitCommission"]);
-    item.desc = @"我的分成";
-    [arr addObject:item];
+    if([self isSelf]){
+        categoryDic = [[NSMutableDictionary alloc] init];
+        [self.dataArray addObject:categoryDic];
+        
+        [categoryDic setObject:@"充值与提现" forKey:@"categoryName"];
+        arr = [[NSMutableArray alloc] init];
+        [categoryDic setObject:arr forKey:@"list"];
+        
+        item = [[ReportFormsItem alloc] init];
+        item.icon = @"fdefdsv";
+        item.title = NUMBER_TO_STR(dict[@"rechargeMoneySum"]);
+        item.desc = @"充值总额";
+        [arr addObject:item];
+        
+        item = [[ReportFormsItem alloc] init];
+        item.icon = @"Totalrecharge";
+        item.title = NUMBER_TO_STR(dict[@"cashDrawsMoneySum"]);
+        item.desc = @"提现总额";
+        [arr addObject:item];
+        [self.collectionView reloadData];
+        
+        item = [[ReportFormsItem alloc] init];
+        item.icon = @"Startingamount";
+        item.title = NUMBER_TO_STR(dict[@"beginMoney"]);
+        item.desc = @"起始余额";
+        [arr addObject:item];
+        
+        item = [[ReportFormsItem alloc] init];
+        item.icon = @"Asofbalance";
+        item.title = NUMBER_TO_STR(dict[@"endMoney"]);
+        item.desc = @"截至余额";
+        [arr addObject:item];
+        
+//        item = [[ReportFormsItem alloc] init];
+//        item.icon = @"Profitandloss";
+//        item.title = NUMBER_TO_STR(dict[@"profit"]);
+//        item.desc = @"盈亏";
+//        [arr addObject:item];
+//
+//        item = [[ReportFormsItem alloc] init];
+//        item.icon = @"fc";
+//        item.title = NUMBER_TO_STR(dict[@"profitCommission"]);
+//        item.desc = @"我的分成";
+//        [arr addObject:item];
+    }
     
     categoryDic = [[NSMutableDictionary alloc] init];
     [self.dataArray addObject:categoryDic];
@@ -217,9 +219,9 @@
     [arr addObject:item];
     
     item = [[ReportFormsItem alloc] init];
-    item.icon = @"yqhyyj";
-    item.title = NUMBER_TO_STR(dict[@"inviteCommission"]);
-    item.desc = @"邀请好友佣金";
+    item.icon = @"";//@"yqhyyj";
+    item.title = @"敬请期待";//NUMBER_TO_STR(dict[@"inviteCommission"]);
+    item.desc = @"";
     [arr addObject:item];
     
     item = [[ReportFormsItem alloc] init];
@@ -305,12 +307,13 @@
         if(indexPath.section == 0){
             if(pView == nil){
                 pView = [ReportHeaderView headView];
+                self.headerView = pView;
                 WEAK_OBJ(weakSelf, self);
                 pView.beginChange = ^(id object) {
-                    [weakSelf showTimeSelectView];
+                    [weakSelf datePickerByType:0];
                 };
                 pView.endChange = ^(id object) {
-                    [weakSelf showTimeSelectView];
+                    [weakSelf datePickerByType:1];
                 };
                 pView.tag = 97;
                 [reusableview addSubview:pView];
@@ -482,5 +485,42 @@
     }
     SVP_SHOW;
     [self getData];
+}
+
+- (void)datePickerByType:(NSInteger)type{
+    __weak typeof(self) weakSelf = self;
+    [CDAlertViewController showDatePikerDate:^(NSString *date) {
+        [weakSelf updateType:type date:date];
+    }];
+}
+
+- (void)updateType:(NSInteger)type date:(NSString *)date{
+    if (type == 0) {
+        if([self.beginTime isEqualToString:date])
+            return;
+        self.beginTime = date;
+        self.tempBeginTime = self.beginTime;
+        self.headerView.beginTime = self.beginTime;
+        [self.rightBtn setTitle:@"--" forState:UIControlStateNormal];
+    }else{
+        if([self.endTime isEqualToString:date])
+            return;
+        self.endTime = date;
+        self.tempEndTime = self.endTime;
+        self.headerView.endTime = self.endTime;
+        [self.rightBtn setTitle:@"--" forState:UIControlStateNormal];
+    }
+    if([self.beginTime compare:self.endTime] != NSOrderedDescending){
+        SVP_SHOW;
+        [self getData];
+    }
+}
+
+-(BOOL)isSelf{
+    if(self.userId == nil)
+        return NO;
+    if([self.userId integerValue] == [APP_MODEL.user.userId integerValue])
+        return YES;
+    return NO;
 }
 @end

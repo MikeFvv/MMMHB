@@ -115,11 +115,11 @@ typedef void (^CodeBlock)(NSString *code);
 
 #pragma mark WXApiDelegate
 -(void) onReq:(BaseReq*)req{
-    NSLog(@"%@",req);
+//    NSLog(@"%@",req);
 }
 
 -(void) onResp:(BaseResp*)resp{
-    NSLog(@"%@",resp);
+//    NSLog(@"%@",resp);
     if ([resp isKindOfClass:[SendAuthResp class]]) {
         SendAuthResp *sp = (SendAuthResp *)resp;
         if (sp.code != nil) {
@@ -149,7 +149,7 @@ typedef void (^CodeBlock)(NSString *code);
             [self getWXUserInfoByObj:@{@"access_token":dic[@"access_token"],@"openid":dic[@"openid"],@"lang":@"zh_CN"}];
         }
     } failure:^(NSError *error) {
-        NSLog(@"%@",[error debugDescription]);
+//        NSLog(@"%@",[error debugDescription]);
         self.failure(error);
     }];
 }
@@ -163,7 +163,7 @@ typedef void (^CodeBlock)(NSString *code);
             self.success(dic);
         }
     } failure:^(NSError *error) {
-        NSLog(@"%@",[error debugDescription]);
+//        NSLog(@"%@",[error debugDescription]);
         self.failure(error);
     }];
 }

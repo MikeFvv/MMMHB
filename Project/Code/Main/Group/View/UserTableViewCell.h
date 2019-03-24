@@ -8,6 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
+
+typedef void (^DeleteBtnBlock)(void);
+
 @interface UserTableViewCell : UITableViewCell
+
+@property (nonatomic,assign) BOOL isDelete;
+@property (nonatomic ,copy) DeleteBtnBlock deleteBtnBlock;
+
 
 @end

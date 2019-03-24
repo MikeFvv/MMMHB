@@ -25,7 +25,7 @@
 @property(nonatomic,assign)NSInteger agentFlag;//是否是代理
 
 /**
- 后台token
+ 后台Token
  */
 @property(nonatomic,copy)NSString *fullToken;
 @property(nonatomic,copy)NSString *nick;

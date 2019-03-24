@@ -13,7 +13,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.title = @"报表";
+    self.title = @"我的报表";
     
     UIButton *btn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 60, 44)];
     btn.titleLabel.font = [UIFont systemFontOfSize:15];
@@ -28,6 +28,7 @@
     
     ReportFormsView *view = [[ReportFormsView alloc] init];
     view.userId = self.userId;
+    view.rightBtn = self.rightBtn;
     [self.view addSubview:view];
     [view mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);

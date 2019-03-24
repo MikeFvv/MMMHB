@@ -132,24 +132,15 @@
     } else {
         [_headIcon cd_setImageWithURL:[NSURL URLWithString:[NSString cdImageLink:item.img]] placeholderImage:[UIImage imageNamed:@"msg3"]];
     }
-    
-    //
-    //                        NSString *last = @"暂无最新消息";
-    //                        int number = 0 ;
-    //                        if (g) {
-    //                            last = g.lastMessage;
-    //                            number = g.number;
-    //                        }
-    //                        [group setObject:last forKey:@"lastMessage"];
-    //                        [group setObject:@(number) forKey:@"number"];
+
     if (item.isMyJoined == YES) {
         PushMessageModel *pmModel = [SqliteManage queryById:item.groupId];
         if (pmModel.number >0) {
             
             if ([pmModel.lastMessage isEqualToString:RedPacketString] || [pmModel.lastMessage isEqualToString:CowCowMessageString]) {
-                _descLabel.text = (pmModel.number>99)?[NSString stringWithFormat:@"【99+未读】【红包】"]:[NSString stringWithFormat:@"【%d条未读】【红包】",pmModel.number];
+                _descLabel.text = (pmModel.number>99) ? @"【99+未读】"  : [NSString stringWithFormat:@"【%d条未读】【红包】",pmModel.number];
             } else {
-                _descLabel.text = (pmModel.number>99)?[NSString stringWithFormat:@"【99+未读】%@",pmModel.lastMessage]:[NSString stringWithFormat:@"【%d条未读】%@",pmModel.number,pmModel.lastMessage];
+                _descLabel.text = (pmModel.number>99) ? @"【99+未读】" : [NSString stringWithFormat:@"【%d条未读】%@",pmModel.number,pmModel.lastMessage];
             }
             
             _dotView.hidden = NO;

@@ -26,8 +26,12 @@
 @property (nonatomic ,copy) NSString *rongYunKey;
 @property (nonatomic ,copy) NSString *authKey;
 
+// NO 生产正式版    YES Beta测试版
+@property (nonatomic ,assign) BOOL isReleaseOrBeta;
+@property (nonatomic ,assign) NSInteger testVersionIndex;
+
 + (instancetype)shareInstance;
-- (void)save;///<登录存档
+- (void)saveAppModel;///<登录存档
 - (void)logout;///<退出清理
 - (UIViewController *)rootVc;
 - (void)initSetUp;

@@ -13,6 +13,8 @@
 @interface ShareViewController ()<UICollectionViewDelegate,UICollectionViewDataSource>
 @property(nonatomic,strong)UICollectionView *collectionView;
 @property(nonatomic,strong)NSArray *dataArray;
+@property(nonatomic,strong)NSString *shareUrl;
+@property(nonatomic,strong)NSDictionary *tempDic;
 
 @end
 
@@ -21,7 +23,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.title = @"推广海报";
+    self.title = @"分享赚钱";
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
     layout.minimumLineSpacing = 8;
     layout.minimumInteritemSpacing = 8;
@@ -42,6 +44,9 @@
         make.edges.equalTo(weakSelf.view);
     }];
     SVP_SHOW;
+    
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    self.shareUrl = [ud objectForKey:@"shareUrl"];
     [self getData];
 }
 
@@ -92,11 +97,31 @@
 #pragma mark --UICollectionViewDelegate
 //UICollectionView被选中时调用的方法
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
-    NSDictionary *dic = self.dataArray[indexPath.row];
+    WEAK_OBJ(weakSelf, self);
+    self.tempDic = self.dataArray[indexPath.row];
+    SVP_SHOW;
+    NSInteger tId = [self.tempDic[@"id"] integerValue];
+    [NET_REQUEST_MANAGER getShareUrlWithCode:INT_TO_STR(tId) success:^(id object) {
+        weakSelf.shareUrl = object[@"data"];
+        if(weakSelf.shareUrl == nil){
+            SVP_ERROR_STATUS(@"获取分享地址失败");
+            return;
+        }
+        SVP_DISMISS;
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        [ud setObject:weakSelf.shareUrl forKey:@"shareUrl"];
+        [ud synchronize];
+        [weakSelf requestUrlBack];
+    } fail:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
+    }];
+}
+
+-(void)requestUrlBack{
     ShareDetailViewController *vc = [[ShareDetailViewController alloc] init];
-    vc.title = dic[@"title"];
-    vc.shareInfo = dic;
+    vc.title = self.tempDic[@"title"];
+    vc.shareInfo = self.tempDic;
+    vc.shareUrl = self.shareUrl;
     [self.navigationController pushViewController:vc animated:YES];
-    
 }
 @end

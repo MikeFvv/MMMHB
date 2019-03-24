@@ -84,11 +84,11 @@
 "PublicService"="服务号";
 "NOT_IN_DISCUSSION"="您当前不在此讨论组";
 "NOT_IN_GROUP"="您当前不在此群组";
-"FORBIDDEN_IN_GROUP"="您在当前群组中被禁言。";
+"FORBIDDEN_IN_GROUP"="当前群组已禁言";
 "NOT_IN_CHATROOM"="您当前不在此聊天室";
 "Message rejected"="您的消息已发出，但被对方拒绝";
 "AccessRightTitle"="无法访问";
-"ForbiddenInChatRoom"="你已被禁言，不能发送消息。";
+"ForbiddenInChatRoom"="当前聊天室已禁言";
 "KickedFromChatRoom"="你已被踢出聊天室。";
 "JoinChatRoomRejected"="你被禁止加入聊天室，请联系客服。";
 "JoinChatRoomFailed"="加入聊天室失败";

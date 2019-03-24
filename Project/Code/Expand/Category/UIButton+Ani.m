@@ -28,7 +28,7 @@
     }];
 }
 
--(void)delayEnable{//延迟一段时间才能点
+-(void)delayEnable {//延迟一段时间才能点
     [self addTarget:self action:@selector(delayEnableAction) forControlEvents:UIControlEventTouchUpInside];
 }
 

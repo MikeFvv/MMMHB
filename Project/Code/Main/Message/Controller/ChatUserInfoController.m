@@ -61,11 +61,11 @@
     [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
          SVP_DISMISS;
-        if ([[response objectForKey:@"code"] integerValue] == 0) {
+        if ([response objectForKey:@"code"] && [[response objectForKey:@"code"] integerValue] == 0) {
             strongSelf.userInfo = response[@"data"];
             [strongSelf.tableView reloadData];
         } else {
-            NSLog(@"post 请求数据结果： *** %@", response);
+//            NSLog(@"post 请求数据结果： *** %@", response);
         }
         
     } failureBlock:^(NSError *error) {

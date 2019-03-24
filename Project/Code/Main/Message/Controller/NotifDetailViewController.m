@@ -113,7 +113,6 @@
 
 - (void)getData{
 //    [NotifMessageNet getNotifDetailObj:@{@"message_id":_message.message_id} Success:^(NSDictionary *info) {
-//        NSLog(@"%@",info);
 //    } Failure:^(NSError *error) {
 //
 //    }];

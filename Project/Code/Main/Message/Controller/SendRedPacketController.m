@@ -15,9 +15,14 @@
 #import "BANetManager_OC.h"
 #import "GroupRuleModel.h"
 #import "NSString+RegexCategory.h"
+#import "RongCloudManager.h"
+#import "NotificationMessageModel.h"
+#import "SendRPTextCell.h"
 
 @interface SendRedPacketController ()<UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate>{
     UITextField *_textField[3];
+    UILabel *_titLabel[3];
+    UILabel *_unitLabel[3];
 }
 
 @property (nonatomic ,strong) UITableView *tableView;
@@ -28,7 +33,9 @@
 @property (nonatomic ,strong) UILabel *promptLabel;
 @property (nonatomic ,assign) NSInteger textFieldObjectIndex;
 
-
+@property (nonatomic,strong) NSString *moneyStr;
+@property (nonatomic,strong) NSString *countStr;
+@property (nonatomic,strong) NSString *mineStr;
 
 @end
 
@@ -40,6 +47,9 @@
     [self initSubviews];
     [self initLayout];
     [self initNotif];
+    
+    [self.tableView registerClass:[SendRPTextCell class] forCellReuseIdentifier:@"SendRPTextCell"];
+    
 }
 
 -(void)viewDidAppear:(BOOL)animated {
@@ -105,7 +115,8 @@
     
     _tableView.backgroundColor = [UIColor clearColor];
     _tableView.separatorInset = UIEdgeInsetsMake(0, 20, 0, 0);
-    _tableView.separatorColor = TBSeparaColor;
+    _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    //    _tableView.separatorColor = TBSeparaColor;
     _tableView.rowHeight = 60;
     
     UIView *headView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 100)];
@@ -144,6 +155,9 @@
     _submit.titleLabel.font = [UIFont boldSystemFontOfSize2:18];
     _submit.layer.masksToBounds = YES;
     _submit.backgroundColor = MBTNColor;
+    _submit.enabled = NO;
+    _submit.alpha = 0.7;
+    
     [_submit setTitle:@"塞钱进红包" forState:UIControlStateNormal];
     [_submit setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [_submit addTarget:self action:@selector(action_sendRedpacked) forControlEvents:UIControlEventTouchUpInside];
@@ -154,15 +168,19 @@
         make.height.equalTo(@(44));
         make.top.equalTo(fotView.mas_top).offset(7);
     }];
-    _submit.alpha = 0.5;
+    //    _submit.alpha = 0.5;
     
     UILabel *bot = [UILabel new];
     [fotView addSubview:bot];
     bot.font = [UIFont systemFontOfSize2:12];
     bot.textColor = COLOR_X(140, 140, 140);
     
-  
-    bot.text = [NSString stringWithFormat:@"未领取的红包，将于%0.f分钟后发起退款", [self.message.rpOverdueTime floatValue]/60 <= 1 ? 1 : [self.message.rpOverdueTime floatValue]/60];
+    if (_message.type == 2) {
+        bot.text = kMessCowRefundMessage;
+    } else {
+        bot.text = [NSString stringWithFormat:@"未领取的红包，将于%0.f分钟后发起退款", [self.message.rpOverdueTime floatValue]/60 <= 1 ? 1 : [self.message.rpOverdueTime floatValue]/60];
+    }
+    
     
     [bot mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerX.equalTo(self -> _submit);
@@ -206,71 +224,46 @@
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    NSString *cellId = [NSString stringWithFormat:@"cell%ld",indexPath.row];
-    UITableViewCell *cell =[tableView dequeueReusableCellWithIdentifier:cellId];
-    if (cell == nil) {
-        cell = [[UITableViewCell alloc]initWithStyle:0 reuseIdentifier:cellId];
-        //        _textField[row].text = _rowList[indexPath.section][indexPath.row][@"title"];
-        cell.textLabel.text = _rowList[indexPath.section][indexPath.row][@"title"];
-        cell.textLabel.font = [UIFont systemFontOfSize2:16];
-        cell.textLabel.textColor = Color_0;
-        
-        NSInteger row = indexPath.section *2 +indexPath.row;
-        _textField[row] = [UITextField new];
-        [cell.contentView addSubview:_textField[row]];
-        
-        _textField[row].placeholder = _rowList[indexPath.section][indexPath.row][@"placeholder"];
-        _textField[row].font = [UIFont systemFontOfSize2:16];
-        _textField[row].keyboardType = UIKeyboardTypeNumberPad;
-        _textField[row].textAlignment = NSTextAlignmentRight;
-        
-        UILabel *unit = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 30, 25)];
-        _textField[row].rightView = unit;
-        _textField[row].rightViewMode = UITextFieldViewModeAlways;
-        //        _textField[row].backgroundColor = [UIColor redColor];
-        
-        unit.font = [UIFont boldSystemFontOfSize2:16];
-        unit.text = _rowList[indexPath.section][indexPath.row][@"right"];;
-        unit.textAlignment = NSTextAlignmentRight;
-        unit.textColor = Color_0;
-        
-        if(row == 1){
-            if (self.isFu) {
-                _textField[1].placeholder = [NSString stringWithFormat:@"%@-%@",self.message.simpMinCount,self.message.simpMaxCount];
-                _textField[1].userInteractionEnabled = YES;
-                cell.textLabel.textColor = Color_0;
-                unit.textColor = Color_0;
-            } else {
-                if(_message.type == 1) {
-                    _textField[1].text = [NSString stringWithFormat:@"%@",self.message.maxCount];
-                    _textField[1].userInteractionEnabled = NO;
-                    _textField[1].textColor = COLOR_X(140, 140, 140);
-                    cell.textLabel.textColor = COLOR_X(140, 140, 140);
-                    unit.textColor = COLOR_X(140, 140, 140);
-                } else if(_message.type == 2) {
-                    if (self.message.maxCount.integerValue == self.message.minCount.integerValue) {
-                        _textField[1].text = [NSString stringWithFormat:@"%@",self.message.maxCount];
-                        _textField[1].userInteractionEnabled = NO;
-                        _textField[1].textColor = COLOR_X(140, 140, 140);
-                        cell.textLabel.textColor = COLOR_X(140, 140, 140);
-                        unit.textColor = COLOR_X(140, 140, 140);
-                    } else {
-                        _textField[1].placeholder = [NSString stringWithFormat:@"%@-%@",self.message.minCount,self.message.maxCount];
-                        _textField[1].userInteractionEnabled = YES;
-                        cell.textLabel.textColor = Color_0;
-                        unit.textColor = Color_0;
-                    }
+    
+    
+    SendRPTextCell *cell = [SendRPTextCell cellWithTableView:tableView reusableId:@"SendRPTextCell"];
+    //    cell.backgroundColor = [UIColor blueColor];
+    cell.object = self;
+    cell.titleLabel.text = _rowList[indexPath.section][indexPath.row][@"title"];
+    cell.titleLabel.textColor = Color_0;
+    cell.deTextField.placeholder = _rowList[indexPath.section][indexPath.row][@"placeholder"];
+    cell.unitLabel.text = _rowList[indexPath.section][indexPath.row][@"right"];;
+    cell.unitLabel.textColor = Color_0;
+    cell.deTextField.userInteractionEnabled = YES;
+    cell.deTextField.tag = indexPath.section * 1000 + indexPath.row;
+    cell.isUpdateTextField = NO;
+    
+   if (indexPath.section == 0 && indexPath.row == 1) {
+        if (self.isFu) {
+            cell.deTextField.placeholder = [NSString stringWithFormat:@"%@-%@",self.message.simpMinCount,self.message.simpMaxCount];
+        } else {
+            if(_message.type == 1) {
+                cell.titleLabel.textColor = COLOR_X(140, 140, 140);
+                cell.deTextField.text = [NSString stringWithFormat:@"%@",self.message.maxCount];
+                cell.deTextField.userInteractionEnabled = NO;
+                cell.deTextField.textColor = COLOR_X(140, 140, 140);
+                cell.isUpdateTextField = YES;
+                cell.unitLabel.textColor = COLOR_X(140, 140, 140);
+            } else if(_message.type == 2) {
+                if (self.message.maxCount.integerValue == self.message.minCount.integerValue) {
+                    cell.titleLabel.textColor = COLOR_X(140, 140, 140);
+                    cell.deTextField.text = [NSString stringWithFormat:@"%@",self.message.maxCount];
+                    cell.deTextField.userInteractionEnabled = NO;
+                    cell.deTextField.textColor = COLOR_X(140, 140, 140);
+                    cell.isUpdateTextField = YES;
+                    cell.unitLabel.textColor = COLOR_X(140, 140, 140);
+                } else {
+                    cell.deTextField.placeholder = [NSString stringWithFormat:@"%@-%@",self.message.minCount,self.message.maxCount];
                 }
             }
         }
-        if(_textField[row].userInteractionEnabled)
-            _textField[row].delegate = self;
-        [_textField[row] mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.right.equalTo(cell.contentView.mas_right).offset(-15);
-            make.top.bottom.equalTo(cell.contentView);
-            make.left.equalTo(cell.contentView).offset(98);
-        }];
     }
+    
     return cell;
 }
 
@@ -293,10 +286,9 @@
     return view;
 }
 
-
-
 #pragma mark action
 - (void)action_cancle {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"scrollToBottom" object:nil];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -313,9 +305,10 @@
 
 #pragma mark - 发红包
 - (void)action_sendRedpacked {
-    NSString *money = _textField[0].text;
-    NSString *packetNum = _textField[1].text;
-    NSString *bombNum = [_textField[2].text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    
+    NSString *money = self.moneyStr;
+    NSString *packetNum = self.countStr;
+    NSString *bombNum = [self.mineStr stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     
     NSString * regex        = @"(^[0-9]{0,15}$)";
     NSPredicate * pred      = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", regex];
@@ -353,12 +346,27 @@
         [dic setObject:bombNum forKey:@"bombNum"];
     }
     
-    
+    _submit.enabled = NO;
     [self redpackedRequest:money packetNum:packetNum extDict:dic];
     
 }
 
 - (void)redpackedRequest:(NSString *)money packetNum:(NSString *)packetNum extDict:(NSDictionary *)extDict {
+    
+    if (![RongCloudManager shareInstance].isConnectRC) {
+        
+        NotificationMessageModel *model = [[NotificationMessageModel alloc] init];
+        model.messagetype = 3;
+        
+        [[RCIM sharedRCIM] sendMessage:ConversationType_GROUP targetId:self.message.groupId content:model pushContent:nil pushData:nil success:^(long messageId) {
+        } error:^(RCErrorCode nErrorCode, long messageId) {
+        }];
+        
+        [self dismissViewControllerAnimated:YES completion:nil];
+        return;
+    }
+    
+    
     NSDictionary *parameters = @{
                                  @"ext":extDict,
                                  @"groupId":self.message.groupId,
@@ -380,14 +388,17 @@
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
+        strongSelf.submit.enabled = YES;
         SVP_DISMISS;
-        if ([[response objectForKey:@"code"] integerValue] == 0) {
+        if ([response objectForKey:@"code"] && [[response objectForKey:@"code"] integerValue] == 0) {
             [strongSelf action_cancle];
         } else {
             SVP_ERROR_STATUS([response objectForKey:@"msg"]);
         }
         
     } failureBlock:^(NSError *error) {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        strongSelf.submit.enabled = YES;
         SVP_DISMISS;
         SVP_ERROR_STATUS(kSystemBusyMessage);
         //        [FUNCTION_MANAGER handleFailResponse:error];
@@ -395,44 +406,74 @@
 }
 
 
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    
+    if (textField.tag == (1000+0)) {
+        //这里的if时候为了获取删除操作,如果没有次if会造成当达到字数限制后删除键也不能使用的后果.
+        if (range.length == 1 && string.length == 0) {
+            return YES;
+        } else if (textField.text.length >= 1) {
+            textField.text = [textField.text substringToIndex:1];
+            return NO;
+        }
+    }
+    return YES;
+}
+
 #pragma mark -  输入字符判断
 - (void)textFieldDidChangeValue:(NSNotification *)text{
     
-    self.textFieldObjectIndex = 0;
-    if (_textField[0] == text.object) {
+    UITextField *textFieldObj = (UITextField *)text.object;
+    self.textFieldObjectIndex = textFieldObj.tag;
+    if (textFieldObj.tag == 0) {
         self.textFieldObjectIndex = 0;
-    } else if (_textField[1] == text.object) {
+    } else if (textFieldObj.tag == 1) {
         self.textFieldObjectIndex = 1;
-    } else if (_textField[2] == text.object) {
+    } else if (textFieldObj.tag == 1000) {
         self.textFieldObjectIndex = 2;
     }
     
-    NSInteger m = [_textField[0].text integerValue];
-    
-    if (text.object == _textField[0]) {
-        _moneyLabel.text = [NSString stringWithFormat:@"￥%ld",m];
+
+    if(!self.isFu && _message.type == 1) {
+        self.countStr = self.message.maxCount;
     }
-    BOOL money = [self money:m];
+    if(!self.isFu && _message.type == 2) {
+        if (self.message.maxCount.integerValue == self.message.minCount.integerValue) {
+            self.countStr = self.message.maxCount;
+        }
+    }
     
-    NSInteger c = [_textField[1].text integerValue];
-    BOOL count = [self count:c];
+    if (textFieldObj.tag == 0) {
+        self.moneyStr = textFieldObj.text;
+    } else if (textFieldObj.tag == 1) {
+        self.countStr = textFieldObj.text;
+    } if (textFieldObj.tag == 1000+0) {
+        self.mineStr = textFieldObj.text;
+    }
     
-    //    BOOL lel = [[_textField[2].text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isSingleNumber];
-    BOOL lel = [self leiNum:[_textField[2].text integerValue]];
+    NSInteger moneyone = [self.moneyStr integerValue];
+    self.moneyLabel.text = [NSString stringWithFormat:@"￥%ld",moneyone];
+    BOOL money  = [self moneyAction:moneyone];
     
-    if ((self.isFu && money && count) || (_message.type == 1 && money && lel) || (_message.type == 2 && money && count)) {
-        _submit.enabled = YES;
-        _submit.alpha = 1.0;
+    NSInteger countTemp = [self.countStr integerValue];
+    BOOL count  = [self countAction:countTemp];
+    
+    BOOL lel = self.mineStr.length <= 0 ? NO : [self leiNum:[self.mineStr integerValue]];
+
+
+    if ((self.isFu && money && count) || (!self.isFu && _message.type == 1 && money && lel) || (_message.type == 2 && money && count)) {
+        self.submit.enabled = YES;
+        self.submit.alpha = 1.0;
         self.promptLabel.text = @"";
     }  else {
-        _submit.enabled = NO;
-        _submit.alpha = 0.5;
+        self.submit.enabled = NO;
+        self.submit.alpha = 0.7;
         
     }
     
 }
 
-- (BOOL)money:(CGFloat)money {
+- (BOOL)moneyAction:(CGFloat)money {
     
     NSInteger max = 0;
     NSInteger min = 0;
@@ -461,7 +502,7 @@
     }
 }
 
-- (BOOL)count:(CGFloat)count {
+- (BOOL)countAction:(CGFloat)count {
     
     NSInteger max = 0;
     NSInteger min = 0;
@@ -495,7 +536,7 @@
     CGFloat max = 9;
     CGFloat min = 0;
     if ((number > max) | (number < min)) {
-        if (self.textFieldObjectIndex == 2) {
+        if (self.textFieldObjectIndex == 1000) {
             self.promptLabel.text = @"雷数范围:0-9";
         }
         return NO;
@@ -517,16 +558,6 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (BOOL)textFieldShouldEndEditing:(UITextField *)textField{
-    if(textField == _textField[0]){
-        if(_textField[1].userInteractionEnabled)
-            [_textField[1] performSelector:@selector(becomeFirstResponder) withObject:nil afterDelay:0.5];
-        else
-            [_textField[2] performSelector:@selector(becomeFirstResponder) withObject:nil afterDelay:0.5];
-    }
-    else
-        [textField resignFirstResponder];
-    return YES;
-}
+
 
 @end

@@ -12,8 +12,10 @@
 #import "SqliteManage.h"
 #import "EnvelopeMessage.h"
 #import "ChatViewController.h"
+#import "BANetManager_OC.h"
 
 @interface RongCloudManager()
+@property(nonatomic,assign)NSInteger retryCount;
 @end
 
 @implementation RongCloudManager
@@ -32,6 +34,7 @@
     self = [super init];
     if (self) {
         //配置融云
+        self.retryCount = 0;
         [RCIM sharedRCIM].enablePersistentUserInfoCache = YES;
         [RCIM sharedRCIM].userInfoDataSource = self;//[RonYun shareInstance];
         [RCIM sharedRCIM].groupInfoDataSource = self;//[RonYun shareInstance];
@@ -102,7 +105,7 @@
         }
             break;
         case ConnectionStatus_DISCONN_EXCEPTION:{
-            NSLog(@"111");
+            //            NSLog(@"111");
         }
             break;
         default:
@@ -111,7 +114,7 @@
     
 }
 
-#pragma mark - RCIMReceiveMessageDelegate
+#pragma mark - RCIMReceiveMessageDelegate 未读消息来源
 - (void)onRCIMReceiveMessage:(RCMessage *)message left:(int)left{
     // 广播消息
     if ([message.objectName isEqualToString:@"RC:CmdMsg"]) {
@@ -122,7 +125,7 @@
     if (message.conversationType == ConversationType_PRIVATE) {
         RCTextMessage *text = (RCTextMessage *)message.content;
         if ([message.senderUserId isEqualToString:@"1"]&&[text.content isEqualToString:@"push웃유App"]) {
-            NSLog(@"%@",text.extra.mj_JSONObject);
+            //            NSLog(@"%@",text.extra.mj_JSONObject);
             NSString *type = text.extra.mj_JSONObject[@"type"];
             if ([type isEqualToString:@"login"]) {
                 if (!APP_MODEL.user.isLogined) {
@@ -150,6 +153,7 @@
     [self messageTypeJudgeMessage:message];
 }
 
+
 - (void)messageTypeJudgeMessage:(RCMessage *)message {
     
     if ([message.objectName isEqualToString:@"RC:TxtMsg"] || [message.objectName isEqualToString:@"RC:ImgMsg"] || [message.objectName isEqualToString:@"RC:VcMsg"]) {
@@ -162,7 +166,7 @@
         NSString *gId = message.targetId;
         number = ([tid isEqualToString:gId])?0:1;
         NSString *text = nil;
-        NSLog(@"============ %@", message.objectName);
+        //        NSLog(@"============ %@", message.objectName);
         if ([message.content isKindOfClass:[RCTextMessage class]]) {
             RCTextMessage *content = (RCTextMessage *)message.content;
             text = content.content;
@@ -253,7 +257,7 @@
 - (void)getUserInfoWithUserId:(NSString *)userId
                       inGroup:(NSString *)groupId
                    completion:(void (^)(RCUserInfo *userInfo))completion{
-    NSLog(@"dsad");
+    //    NSLog(@"dsad");
 }
 
 #pragma mark RCIMGroupUserInfoDataSource
@@ -264,7 +268,7 @@
 
 
 - (void)initWithMode{
-    [[RCIM sharedRCIM] initWithAppKey:APP_MODEL.rongYunKey];
+    [[RCIM sharedRCIM] initWithAppKey:[AppModel shareInstance].rongYunKey];
 }
 
 - (void)setToken:(NSString *)token{
@@ -272,33 +276,42 @@
 }
 
 - (void)doConnect{
-    if (self.isConnect) {
+    if (self.isConnectRC) {
         return;
     }
     [[RCIM sharedRCIM] disconnect];
-    if (APP_MODEL.rongYunToken != nil) {
-        [self connect];
-    }
-    else{
+    if ([AppModel shareInstance].rongYunToken != nil) {
+        [self connectRongCloud];
+    } else {
         [self getRongCloudToken];
     }
 }
 
-- (void)connect{
-    WEAK_OBJ(weakSelf, self);
-    NSLog(@"融云key:%@",APP_MODEL.rongYunToken);
 
-    [[RCIM sharedRCIM]connectWithToken:APP_MODEL.rongYunToken success:^(NSString *userId) {
+#pragma mark -  与融云服务器建立连接
+- (void)connectRongCloud {
+    WEAK_OBJ(weakSelf, self);
+    NSLog(@"============ 融云Token:%@ ============",[AppModel shareInstance].rongYunToken);
+    
+    [[RCIM sharedRCIM] connectWithToken:[AppModel shareInstance].rongYunToken success:^(NSString *userId) {
         [weakSelf refreshUserInfo];
-        weakSelf.isConnect = YES;
+        weakSelf.isConnectRC = YES;
+        weakSelf.retryCount = 0;
     } error:^(RCConnectErrorCode status) {
-        NSLog(@"%ld",(long)status);
-        weakSelf.isConnect = NO;
-    } tokenIncorrect:^{
-        NSLog(@"token is invalue");
-        weakSelf.isConnect = NO;
+        NSLog(@"🔴 %ld",(long)status);
+        weakSelf.isConnectRC = NO;
+        if(weakSelf.retryCount < 10){
+            weakSelf.retryCount++;
+           [[RongCloudManager shareInstance] doConnect];
+        }
+    } tokenIncorrect:^{ 
+        NSLog(@"***** 🔴Token不正确 *****");
+        weakSelf.isConnectRC = NO;
         [[RCIMClient sharedRCIMClient] disconnect];
-        [weakSelf getRongCloudToken];
+        if(weakSelf.retryCount < 10){
+            weakSelf.retryCount += 1;
+            [weakSelf getRongCloudToken];
+        }
     }];
 }
 
@@ -308,21 +321,53 @@
     [[RCIM sharedRCIM] refreshUserInfoCache:user withUserId:APP_MODEL.user.userId];
     [RCIM sharedRCIM].currentUserInfo = user;
 }
+
+#pragma mark - 获取融云Token
 /**
  获取融云Token
  */
 - (void)getRongCloudToken {
-    [NET_REQUEST_MANAGER requestIMTokenWithSuccess:^(id object) {
-        NSLog(@"************** 融云Token: %@ **************", [object objectForKey:@"data"]);
-        [self connect];
-    } fail:^(id object) {
-        NSLog(@"************** 获取融云Token失败 **************");
-        [FUNCTION_MANAGER handleFailResponse:object];
-    }];
+    //    [NET_REQUEST_MANAGER requestIMTokenWithSuccess:^(id object) {
+    //        NSLog(@"************** 融云Token: %@ **************", [object objectForKey:@"data"]);
+    //        [self connectRongCloud];
+    //    } fail:^(id object) {
+    //        NSLog(@"************** 🔴获取融云Token失败 **************");
+    //        [FUNCTION_MANAGER handleFailResponse:object];
+    //    }];
+    
+    BADataEntity *entity = [BADataEntity new];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",APP_MODEL.serverUrl,@"social/basic/getIMToken"];
+    entity.needCache = NO;
+    
+    __weak __typeof(self)weakSelf = self;
+    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        if ([response objectForKey:@"code"] && [[response objectForKey:@"code"] integerValue] == 0) {
+             NSLog(@"************** 融云Token: %@ **************", [response objectForKey:@"data"]);
+            [AppModel shareInstance].rongYunToken = [response objectForKey:@"data"];
+            [[AppModel shareInstance] saveAppModel];
+            [strongSelf connectRongCloud];
+        } else {
+            NSLog(@"************** 🔴获取融云Token失败 %@**************",response);
+//            AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+//            [view showWithText:@"此账号连接服务器失败" button:@"退出重连" callBack:^(id object) {
+//                [[AppModel shareInstance] logout];
+//            }];
+        }
+    } failureBlock:^(NSError *error) { 
+        NSLog(@"************** 🔴获取融云Token失败 %@**************",error);
+//        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+//        [view showWithText:@"此账号连接服务器失败" button:@"退出重连" callBack:^(id object) {
+//            [[AppModel shareInstance] logout];
+//        }];
+    } progressBlock:nil];
 }
 
+
+
+
 - (void)disConnect{
-    self.isConnect = NO;
+    self.isConnectRC = NO;
     [[RCIM sharedRCIM] logout];
 }
 

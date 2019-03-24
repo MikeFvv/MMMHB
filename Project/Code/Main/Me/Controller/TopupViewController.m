@@ -55,7 +55,7 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    self.navigationItem.title = @"充值";
+    self.navigationItem.title = @"充值中心";
     _tableView = [UITableView groupTable];
     [self.view addSubview:_tableView];
     _tableView.dataSource = self;
@@ -73,9 +73,7 @@
     _topupBar = [TopupBarView topupBar];
     _tableView.tableHeaderView = _topupBar;
     
-    
     [self setUITwo];
-    
 }
 
 - (void)setUITwo {
@@ -153,6 +151,7 @@
     if (cell == nil) {
         cell = [self setCell:cell dict:dict cellIdentifier:cellIdentifier];
     }
+    cell.rightArrowImage.hidden = YES;
     UIImageView *flagView = [cell.contentView viewWithTag:1];
     if(self.selectIndex/100 == indexPath.section && self.selectIndex%100 == indexPath.row)
         flagView.hidden = NO;
@@ -217,6 +216,10 @@
         SVP_ERROR_STATUS(@"请输入正确的充值金额");
         return;
     }
+    if (_topupBar.money.length > 8) {
+        SVP_ERROR_STATUS(@"充值金额过大");
+        return;
+    }
     [self openByWeb];
 }
 
@@ -239,7 +242,5 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
-
 
 @end

@@ -9,6 +9,9 @@
 #import "DiscoveryViewController.h"
 #import "MemberCell.h"
 #import "AlertViewCus.h"
+#import "WheelViewController.h"
+#import "WebViewController2.h"
+#import "WebViewController.h"
 
 @interface DiscoveryViewController ()<UITableViewDelegate,UITableViewDataSource>{
     UITableView *_tableView;
@@ -40,30 +43,31 @@
     _tableView.dataSource = self;
     
     NSMutableDictionary *dic1 = [[NSMutableDictionary alloc] init];
-    [dic1 setObject:@"discover_qpyx" forKey:@"icon"];
-    [dic1 setObject:@"棋 牌 游 戏" forKey:@"title"];
+    [dic1 setObject:@"discover_sgyxj" forKey:@"icon"];
+    [dic1 setObject:@"水果游戏机" forKey:@"title"];
+    [dic1 setObject:@"1" forKey:@"tag"];
     
     NSMutableDictionary *dic2 = [[NSMutableDictionary alloc] init];
-    [dic2 setObject:@"discover_bjsc" forKey:@"icon"];
-    [dic2 setObject:@"北 京 赛 车" forKey:@"title"];
-    
+    [dic2 setObject:@"discover_xydzp" forKey:@"icon"];
+    [dic2 setObject:@"幸运大转盘" forKey:@"title"];
+    [dic2 setObject:@"2" forKey:@"tag"];
+
     NSMutableDictionary *dic3 = [[NSMutableDictionary alloc] init];
-    [dic3 setObject:@"discover_cqssc" forKey:@"icon"];
-    [dic3 setObject:@"重庆时时彩" forKey:@"title"];
-    
-    NSMutableDictionary *dic4 = [[NSMutableDictionary alloc] init];
-    [dic4 setObject:@"discover_hbyyb" forKey:@"icon"];
-    [dic4 setObject:@"红包余额包" forKey:@"title"];
-    
-    NSMutableDictionary *dic5 = [[NSMutableDictionary alloc] init];
-    [dic5 setObject:@"discover_xxxyx" forKey:@"icon"];
-    [dic5 setObject:@"休闲小游戏" forKey:@"title"];
-    
-    NSMutableDictionary *dic6 = [[NSMutableDictionary alloc] init];
-    [dic6 setObject:@"discover_gdyx" forKey:@"icon"];
-    [dic6 setObject:@"更 多 游 戏" forKey:@"title"];
-    
-    _dataArray = [NSArray arrayWithObjects:dic1,dic2,dic3,dic4,dic5,dic6, nil];
+    if([FUNCTION_MANAGER appType] == AppType_XZHB){
+        [dic3 setObject:@"discover_xzyeb" forKey:@"icon"];
+        [dic3 setObject:@"小猪余额宝" forKey:@"title"];
+    }else if([FUNCTION_MANAGER appType] == AppType_TTHB){
+        [dic3 setObject:@"discover_ttyeb" forKey:@"icon"];
+        [dic3 setObject:@"天天余额宝" forKey:@"title"];
+    }else if([FUNCTION_MANAGER appType] == AppType_WWHB){
+        [dic3 setObject:@"discover_wwyeb" forKey:@"icon"];
+        [dic3 setObject:@"旺旺余额宝" forKey:@"title"];
+    }else if([FUNCTION_MANAGER appType] == AppType_WBHB){
+        [dic3 setObject:@"discover_wbyeb" forKey:@"icon"];
+        [dic3 setObject:@" 5 8 余额宝" forKey:@"title"];
+    }
+    [dic3 setObject:@"3" forKey:@"tag"];
+    _dataArray = [NSArray arrayWithObjects:dic2,dic1,dic3, nil];
     [_tableView reloadData];
 }
 
@@ -83,6 +87,7 @@
         
         cell.itemIcon.layer.masksToBounds = YES;
         cell.itemIcon.layer.cornerRadius = 9.0;
+        cell.itemIcon.contentMode = UIViewContentModeScaleAspectFit;
     }
     NSDictionary *dic = [_dataArray objectAtIndex:indexPath.row];
     cell.itemIcon.image = [UIImage imageNamed:dic[@"icon"]];
@@ -102,15 +107,25 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
-//    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"等待更新，敬请期待" preferredStyle:UIAlertControllerStyleAlert];
-//    [alertController modifyColor];
-//    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"好的" style:UIAlertActionStyleDestructive handler:nil];
-//    [okAction setValue:Color_0 forKey:@"_titleTextColor"];
-//    [alertController addAction:okAction];
-//    [self presentViewController:alertController animated:YES completion:nil];
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        [self presentViewController:alertController animated:YES completion:nil];
-//    });
+    NSDictionary *dic = _dataArray[indexPath.row];
+    NSInteger tag = [dic[@"tag"] integerValue];
+    if(tag == 2){
+        WheelViewController *vc = [[WheelViewController alloc] init];
+        vc.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:vc animated:YES];
+        return;
+    }else if(tag == 1){
+        NSString *urlHead = APP_MODEL.commonInfo[@"fruit.slot.url"];
+        if(urlHead.length > 0){
+            NSString *url = [NSString stringWithFormat:@"%@?token=%@",urlHead,APP_MODEL.user.token];
+            WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+            vc.navigationItem.title = @"水果游戏机";
+            vc.hidesBottomBarWhenPushed = YES;
+            //[vc loadWithURL:url];
+            [self.navigationController pushViewController:vc animated:YES];
+            return;
+        }
+    }
     AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
     [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
 }

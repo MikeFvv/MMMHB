@@ -42,7 +42,6 @@
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
          __strong __typeof(weakSelf)strongSelf = weakSelf;
-        //        NSLog(@"get 请求数据结果： *** %@", response);
         [strongSelf processingData:response];
         successBlock(response);
         

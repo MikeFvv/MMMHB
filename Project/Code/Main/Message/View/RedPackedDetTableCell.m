@@ -75,9 +75,6 @@
         make.top.equalTo(self ->_name.mas_bottom).offset(6);
     }];
     
-    
-    
-    
     [_mineImageView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(self.contentView.mas_right).offset(-100);
         make.centerY.equalTo(self.contentView.mas_centerY);
@@ -111,24 +108,6 @@
         make.centerY.equalTo(self.name.mas_centerY);
         make.size.mas_equalTo(CGSizeMake(36, 18));
     }];
-                        
-                        
-//    UIView *sexBack = [UIView new];
-//    [self.contentView addSubview:sexBack];
-//    sexBack.layer.cornerRadius = 7.5;
-//    sexBack.layer.masksToBounds = YES;
-//    sexBack.backgroundColor = SexBack;
-//    [sexBack mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.left.equalTo(self -> _name.mas_right).offset(3);
-//        make.centerY.equalTo(self ->_name);
-//        make.width.height.equalTo(@(15));
-//    }];
-    
-//    _sex = [UIImageView new];
-//    [sexBack addSubview:_sex];
-//    [_sex mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.center.equalTo(sexBack);
-//    }];
     
     _date = [UILabel new];
     [self.contentView addSubview:_date];
@@ -162,18 +141,7 @@
     _maxImg = [UIImageView new];
     [self.contentView addSubview:_maxImg];
     _maxImg.image = [UIImage imageNamed:@"icon_luck_max"];
-    
-//    UIView *lineView = [[UIView alloc] init];
-//    lineView.backgroundColor = [UIColor colorWithRed:0.922 green:0.922 blue:0.922 alpha:1.000];
-//    [self.contentView addSubview:lineView];
-//    
-//    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.left.mas_equalTo(self.contentView.mas_left).offset(20);
-//        make.right.mas_equalTo(self.contentView.mas_right).offset(-20);
-//        make.bottom.mas_equalTo(self.contentView);
-//        make.height.mas_equalTo(@(0.5));
-//    }];
-    
+
 }
 
 - (void)setObj:(id)obj{
@@ -182,8 +150,8 @@
     
     NSString *money = [NSString stringWithFormat:@"%@",[obj objectForKey:@"money"]];
     NSString *nickname = [NSString stringWithFormat:@"%@",[obj objectForKey:@"nick"]];
-   
-//    NSInteger sex = [[obj objectForKey:@"gender"] integerValue];
+    
+    //    NSInteger sex = [[obj objectForKey:@"gender"] integerValue];
     
     if ([[obj objectForKey:@"createTime"] isKindOfClass:[NSString class]]) {
         _date.text = [obj objectForKey:@"createTime"];
@@ -192,27 +160,7 @@
     }
     
     _name.text = (![nickname isKindOfClass:[NSNull class]])?nickname:@"";
-    
-//    _sex.image = (sex==0)?[UIImage imageNamed:@"male"]:[UIImage imageNamed:@"female"];
-    
-//    EnvelopeNet *model = [EnvelopeNet shareInstance];
-//    NSArray *mids = [model.mids componentsSeparatedByString:@","];
-//    NSString *userId = [NSString stringWithFormat:@"%@",[obj objectForKey:@"userId"]];
-    
-    
-     _money.text = (![money isKindOfClass:[NSNull class]]) ? money : @"";
-//    for (NSDictionary *dict in model.dataList) {
-//        if ([userId isEqualToString:dict[@"userId"]]) {
-//            NSInteger length = 0;
-//            if (money.length >0) {
-//                length = money.length - 1;
-//            }
-//            NSRange r = NSMakeRange(length, 1);
-//            _money.text = [money stringByReplacingCharactersInRange:r withString:@"*"];
-//            break;
-//        }
-//    }
-
+    _money.text = (![money isKindOfClass:[NSNull class]]) ? money : @"";
     
     if ([[obj objectForKey:@"redpType"] integerValue] == 2) { // 牛牛红包
         self.pointsNumImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"cow_%@", [obj objectForKey:@"score"]]];

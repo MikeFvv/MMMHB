@@ -10,7 +10,7 @@
 #import "UIImageView+WebCache.h"
 
 @interface ImageDetailViewController ()
-
+@property(nonatomic,assign)BOOL needShowBar;
 @end
 
 @implementation ImageDetailViewController
@@ -20,7 +20,8 @@
     if(self.bgColor == nil)
         self.bgColor = COLOR_X(228, 32, 52);
     self.view.backgroundColor = self.bgColor;
-    self.view.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 64);
+    if(self.hiddenNavBar == NO)
+        self.view.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 64);
     // Do any additional setup after loading the view.
     self.automaticallyAdjustsScrollViewInsets = NO;
     [self.navigationController.navigationBar setTranslucent:NO];
@@ -33,6 +34,24 @@
     self.imageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.scrollView addSubview:self.imageView];
     [self showImage];
+    
+    if(self.hiddenNavBar){
+        UIButton *backBtn=[UIButton buttonWithType:UIButtonTypeCustom];
+        [backBtn setImage:[UIImage imageNamed:@"nav_back"] forState:UIControlStateNormal];
+        [backBtn addTarget:self action:@selector(back) forControlEvents:UIControlEventTouchUpInside];
+        backBtn.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        [self.view addSubview:backBtn];
+        [backBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@5);
+            make.top.equalTo(@20);
+            make.width.height.equalTo(@48);
+        }];
+    }
+    self.navigationController.interactivePopGestureRecognizer.delegate = self;
+}
+
+-(void)back{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)showImage{
@@ -81,4 +100,25 @@
 }
 */
 
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    if(self.navigationController.navigationBarHidden)
+        self.needShowBar = NO;
+    else
+        self.needShowBar = YES;
+    if(self.hiddenNavBar){
+        if(self.navigationController.navigationBarHidden == NO)
+            [self.navigationController setNavigationBarHidden:YES animated:YES];
+    }else{
+        if(self.navigationController.navigationBarHidden == YES)
+            [self.navigationController setNavigationBarHidden:NO animated:YES];
+    }
+}
+
+-(void)viewWillDisappear:(BOOL)animated{
+    if(self.needShowBar){
+        if(self.navigationController.navigationBarHidden == YES)
+            [self.navigationController setNavigationBarHidden:NO animated:YES];
+    }
+}
 @end

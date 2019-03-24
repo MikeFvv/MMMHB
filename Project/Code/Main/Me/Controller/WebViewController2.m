@@ -49,6 +49,9 @@
     }
     NSURL *u = [NSURL URLWithString:url];
     NSURLRequest *request = [NSURLRequest requestWithURL:u];
+//    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:u];
+//    if(APP_MODEL.user.fullToken)
+//        [request setValue:APP_MODEL.user.fullToken forHTTPHeaderField:@"Authorization"];
     [_webView scalesPageToFit];
     [_webView loadRequest:request];
     
@@ -79,6 +82,7 @@
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
+    return YES;
     NSString *url = request.URL.absoluteString;
     NSLog(@"------|%@",url);
     if([url containsString:@"qr.alipay"]){
@@ -154,7 +158,7 @@
 }
 
 - (void)action_info {
-    NSLog(@"111111");
+//    NSLog(@"111111");
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error{

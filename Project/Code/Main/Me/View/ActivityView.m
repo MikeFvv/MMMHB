@@ -8,9 +8,11 @@
 
 #import "ActivityView.h"
 #import "ActivityCell.h"
+#import "ActivityCell2.h"
+#import "ActivityCell3.h"
 #import "ImageDetailViewController.h"
 #import "AlertViewCus.h"
-#import "ImageDetailWithTitleViewController.h"
+#import "FirstRewardDetailViewController.h"
 
 @implementation ActivityView
 
@@ -32,7 +34,7 @@
     _tableView.showsHorizontalScrollIndicator = NO;
     _tableView.showsVerticalScrollIndicator = YES;
     _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    _tableView.rowHeight = 110;
+    _tableView.rowHeight = 120;
     _tableView.tableHeaderView = [self headView];
     [self addSubview:_tableView];
     _tableView.delegate = self;
@@ -90,10 +92,16 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     NSString *cellIdentifier = [NSString stringWithFormat:@"%ld_%ld",(long)indexPath.section,(long)indexPath.row];
-    
+    NSMutableDictionary *dic = [_dataArray objectAtIndex:indexPath.row];
+    NSDictionary *promotDic = dic[@"skPromot"];
+    NSArray *arr = dic[@"skPromotItemList"];
+    NSInteger type = [promotDic[@"type"] integerValue];
     ActivityCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
     if (cell == nil) {
-        cell = [[ActivityCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
+        if(type == 3000 || type == 4000)
+            cell = [[ActivityCell3 alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
+        else
+            cell = [[ActivityCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
         cell.accessoryType = UITableViewCellAccessoryNone;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.backgroundColor = [UIColor clearColor];
@@ -101,8 +109,9 @@
         [cell initView];
         [cell.xiangQingBtn addTarget:self action:@selector(xiangQingAction:) forControlEvents:UIControlEventTouchUpInside];
     }
-    NSMutableDictionary *dic = [_dataArray objectAtIndex:indexPath.row];
-    NSDictionary *promotDic = dic[@"skPromot"];
+    float a = [dic[@"moneySum"] floatValue];
+
+    
     cell.titleLabel.text = promotDic[@"mainTitle"];
     [cell.numBtn setTitle:dic[@"reward"] forState:UIControlStateNormal];
     BOOL isGet = [dic[@"hasReceive"] boolValue];
@@ -118,21 +127,25 @@
     else
         [cell.getBtn addTarget:self action:@selector(getReword:) forControlEvents:UIControlEventTouchUpInside];
 
-    float a = [dic[@"moneySum"] floatValue];
-    float b = a;
-    id thresholdMax = dic[@"thresholdMax"];
-    if([thresholdMax isKindOfClass:[NSNull class]]){
-        
-    }else if([thresholdMax isKindOfClass:[NSString class]]){
-        if(![thresholdMax isEqualToString:@"0"])
+    if(type == 3000 || type == 4000){
+        ActivityCell2 *cell2 = (ActivityCell2 *)cell;
+        [cell2 setPointArray:arr andCurrentMoney:a];
+    }else{
+        float b = a;
+        id thresholdMax = dic[@"thresholdMax"];
+        if([thresholdMax isKindOfClass:[NSNull class]]){
+            
+        }else if([thresholdMax isKindOfClass:[NSString class]]){
+            if(![thresholdMax isEqualToString:@"0"])
+                b = [thresholdMax floatValue];
+        }
+        else if([thresholdMax isKindOfClass:[NSNumber class]])
             b = [thresholdMax floatValue];
+        float rate = 0;
+        if(b > 0)
+            rate = a/b;
+        cell.rate = rate;
     }
-    else if([thresholdMax isKindOfClass:[NSNumber class]])
-        b = [thresholdMax floatValue];
-    float rate = 0;
-    if(b > 0)
-        rate = a/b;
-    cell.rate = rate;
     return cell;
 }
 
@@ -163,9 +176,9 @@
     self.selectIndex = path.row;
     WEAK_OBJ(weakSelf, self);
     AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
-    [view showWithText:@"是否领取奖励？" button1:@"领取" button2:@"取消" callBack:^(id object) {
+    [view showWithText:@"是否领取奖励？" button1:@"取消" button2:@"领取" callBack:^(id object) {
         NSInteger index = [object integerValue];
-        if(index == 0)
+        if(index == 1)
             [weakSelf getReword2];
     }];
 }
@@ -196,15 +209,18 @@
     
     ImageDetailViewController *vc = [[ImageDetailViewController alloc] init];
     vc.imageUrl = img;
+    vc.hiddenNavBar = YES;
     vc.title = @"活动详情";
+    vc.hidesBottomBarWhenPushed = YES;
     [[FUNCTION_MANAGER currentViewController].navigationController pushViewController:vc animated:YES];
 }
 
 -(void)headAction:(UIButton *)btn{
     //[self xiangQingAction:nil];
     NSInteger tag = btn.tag;
-    ImageDetailWithTitleViewController *vc = [[ImageDetailWithTitleViewController alloc] init];
+    FirstRewardDetailViewController *vc = [[FirstRewardDetailViewController alloc] init];
     vc.userId = self.userId;
+    vc.hiddenNavBar = YES;
     if(tag == 1){
         vc.rewardType = 1100;
         vc.title = @"我的首充奖励";
@@ -213,6 +229,7 @@
         vc.rewardType = 1200;
         vc.title = @"我的二充奖励";
     }
+    vc.hidesBottomBarWhenPushed = YES;
     [[FUNCTION_MANAGER currentViewController].navigationController pushViewController:vc animated:YES];
 }
 

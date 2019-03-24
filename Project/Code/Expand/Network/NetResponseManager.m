@@ -39,11 +39,14 @@
         if([dict objectForKey:@"code"] == nil)
             code = -1;
         if(httpManager.act == ActRequestToken || httpManager.act == ActRequestTokenBySMS){
+            NSString *refreshToken = [dict objectForKey:@"refresh_token"];
+            if(refreshToken.length > 10)
+                code = ResultCodeSuccess;
             [self getTokenBack:dict];
         }else if(httpManager.act == ActRequestIMToken){
             if(code == ResultCodeSuccess){
                 APP_MODEL.rongYunToken = [dict objectForKey:@"data"];
-                [APP_MODEL save];
+                [APP_MODEL saveAppModel];
                 NSLog(@"融云token = %@",APP_MODEL.rongYunToken);
             }
         }else if(httpManager.act == ActRequestUserInfo){
@@ -95,7 +98,7 @@
     user.fullToken = APP_MODEL.user.fullToken;
     APP_MODEL.user = user;
     APP_MODEL.user.isLogined = YES;
-    [APP_MODEL save];
+    [APP_MODEL saveAppModel];
     [NET_REQUEST_MANAGER requestIMTokenWithSuccess:nil fail:nil];
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     [ud setObject:user.userId forKey:@"userId"];
@@ -109,7 +112,7 @@
 
 -(void)getSystemNoticeBack:(NSDictionary *)dict{
     APP_MODEL.noticeArray = dict[@"records"];
-    [APP_MODEL save];
+    [APP_MODEL saveAppModel];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"updateScrollBarView" object:nil];
 }
 @end

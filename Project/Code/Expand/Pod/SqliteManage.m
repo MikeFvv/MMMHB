@@ -23,11 +23,16 @@
 + (void)updateGroup:(NSString *)group number:(int)number lastMessage:(NSString *)last {
     NSString *query = [NSString stringWithFormat:@"groupId='%@' AND userId='%@'",group,APP_MODEL.user.userId];
     PushMessageModel *oldModel = [[WHC_ModelSqlite query:[PushMessageModel class] where:query] firstObject];
+    
     if (oldModel) {
+        
         if (number == 0) {
             [AppModel shareInstance].unReadCount -= oldModel.number;
             oldModel.number = 0;
         } else {
+            if (oldModel.number > 99) {
+                return;
+            }
             oldModel.number += 1;
             [AppModel shareInstance].unReadCount += 1;
         }
@@ -37,6 +42,10 @@
         }
         [WHC_ModelSqlite update:oldModel where:query];
     } else {
+        if (number == 0) {
+            return;
+        }
+        
         [AppModel shareInstance].unReadCount += 1;
         PushMessageModel *new = [PushMessageModel new];
         new.number = 1;
@@ -46,7 +55,11 @@
         [WHC_ModelSqlite insert:new];
     }
 //    [[AppModel shareInstance] save];
-    [[NSNotificationCenter defaultCenter]postNotificationName:@"CDReadNumberChange" object:nil];
+    
+    if (oldModel.number <= 99) {
+       [[NSNotificationCenter defaultCenter]postNotificationName:@"CDReadNumberChange" object:nil];
+    }
+    
 }
 
 + (void)removeGroup:(NSString *)group{

@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ShareDetailViewController : SuperViewController
 @property(nonatomic,strong)NSDictionary *shareInfo;
+@property(nonatomic,strong)NSString *shareUrl;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -2,7 +2,7 @@
 //  CowCowVSMessageModel.h
 //  Project
 //
-//  Created by 罗耀生 on 2019/1/28.
+//  Created by Mike on 2019/1/28.
 //  Copyright © 2019 CDJay. All rights reserved.
 //
 
