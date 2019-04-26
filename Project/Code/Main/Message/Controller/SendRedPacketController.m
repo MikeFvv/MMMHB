@@ -13,7 +13,6 @@
 #import "MessageItem.h"
 #import "NetRequestManager.h"
 #import "BANetManager_OC.h"
-#import "GroupRuleModel.h"
 #import "NSString+RegexCategory.h"
 #import "RongCloudManager.h"
 #import "NotificationMessageModel.h"
@@ -178,7 +177,7 @@
     if (_message.type == 2) {
         bot.text = kMessCowRefundMessage;
     } else {
-        bot.text = [NSString stringWithFormat:@"未领取的红包，将于%0.f分钟后发起退款", [self.message.rpOverdueTime floatValue]/60 <= 1 ? 1 : [self.message.rpOverdueTime floatValue]/60];
+        bot.text = [NSString stringWithFormat:@"未领取的红包，将于%0.2f分钟后发起退款", [self.message.rpOverdueTime floatValue]/60];
     }
     
     

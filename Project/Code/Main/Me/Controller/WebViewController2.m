@@ -82,9 +82,10 @@
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
-    return YES;
     NSString *url = request.URL.absoluteString;
     NSLog(@"------|%@",url);
+    return YES;
+
     if([url containsString:@"qr.alipay"]){
         if(_indicatorView){
             [_indicatorView stopAnimating];

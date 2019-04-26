@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic,assign)BOOL hiddenNavBar;
 
+@property(nonatomic,assign)BOOL top;//是否置顶
+
 -(void)showImage;
 -(void)writeTitle;
 @end

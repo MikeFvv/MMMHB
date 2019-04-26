@@ -135,21 +135,21 @@
         make.center.mas_equalTo(bgView.center);
     }];
     
-    UIButton *btn1 = [self createBtnWithIcon:@"make-money" title:@"分享赚钱"];
-    [bgView addSubview:btn1];
-    [btn1 mas_makeConstraints:^(MASConstraintMaker *make) {
+    UIButton *btn2 = [self createBtnWithIcon:@"my-bzzx" title:@"代理中心"];
+    [bgView addSubview:btn2];
+    [btn2 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.top.bottom.equalTo(bgView);
         make.right.equalTo(line);
     }];
-    self.zuanQianBtn = btn1;
-
-    UIButton *btn2 = [self createBtnWithIcon:@"my-bzzx" title:@"帮助中心"];
-    [bgView addSubview:btn2];
-    [btn2 mas_makeConstraints:^(MASConstraintMaker *make) {
+    self.zhangDanBtn = btn2;
+    
+    UIButton *btn1 = [self createBtnWithIcon:@"make-money" title:@"分享赚钱"];
+    [bgView addSubview:btn1];
+    [btn1 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.top.bottom.equalTo(bgView);
         make.left.equalTo(line);
     }];
-    self.zhangDanBtn = btn2;
+    self.zuanQianBtn = btn1;
     
     line = [[UIView alloc] init];
     line.backgroundColor =  TBSeparaColor;

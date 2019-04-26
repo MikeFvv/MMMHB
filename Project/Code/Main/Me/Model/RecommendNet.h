@@ -19,7 +19,13 @@
 @property (nonatomic ,assign) BOOL isMost;///<没有更多
 @property (nonatomic ,assign) BOOL IsNetError;///<没有更多
 
+@property(nonatomic,strong)NSString *userString;
+@property(nonatomic,assign)NSInteger type;
+@property(nonatomic,strong)NSDictionary *commonInfo;
+
 - (void)getPlayerWithPage:(NSInteger)page success:(void (^)(NSDictionary *))success
                   failure:(void (^)(NSError *))failue;
 
+- (void)requestCommonInfoWithSuccess:(void (^)(NSDictionary *))success
+                             failure:(void (^)(NSError *))failue;
 @end

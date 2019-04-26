@@ -20,7 +20,7 @@
 @property(nonatomic,strong)NSMutableArray *billTypeList;
 @property(nonatomic,strong)BillNet *model;
 @property(nonatomic,strong)BillHeadView *headView;
-
+// 发包ID
 @property(nonatomic, copy) NSString *sendPId;
 
 @end
@@ -43,6 +43,7 @@
 #pragma mark ----- Data
 - (void)initData{
     _model = [[BillNet alloc]init];
+    _model.categoryStr = self.infoDic[@"url"];
 }
 
 #pragma mark ----- Layout
@@ -54,7 +55,6 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    self.navigationItem.title = @"账单记录";
     WEAK_OBJ(weakSelf, self);
     __weak BillNet *weakModel = _model;
     
@@ -67,7 +67,11 @@
     UIView *view = [[UIView alloc] init];
     view.backgroundColor = BaseColor;
     _tableView.backgroundView = view;
-    _headView = [BillHeadView headView];
+    BOOL isAll = NO;
+    NSString *type = self.infoDic[@"url"];
+    if(type.length == 0)
+        isAll = YES;
+    _headView = [BillHeadView headView:isAll];
     _headView.billTypeList = self.billTypeList;
     _headView.beginTime = _model.beginTime;
     _headView.endTime = _model.endTime;
@@ -79,8 +83,7 @@
     };
     _headView.TypeChange = ^(NSInteger type) {
         NSDictionary *dic = weakSelf.billTypeList[type];
-        NSInteger tt = [dic[@"id"] integerValue];
-        weakModel.type = tt;
+        weakModel.billName = dic[@"name"];
         [weakSelf performSelector:@selector(getData) withObject:nil afterDelay:0.5];
     };
     
@@ -88,6 +91,7 @@
     
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
         [weakSelf getData];
+        [weakSelf requestBlance];
     }];
     
     _tableView.mj_footer = [MJRefreshAutoFooter footerWithRefreshingBlock:^{
@@ -99,7 +103,10 @@
 
 -(void)getBillType{
     WEAK_OBJ(weakSelf, self);
-    [NET_REQUEST_MANAGER requestBillTypeWithSuccess:^(id object) {
+    NSString *type = self.infoDic[@"url"];
+    if(type.length == 0)
+        return;
+    [NET_REQUEST_MANAGER requestBillTypeWithType:type success:^(id object) {
         NSArray *arr = object[@"data"];
         [weakSelf.billTypeList addObjectsFromArray:arr];
     } fail:^(id object) {
@@ -182,11 +189,13 @@
     if(title.length > 0)
         [tStr appendString:dic[@"title"]];
     NSString *intro = dic[@"intro"];
+    if([intro isKindOfClass:[NSNull class]])
+        intro = @"";
     if(intro.length > 0){
         if(tStr.length > 0){
-            [tStr appendFormat:@"(%@)",dic[@"intro"]];
+            [tStr appendFormat:@"(%@)",intro];
         }else
-            [tStr appendString:dic[@"intro"]];
+            [tStr appendString:intro];
     }
     if(tStr.length > 0){
         CGSize size = CGSizeMake(SCREEN_WIDTH - 15, 999);
@@ -291,12 +300,16 @@
 }
 
 -(void)viewDidAppear:(BOOL)animated{
+    [self requestBlance];
+}
+
+-(void)requestBlance{
     WEAK_OBJ(weakSelf, self);
     [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
-        weakSelf.headView.balanceLabel.text = [NSString stringWithFormat:@"余额：%@元",APP_MODEL.user.balance];
+        if(weakSelf.headView.balanceLabel)
+            weakSelf.headView.balanceLabel.text = [NSString stringWithFormat:@"余额：%@元",APP_MODEL.user.balance];
     } fail:^(id object) {
-    
+        
     }];
-
 }
 @end

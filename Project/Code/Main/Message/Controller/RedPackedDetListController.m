@@ -152,7 +152,7 @@
 }
 
 - (void)onGotoBill:(id)sender {
-    CDPush(self.navigationController, CDPVC(@"BillViewController", nil), YES);
+    CDPush(self.navigationController, CDPVC(@"BillTypeViewController", nil), YES);
 }
 
 #pragma mark - initData
@@ -208,7 +208,7 @@
     if ([self.model.redPackedInfoDetail[@"type"] integerValue] == 2) {
         mesLabel.text =  kMessCowRefundMessage;
     } else {
-        mesLabel.text = [NSString stringWithFormat:@"未领取的红包，将于%0.f分钟后发起退款", self.returnPackageTime/60 <= 1 ? 1 : self.returnPackageTime/60];
+//        mesLabel.text = [NSString stringWithFormat:@"未领取的红包，将于%0.2f分钟后发起退款", self.returnPackageTime/60];
     }
     
     mesLabel.font = [UIFont systemFontOfSize:13];

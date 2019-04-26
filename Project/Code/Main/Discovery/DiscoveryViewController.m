@@ -15,20 +15,22 @@
 
 @interface DiscoveryViewController ()<UITableViewDelegate,UITableViewDataSource>{
     UITableView *_tableView;
-    NSArray *_dataArray;
+    NSMutableArray *_dataArray;
 }
+
 @end
 
 @implementation DiscoveryViewController
 
 - (void)viewDidLoad {
+    _dataArray = [[NSMutableArray alloc] init];
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.navigationItem.title = @"发现";
     self.navigationItem.backBarButtonItem = nil;
     self.navigationItem.hidesBackButton = YES;
     self.navigationItem.leftBarButtonItem = nil;
-    _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, CDScreenHeight - 50)  style:UITableViewStyleGrouped];
+    _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, CDScreenHeight - 50)  style:UITableViewStylePlain];
     UIView *view = [[UIView alloc] init];
     view.backgroundColor = BaseColor;
     _tableView.backgroundView = view;
@@ -36,8 +38,9 @@
     _tableView.backgroundColor=[UIColor clearColor];
     _tableView.showsHorizontalScrollIndicator = NO;
     _tableView.showsVerticalScrollIndicator = YES;
-    _tableView.rowHeight = 70;
+    _tableView.rowHeight = 64;
     _tableView.separatorColor = TBSeparaColor;
+    _tableView.separatorInset = UIEdgeInsetsMake(0, 80, 0, 0);
     [self.view addSubview:_tableView];
     _tableView.delegate = self;
     _tableView.dataSource = self;
@@ -52,27 +55,81 @@
     [dic2 setObject:@"幸运大转盘" forKey:@"title"];
     [dic2 setObject:@"2" forKey:@"tag"];
 
+    NSArray *array = [NSArray arrayWithObjects:dic2,dic1, nil];
+    [_dataArray addObject:array];
+
+    
     NSMutableDictionary *dic3 = [[NSMutableDictionary alloc] init];
-    if([FUNCTION_MANAGER appType] == AppType_XZHB){
-        [dic3 setObject:@"discover_xzyeb" forKey:@"icon"];
-        [dic3 setObject:@"小猪余额宝" forKey:@"title"];
-    }else if([FUNCTION_MANAGER appType] == AppType_TTHB){
-        [dic3 setObject:@"discover_ttyeb" forKey:@"icon"];
-        [dic3 setObject:@"天天余额宝" forKey:@"title"];
-    }else if([FUNCTION_MANAGER appType] == AppType_WWHB){
-        [dic3 setObject:@"discover_wwyeb" forKey:@"icon"];
-        [dic3 setObject:@"旺旺余额宝" forKey:@"title"];
-    }else if([FUNCTION_MANAGER appType] == AppType_WBHB){
-        [dic3 setObject:@"discover_wbyeb" forKey:@"icon"];
-        [dic3 setObject:@" 5 8 余额宝" forKey:@"title"];
-    }
+    [dic3 setObject:@"discover_yeb" forKey:@"icon"];
+    NSString *s = [FUNCTION_MANAGER getApplicationName];
+    s = [s stringByReplacingOccurrencesOfString:@"红包" withString:@""];
+    s = [NSString stringWithFormat:@"%@余额宝",s];
+    [dic3 setObject:s forKey:@"title"];
     [dic3 setObject:@"3" forKey:@"tag"];
-    _dataArray = [NSArray arrayWithObjects:dic2,dic1,dic3, nil];
+//    if([FUNCTION_MANAGER appType] == AppType_XZHB)
+//        [dic3 setObject:@"小猪余额宝" forKey:@"title"];
+//    else if([FUNCTION_MANAGER appType] == AppType_TTHB)
+//        [dic3 setObject:@"天天余额宝" forKey:@"title"];
+//    else if([FUNCTION_MANAGER appType] == AppType_WWHB)
+//        [dic3 setObject:@"旺旺余额宝" forKey:@"title"];
+//    else if([FUNCTION_MANAGER appType] == AppType_WBHB)
+//        [dic3 setObject:@" 5 8 余额宝" forKey:@"title"];
+//    else if([FUNCTION_MANAGER appType] == AppType_CSHB)
+//        [dic3 setObject:@"测试余额宝" forKey:@"title"];
+//    else if([FUNCTION_MANAGER appType] == AppType_QQHB)
+//        [dic3 setObject:@"全球余额宝" forKey:@"title"];
+    
+    NSMutableDictionary *dic4 = [[NSMutableDictionary alloc] init];
+    [dic4 setObject:@"discover_dzpk" forKey:@"icon"];
+    [dic4 setObject:@"休闲小游戏" forKey:@"title"];
+    [dic4 setObject:@"4" forKey:@"tag"];
+    
+    NSMutableDictionary *dic5 = [[NSMutableDictionary alloc] init];
+    [dic5 setObject:@"discover_cqssc" forKey:@"icon"];
+    [dic5 setObject:@"桌球小游戏" forKey:@"title"];
+    [dic5 setObject:@"5" forKey:@"tag"];
+    
+    array = [NSArray arrayWithObjects:dic3,dic4,dic5, nil];
+    [_dataArray addObject:array];
+    
+    NSMutableDictionary *dic6 = [[NSMutableDictionary alloc] init];
+    [dic6 setObject:@"discover_h8ty" forKey:@"icon"];
+    [dic6 setObject:@"红包欢乐斗" forKey:@"title"];
+    [dic6 setObject:@"6" forKey:@"tag"];
+    
+    NSMutableDictionary *dic7 = [[NSMutableDictionary alloc] init];
+    [dic7 setObject:@"discover_mgdz" forKey:@"icon"];
+    [dic7 setObject:@"一直被模仿" forKey:@"title"];
+    [dic7 setObject:@"7" forKey:@"tag"];
+    
+    NSMutableDictionary *dic8 = [[NSMutableDictionary alloc] init];
+    [dic8 setObject:@"discover_agsx" forKey:@"icon"];
+    [dic8 setObject:@"从未被超越" forKey:@"title"];
+    [dic8 setObject:@"8" forKey:@"tag"];
+    
+    array = [NSArray arrayWithObjects:dic6,dic7,dic8, nil];
+    [_dataArray addObject:array];
+    
     [_tableView reloadData];
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
     return _dataArray.count;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 8;
+}
+
+- (nullable UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    UIView *view = [[UIView alloc] init];
+    view.backgroundColor = BaseColor;
+    return view;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    NSArray *arr = _dataArray[section];
+    return arr.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -89,37 +146,37 @@
         cell.itemIcon.layer.cornerRadius = 9.0;
         cell.itemIcon.contentMode = UIViewContentModeScaleAspectFit;
     }
-    NSDictionary *dic = [_dataArray objectAtIndex:indexPath.row];
+    NSArray *arr = _dataArray[indexPath.section];
+    NSDictionary *dic = [arr objectAtIndex:indexPath.row];
     cell.itemIcon.image = [UIImage imageNamed:dic[@"icon"]];
     cell.itemLabel.text = dic[@"title"];
     return cell;
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
-    return 0.1f;
-}
-
-- (nullable UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
-    UIView *view = [[UIView alloc] init];
-    view.backgroundColor = BaseColor;
-    return view;
-}
-
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
-    NSDictionary *dic = _dataArray[indexPath.row];
+    NSDictionary *dic = _dataArray[indexPath.section][indexPath.row];
     NSInteger tag = [dic[@"tag"] integerValue];
     if(tag == 2){
-        WheelViewController *vc = [[WheelViewController alloc] init];
-        vc.hidesBottomBarWhenPushed = YES;
-        [self.navigationController pushViewController:vc animated:YES];
-        return;
+        NSString *urlHead = APP_MODEL.commonInfo[@"big.wheel.lottery.url"];
+        if(urlHead.length > 0){
+            NSString *url = [NSString stringWithFormat:@"%@?token=%@",urlHead,APP_MODEL.user.token];
+            WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+            vc.navigationItem.title = dic[@"title"];
+            vc.hidesBottomBarWhenPushed = YES;
+            //[vc loadWithURL:url];
+            [self.navigationController pushViewController:vc animated:YES];
+            return;
+        }
+//        WheelViewController *vc = [[WheelViewController alloc] init];
+//        vc.hidesBottomBarWhenPushed = YES;
+//        [self.navigationController pushViewController:vc animated:YES];
     }else if(tag == 1){
         NSString *urlHead = APP_MODEL.commonInfo[@"fruit.slot.url"];
         if(urlHead.length > 0){
             NSString *url = [NSString stringWithFormat:@"%@?token=%@",urlHead,APP_MODEL.user.token];
             WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
-            vc.navigationItem.title = @"水果游戏机";
+            vc.navigationItem.title = dic[@"title"];
             vc.hidesBottomBarWhenPushed = YES;
             //[vc loadWithURL:url];
             [self.navigationController pushViewController:vc animated:YES];

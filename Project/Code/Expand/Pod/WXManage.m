@@ -42,7 +42,7 @@ typedef void (^CodeBlock)(NSString *code);
     self = [super init];
     if (self) {
         //wx
-        [WXApi registerApp:WXKey];
+        [WXApi registerApp:kWXKey];
     }
     return self;
 }
@@ -142,7 +142,7 @@ typedef void (^CodeBlock)(NSString *code);
 
 - (void)getWXAccessTokenByCode:(NSString *)code{
     CDBaseNet *net = [CDBaseNet normalNet];
-    net.param = @{@"appid":WXKey,@"secret":WXSecret,@"code":code,@"grant_type":@"authorization_code"};
+    net.param = @{@"appid":kWXKey,@"secret":kWXSecret,@"code":code,@"grant_type":@"authorization_code"};
     net.path = WXAccessTokenAPI;
     [net doGetSuccess:^(NSDictionary *dic) {
         if (dic != NULL) {

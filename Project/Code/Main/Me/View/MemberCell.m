@@ -57,7 +57,7 @@
     }];
     
     [_rightLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.right.equalTo(self.contentView).offset(-15);
+        make.right.equalTo(self.contentView).offset(-18);
         make.centerY.equalTo(self.contentView);
     }];
 }

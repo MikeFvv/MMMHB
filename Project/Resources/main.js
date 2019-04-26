@@ -1,26 +1,14 @@
-//
-//require("NSString");
-//
-//defineClass("NetRequestManager", {
-//            requestTockenWithPhone_smsCode_success_fail: function(phone, smsCode, successBlock, failBlock) {
-//            var info = self.requestInfoWithAct(9);
-//            var url = NSString.stringWithFormat("%@?mobile=%@&code=%@&grant_type=mobile&scope=server", info.url(), phone, smsCode);
-//            info.setUrl(url);
-//            self.requestWithData_requestInfo_success_fail(null, info, null, null);
-//            }
-//            }, {});
-//
-//
 
-
-//defineClass("AppModel", {
-//            serverUrl: function() {
-//            self.setIsReleaseOrBeta(NO);
-//            return  "http://api.5858hbw.com/api/";
-//            },
+//require("AppModel, NSString");
 //
-//            rongYunKey: function() {
-//            return "n19jmcy5na0i9";
+//defineClass("WithdrawView", {
+//            initView: function() {
+//            self.submitBtn().layer().setMasksToBounds(YES);
+//            self.submitBtn().layer().setCornerRadius(8);
+//            self.tipLabel().setText(NSString.stringWithFormat("当前零钱余额%@元，", AppModel.shareInstance().user().balance()));
+//            self.textField().setDelegate(self);
+//            self.bankIconImageView().layer().setMasksToBounds(YES);
+//            self.bankIconImageView().layer().setCornerRadius(10);
+//            self.textField().setPlaceholder("最低提现额度为10元");
 //            }
-//
 //            }, {});

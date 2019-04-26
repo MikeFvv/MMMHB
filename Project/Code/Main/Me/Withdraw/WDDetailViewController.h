@@ -23,6 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic,strong)IBOutlet UILabel *remarkLabel;
 
 @property(nonatomic,strong)NSDictionary *infoDic;
+
+@property(nonatomic,strong)IBOutlet UIScrollView *scrollView;
 @end
 
 NS_ASSUME_NONNULL_END

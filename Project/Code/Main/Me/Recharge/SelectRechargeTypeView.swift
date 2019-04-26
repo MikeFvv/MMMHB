@@ -44,11 +44,12 @@ class SelectRechargeTypeView: UIView,UITableViewDelegate,UITableViewDataSource {
         self.addSubview(self.containView!);
         
         var height:NSInteger = 44 + (self.dataArray?.count ?? 0)! * 46
+        
+        if height > NSInteger(self.frame.size.height - 300){
+            height = NSInteger(self.frame.size.height - 300)
+        }
         if height < 90{
             height = 90
-        }
-        if height > NSInteger(self.frame.size.height - 100){
-            height = NSInteger(self.frame.size.height - 100)
         }
         
         let width:NSInteger = NSInteger(self.frame.size.width)
@@ -61,7 +62,7 @@ class SelectRechargeTypeView: UIView,UITableViewDelegate,UITableViewDataSource {
 //        self.containView?.layer.borderColor = UIColor.init(red: 0, green: 0, blue: 0, alpha: 0.1).cgColor
         
         self.titleLabel = UILabel()
-        self.titleLabel?.font = UIFont.systemFont(ofSize: 17)
+        self.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
         self.titleLabel?.textAlignment = NSTextAlignment.center;
         self.titleLabel?.textColor = UIColor.init(white: 1.0, alpha: 1.0);
         self.titleLabel?.backgroundColor = UIColor.init(red: 254/255.0, green: 57/255.0, blue: 98/255.0, alpha: 1.0)
@@ -90,6 +91,8 @@ class SelectRechargeTypeView: UIView,UITableViewDelegate,UITableViewDataSource {
         self.containView?.addSubview(self.tableView!)
         self.tableView?.rowHeight = 56
         self.tableView?.backgroundColor = UIColor.clear
+        self.tableView?.showsVerticalScrollIndicator = false
+        self.tableView?.showsHorizontalScrollIndicator = false
         self.tableView?.delegate = self;
         self.tableView?.dataSource = self;
         self.tableView?.mas_makeConstraints({ (make:MASConstraintMaker?) in

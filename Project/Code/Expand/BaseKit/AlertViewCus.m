@@ -12,7 +12,6 @@
 @property (nonatomic ,strong) UIView *bgView;
 @property (nonatomic ,strong) UIView *containView;
 @property (nonatomic ,strong) UIView *btnView;
-@property (nonatomic ,strong) UILabel *textLabel;
 @property (nonatomic ,copy)CallbackBlock block;
 @end
 
@@ -58,11 +57,17 @@ static AlertViewCus *instance = nil;
         self.containView.layer.masksToBounds = YES;
         self.containView.layer.cornerRadius = 10.0;
         NSInteger width = 300;
-        self.containView.frame = CGRectMake(0, 0, width, width * 0.618);
-        self.containView.center = CGPointMake(frame.size.width/2.0, frame.size.height/2.0 - 30);
+//        self.containView.frame = CGRectMake(0, 0, width, width * 0.618);
+//        self.containView.center = CGPointMake(frame.size.width/2.0, frame.size.height/2.0 - 30);
         [self addSubview:self.containView];
+        [self.containView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(@(width));
+            make.height.equalTo(@(width * 0.618));
+            make.centerX.equalTo(self.mas_centerX);
+            make.centerY.equalTo(self.mas_centerY).offset(-30);
+        }];
         
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, self.containView.frame.size.width - 40, self.containView.frame.size.height - 48)];
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, width - 40, width * 0.618 - 48)];
         label.textColor = Color_0;
         label.backgroundColor = [UIColor clearColor];
         label.font = [UIFont systemFontOfSize2:17];
@@ -71,9 +76,15 @@ static AlertViewCus *instance = nil;
         [self.containView addSubview:label];
         self.textLabel = label;
         
-        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, label.frame.size.height, self.containView.frame.size.width, self.containView.frame.size.height - label.frame.size.height)];
-        view.backgroundColor = MBTNColor;//COLOR_X(242, 242, 242);
+        UIImageView *view = [[UIImageView alloc] init];
+        //view.backgroundColor = MBTNColor;//COLOR_X(242, 242, 242);
+        view.image = [UIImage imageNamed:@"navBarBg"];
+        view.userInteractionEnabled = YES;
         [self.containView addSubview:view];
+        [view mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.bottom.equalTo(self.containView);
+            make.height.equalTo(@48);
+        }];
         self.btnView = view;
 
     }
@@ -84,7 +95,6 @@ static AlertViewCus *instance = nil;
     self.textLabel.text = text;
     self.block = block;
     UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-    btn.frame = CGRectMake(0, 0, self.containView.frame.size.width, 48);
     //[btn setBackgroundColor:MBTNColor];
     [btn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     btn.titleLabel.font = [UIFont boldSystemFontOfSize:16];
@@ -93,7 +103,10 @@ static AlertViewCus *instance = nil;
     btn.layer.masksToBounds = YES;
     btn.layer.cornerRadius = 6.0;
     [self.btnView addSubview:btn];
-    
+    [btn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self.btnView);
+    }];
+    [self refreshLayout];
     [self show];
 }
 
@@ -102,7 +115,6 @@ static AlertViewCus *instance = nil;
     //[self.textLabel setValue:@(40) forKey:@"lineSpacing"];
     self.block = block;
     UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-    btn.frame = CGRectMake(0, 0, self.containView.frame.size.width/2.0, 48);
     //[btn setBackgroundColor:MBTNColor];
     [btn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     btn.titleLabel.font = [UIFont boldSystemFontOfSize:16];
@@ -111,9 +123,12 @@ static AlertViewCus *instance = nil;
     btn.layer.masksToBounds = YES;
     btn.layer.cornerRadius = 6.0;
     [self.btnView addSubview:btn];
+    [btn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.top.bottom.equalTo(self.btnView);
+        make.width.equalTo(self.btnView.mas_width).multipliedBy(0.5);
+    }];
     
     btn = [UIButton buttonWithType:UIButtonTypeCustom];
-    btn.frame = CGRectMake(self.containView.frame.size.width/2.0, 0, self.containView.frame.size.width/2.0, 48);
     //[btn setBackgroundColor:MBTNColor];
     [btn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     btn.titleLabel.font = [UIFont boldSystemFontOfSize:16];
@@ -122,11 +137,21 @@ static AlertViewCus *instance = nil;
     btn.layer.masksToBounds = YES;
     btn.layer.cornerRadius = 6.0;
     [self.btnView addSubview:btn];
+    [btn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.equalTo(self.btnView.mas_width).multipliedBy(0.5);
+        make.right.top.bottom.equalTo(self.btnView);
+    }];
     
-    UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(self.containView.frame.size.width/2.0, 0, 0.5, btn.frame.size.height)];
+    UIView *lineView = [[UIView alloc] init];
     [lineView setBackgroundColor:[UIColor whiteColor]];
     lineView.alpha = 0.8;
     [self.btnView addSubview:lineView];
+    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.btnView.mas_centerX);
+        make.top.bottom.equalTo(self.btnView);
+        make.width.equalTo(@0.5);
+    }];
+    [self refreshLayout];
     [self show];
 }
 
@@ -165,4 +190,20 @@ static AlertViewCus *instance = nil;
     }];
 }
 
+-(void)refreshLayout{
+    CGSize size = [FUNCTION_MANAGER getFitSizeWithLabel:self.textLabel withFixType:FixTypes_width];
+    CGRect rect = self.textLabel.frame;
+    rect.size.height = size.height + 30;
+    NSInteger height = rect.size.height + 48;
+    NSInteger width = 300;
+    NSInteger h = width * 0.618;
+    if(height < h){
+        height = h;
+    }else{
+        self.textLabel.frame = rect;
+        [self.containView mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.height.equalTo(@(height));
+        }];
+    }
+}
 @end

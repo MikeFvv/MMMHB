@@ -109,7 +109,12 @@
     [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
          __strong __typeof(weakSelf)strongSelf = weakSelf;
         //        NSLog(@"get 请求数据结果： *** %@", response);
-        [strongSelf handleGroupListData:response[@"data"] andIsMyJoined:YES];
+        
+        if ([response[@"status"] integerValue] >= 1) {
+            
+        } else {
+            [strongSelf handleGroupListData:response[@"data"] andIsMyJoined:YES];
+        }
         successBlock(response);
         
     } failureBlock:^(NSError *error) {

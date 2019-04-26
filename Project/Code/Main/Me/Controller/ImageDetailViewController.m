@@ -9,7 +9,7 @@
 #import "ImageDetailViewController.h"
 #import "UIImageView+WebCache.h"
 
-@interface ImageDetailViewController ()
+@interface ImageDetailViewController ()<UIGestureRecognizerDelegate>
 @property(nonatomic,assign)BOOL needShowBar;
 @end
 
@@ -25,6 +25,7 @@
     // Do any additional setup after loading the view.
     self.automaticallyAdjustsScrollViewInsets = NO;
     [self.navigationController.navigationBar setTranslucent:NO];
+    
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
     [self.view addSubview:scrollView];
     scrollView.showsVerticalScrollIndicator = NO;
@@ -34,7 +35,9 @@
     self.imageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.scrollView addSubview:self.imageView];
     [self showImage];
-    
+    if (@available(iOS 11.0, *)) {
+        self.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
     if(self.hiddenNavBar){
         UIButton *backBtn=[UIButton buttonWithType:UIButtonTypeCustom];
         [backBtn setImage:[UIImage imageNamed:@"nav_back"] forState:UIControlStateNormal];
@@ -79,10 +82,12 @@
         height = self.scrollView.frame.size.height + 1;
     self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width, height);
     
-    if(self.imageView.frame.size.height < self.scrollView.frame.size.height - 70){
-        CGPoint point = self.imageView.center;
-        point.y = (self.scrollView.frame.size.height - 70)/2.0;
-        self.imageView.center = point;
+    if(!self.top){
+        if(self.imageView.frame.size.height < self.scrollView.frame.size.height - 70){
+            CGPoint point = self.imageView.center;
+            point.y = (self.scrollView.frame.size.height - 70)/2.0;
+            self.imageView.center = point;
+        }
     }
     [self writeTitle];
 }

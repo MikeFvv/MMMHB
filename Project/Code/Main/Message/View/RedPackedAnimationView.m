@@ -324,7 +324,7 @@
         if (type == 2) {
             [self contentShow:@"本包游戏已截止"];
         } else {
-            [self contentShow:[NSString stringWithFormat:@"该红包已超过%0.f分钟，如已领取，可在<账单>中查询", [rpOverdueTime floatValue]/60 <= 1 ? 1 : [rpOverdueTime floatValue]/60]];
+            [self contentShow:[NSString stringWithFormat:@"该红包已超过%0.2f分钟，如已领取，可在<账单>中查询", [rpOverdueTime floatValue]/60]];
         }
         
         [self setDetaiButton];

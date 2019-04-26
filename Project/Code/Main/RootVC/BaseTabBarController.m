@@ -10,6 +10,7 @@
 #import "RongCloudManager.h"
 #import "TabbarButton.h"
 #import "ActivityViewController.h"
+#import "ActivityMainViewController.h"
 
 @interface BaseTabBarController ()<UITabBarControllerDelegate>{
     TabbarButton *_tabbar[5];
@@ -61,10 +62,10 @@
     _selectIndex = 0;
     self.delegate = self;
     
-    NSArray *vcs = @[@"MessageViewController",@"GroupViewController",@"ActivityViewController",@"DiscoveryViewController",@"MemberViewController"];
+    NSArray *vcs = @[@"MessageViewController",@"GroupViewController",@"ActivityMainViewController",@"DiscoveryViewController",@"MemberViewController"];
     NSArray *titles = @[@"消息",@"群组",@"",@"发现",@"我的"];
-    NSArray *nors = @[@"footer-icon-tip",@"footer-icon-group",@"tab-activ1",@"tabar_find",@"footer-icon-my"];//@"footer-icon-jl"
-    NSArray *ses = @[@"footer-icon-tip-on",@"footer-icon-group-on",@"tab-activ2",@"tabar_find_on",@"footer-icon-my-on"];//@"footer-icon-jl-on"
+    NSArray *nors = @[@"footer-icon-tip",@"footer-icon-group",@"tabbar2",@"tabar_find",@"footer-icon-my"];//@"footer-icon-jl"
+    NSArray *ses = @[@"footer-icon-tip-on",@"footer-icon-group-on",@"tabbar1",@"tabar_find_on",@"footer-icon-my-on"];//@"footer-icon-jl-on"
     NSMutableArray *vs = [[NSMutableArray alloc]init];
     CGFloat w = (CDScreenWidth - CDScreenWidth * 0.1)/vcs.count;
     NSInteger m = 0;
@@ -80,28 +81,35 @@
         _tabbar[i] = [TabbarButton tabbar];
         
         [self.tabBar addSubview:_tabbar[i]];
-        if(i == 2)
+        if(i == 2){
             _tabbar[i].frame = CGRectMake(m, 0, w + CDScreenWidth * 0.1, 49);
+            float rateY = 49/75.0;
+            float rateX = (w + CDScreenWidth * 0.1)/158.0;
+            _tabbar[i].scaleX = rateX;
+            _tabbar[i].scaleY = rateY;
+
+        }
         else
             _tabbar[i].frame = CGRectMake(m, 0, w, 49);
         
         if(i == 2){
             _tabbar[i].iconImg.contentMode = UIViewContentModeScaleAspectFit;
             [_tabbar[i].iconImg mas_remakeConstraints:^(MASConstraintMaker *make) {
-                make.centerX.equalTo(_tabbar[i]);
-                make.centerY.equalTo(_tabbar[i]).offset(-5);
+                make.centerX.equalTo(self->_tabbar[i]);
+                make.centerY.equalTo(self->_tabbar[i]).offset(-3);
                 make.width.equalTo(@(w + CDScreenWidth * 0.1 - 10));
             }];
         }
         
         _tabbar[i].title = titles[i];
         _tabbar[i].normalImg = [UIImage imageNamed:nors[i]];
-        _tabbar[i].selectImg = [UIImage imageNamed:ses[i]];
+        if(i != 2)
+            _tabbar[i].selectImg = [UIImage imageNamed:ses[i]];
         _tabbar[i].tabbarSelected = (i == _selectIndex)?YES:NO;
         if(i == 3)
             _tabbar[i].animationType = 2;
         else if(i == 2)
-            _tabbar[i].animationType = 0;
+            _tabbar[i].animationType = 5;
         else if(i == 0)
             _tabbar[i].animationType = 4;
         else

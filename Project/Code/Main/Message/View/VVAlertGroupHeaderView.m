@@ -62,7 +62,12 @@
 //        make.height.mas_equalTo(35);
 //    }];
     
-    
+    UIView *view = [[UIView alloc] init];
+    view.backgroundColor = COLOR_X(250, 250, 250);
+    [self addSubview:view];
+    [view mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self);
+    }];
     UILabel *nameLabel = [[UILabel alloc] init];
     nameLabel.text = @"-";
     nameLabel.font = [UIFont vvFontOfSize:16];
@@ -74,13 +79,20 @@
     
     [nameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerY.mas_equalTo(self.mas_centerY);
+        make.width.mas_equalTo(SCREEN_WIDTH -30*2 -15*2);
         make.left.mas_equalTo(self.mas_left).offset(15);
-        make.right.mas_equalTo(self.mas_right).offset(-15);
     }];
     
     UITapGestureRecognizer *tapGesturRecognizer = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(headerBtnClick)];
     [self addGestureRecognizer:tapGesturRecognizer];
     
+    UIView *lineView = [[UIView alloc] init];
+    lineView.backgroundColor = COLOR_X(240, 240, 240);
+    [self addSubview:lineView];
+    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(self);
+        make.height.equalTo(@0.5);
+    }];
 }
 
 - (void)headerBtnClick {

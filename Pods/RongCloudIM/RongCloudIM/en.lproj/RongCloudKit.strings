@@ -83,7 +83,7 @@
 "SearchPublicService"="Search Public Service";
 "PublicService"="Public Service";
 "NOT_IN_DISCUSSION"="You are not in current discussion";
-"NOT_IN_GROUP"="You are not in current group";
+"NOT_IN_GROUP"="请您退出群组，重新加入";
 "FORBIDDEN_IN_GROUP"="You were forbidden to send message in current group.";
 "NOT_IN_CHATROOM"="You are not in current chatroom";
 "Message rejected"="Your message have sent out, but rejected by the receiver";

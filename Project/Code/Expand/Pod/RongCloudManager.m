@@ -55,32 +55,8 @@
 #pragma mark RCIMConnectionStatusDelegate
 - (void)onRCIMConnectionStatusChanged:(RCConnectionStatus)status{
     switch (status) {
-        case ConnectionStatus_UNKNOWN:{
-            
-        }
-            break;
         case ConnectionStatus_Connected:{
-            
-        }
-            break;
-        case ConnectionStatus_NETWORK_UNAVAILABLE:{
-            
-        }
-            break;
-        case ConnectionStatus_AIRPLANE_MODE:{
-            
-        }
-            break;
-        case ConnectionStatus_Cellular_2G:{
-            
-        }
-            break;
-        case ConnectionStatus_Cellular_3G_4G:{
-            
-        }
-            break;
-        case ConnectionStatus_WIFI:{
-            
+            self.isConnectRC = YES;
         }
             break;
         case ConnectionStatus_KICKED_OFFLINE_BY_OTHER_CLIENT:{
@@ -89,23 +65,24 @@
         }
             break;
         case ConnectionStatus_Connecting:{
-            
+            self.isConnectRC = NO;
         }
             break;
         case ConnectionStatus_Unconnected:{
-            
+            self.isConnectRC = NO;
         }
             break;
         case ConnectionStatus_SignUp:{
-            
+            self.isConnectRC = NO;
         }
             break;
         case ConnectionStatus_TOKEN_INCORRECT:{
-            
+            self.isConnectRC = NO;
         }
             break;
         case ConnectionStatus_DISCONN_EXCEPTION:{
             //            NSLog(@"111");
+            self.isConnectRC = NO;
         }
             break;
         default:
@@ -268,6 +245,7 @@
 
 
 - (void)initWithMode{
+    NSLog(@"融云key:%@",[AppModel shareInstance].rongYunKey);
     [[RCIM sharedRCIM] initWithAppKey:[AppModel shareInstance].rongYunKey];
 }
 
@@ -363,16 +341,10 @@
     } progressBlock:nil];
 }
 
-
-
-
 - (void)disConnect{
     self.isConnectRC = NO;
     [[RCIM sharedRCIM] logout];
 }
-
-
-
 
 //设置群组通知消息没有提示音
 - (BOOL)onRCIMCustomAlertSound:(RCMessage *)message {

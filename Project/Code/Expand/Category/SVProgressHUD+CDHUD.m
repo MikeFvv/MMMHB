@@ -12,7 +12,7 @@
 
 + (void)showError:(NSError *)error{
     NSDictionary *dic = error.userInfo;
-    NSString *msg = @"服务器出错，稍后尝试~";
+    NSString *msg = @"网络连接失败";
     if ([dic objectForKey:@"msg"]) {
         msg = [dic objectForKey:@"msg"];
     }

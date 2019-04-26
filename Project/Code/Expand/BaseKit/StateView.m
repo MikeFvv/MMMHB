@@ -85,19 +85,11 @@
 }
 
 - (void)showNetError{
-    CDWeakSelf(self);
-    dispatch_async(dispatch_get_main_queue(), ^{
-        CDStrongSelf(self);
-        [self showImg:[UIImage imageNamed:@"state_netError"] Title:@"网络开小差了，请检查网络"];
-    });
+    [self showImg:[UIImage imageNamed:@"state_netError"] Title:@"网络开小差了，请检查网络"];
 }
 
 - (void)showEmpty{
-    CDWeakSelf(self);
-    dispatch_async(dispatch_get_main_queue(), ^{
-        CDStrongSelf(self);
-        [self showImg:[UIImage imageNamed:@"state_empty"] Title:@"暂无内容"];
-    });
+    [self showImg:[UIImage imageNamed:@"state_empty"] Title:@"暂无内容"];
 }
 
 - (void)showImg:(UIImage *)img Title:(NSString *)title{

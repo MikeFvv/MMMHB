@@ -7,8 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
+#import "WebProgressView.h"
 
-@interface WebViewController : SuperViewController
+@interface WebViewController : SuperViewController{
+    NSString *_url;
+}
+@property(nonatomic,strong)WKWebView *webView;
 
 - (instancetype)initWithUrl:(NSString *)url;
 - (instancetype)initWithHtmlString:(NSString *)string;

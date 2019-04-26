@@ -77,7 +77,7 @@
                 UILabel *label = [UILabel new];
                 [cell.contentView addSubview:label];
                 label.font = [UIFont systemFontOfSize2:15];
-                label.textColor = Color_0;
+                label.textColor = Color_6;
                 label.text = (indexPath.row == 0)?APP_MODEL.user.userId:APP_MODEL.user.mobile;
                 
                 [label mas_makeConstraints:^(MASConstraintMaker *make) {

@@ -30,6 +30,8 @@
 #import "DepositOrderController.h"
 #import "WebViewController.h"
 #import "HelpCenterWebController.h"
+#import "AgentCenterViewController.h"
+#import "BillTypeViewController.h"
 
 @implementation CellData
 
@@ -81,43 +83,30 @@
 #pragma mark ----- Data
 - (void)initData{
     self.dataArray = [[NSMutableArray alloc] init];
-    NSMutableArray *sectionArray1 = [[NSMutableArray alloc] init];
+    NSMutableArray *sectionArray = [[NSMutableArray alloc] init];
     
-//    CellData *cellData1 = [[CellData alloc] initWithTitle:@"邀请码" subTitle:APP_MODEL.user.invitecode icon:@"my-code" showArrow:NO tag:1];
-//    [sectionArray1 addObject:cellData1];
+    CellData *cellData1 = [[CellData alloc] initWithTitle:@"邀请码" subTitle:APP_MODEL.user.invitecode icon:@"my-code" showArrow:NO tag:1];
+    [sectionArray addObject:cellData1];
+    [self.dataArray addObject:sectionArray];
 
-    CellData *cellData13 = [[CellData alloc] initWithTitle:@"保存下载页" subTitle:nil icon:@"me_down" showArrow:NO tag:13];
-    [sectionArray1 addObject:cellData13];
-    CellData *cellData14 = [[CellData alloc] initWithTitle:@"账单记录" subTitle:nil icon:@"my-zdjl" showArrow:NO tag:14];
-    [sectionArray1 addObject:cellData14];
-    
-//    CellData *cellData12 = [[CellData alloc] initWithTitle:@"幸运大转盘" subTitle:nil icon:@"my-lottery" showArrow:NO tag:12];
-//    [sectionArray1 addObject:cellData12];
-    CellData *cellData10 = [[CellData alloc] initWithTitle:@"申请代理" subTitle:nil icon:@"my-2b" showArrow:NO tag:10];
-    [sectionArray1 addObject:cellData10];
-    CellData *cellData4 = [[CellData alloc] initWithTitle:@"下级玩家" subTitle:nil icon:@"my-player" showArrow:NO tag:4];
-    [sectionArray1 addObject:cellData4];
-    //if(APP_MODEL.user.agentFlag)
-    {
-        CellData *cellData8 = [[CellData alloc] initWithTitle:@"我的报表" subTitle:nil icon:@"my-report" showArrow:NO tag:8];
-        [sectionArray1 addObject:cellData8];
-    }
-//    CellData *cellData9 = [[CellData alloc] initWithTitle:@"活动中心" subTitle:nil icon:@"my-huodong" showArrow:NO tag:9];
-//    [sectionArray1 addObject:cellData9];
-    CellData *cellData2 = [[CellData alloc] initWithTitle:@"充值中心" subTitle:nil icon:@"my-recharge" showArrow:NO tag:2];
-    [sectionArray1 addObject:cellData2];
-    CellData *cellData3 = [[CellData alloc] initWithTitle:@"提现中心" subTitle:nil icon:@"my-withdrawals" showArrow:NO tag:3];
-    [sectionArray1 addObject:cellData3];
-    
-//    CellData *cellData11 = [[CellData alloc] initWithTitle:@"游戏介绍" subTitle:nil icon:@"my-withdrawals" showArrow:NO tag:11];
-//    [sectionArray1 addObject:cellData11];
-    
-    [self.dataArray addObject:sectionArray1];
-    
+    sectionArray = [[NSMutableArray alloc] init];
+    CellData *cellData2 = [[CellData alloc] initWithTitle:@"充值中心" subTitle:nil icon:@"my-recharge" showArrow:YES tag:2];
+    [sectionArray addObject:cellData2];
+    CellData *cellData3 = [[CellData alloc] initWithTitle:@"提现中心" subTitle:nil icon:@"my-withdrawals" showArrow:YES tag:3];
+    [sectionArray addObject:cellData3];
+    [self.dataArray addObject:sectionArray];
+
+    sectionArray = [[NSMutableArray alloc] init];
+    CellData *cellData14 = [[CellData alloc] initWithTitle:@"账单记录" subTitle:nil icon:@"my-zdjl" showArrow:YES tag:14];
+    [sectionArray addObject:cellData14];
+    CellData *cellData10 = [[CellData alloc] initWithTitle:@"帮助中心" subTitle:nil icon:@"my-help" showArrow:YES tag:10];
+    [sectionArray addObject:cellData10];
+    [self.dataArray addObject:sectionArray];
+
     NSString *s = [FUNCTION_MANAGER getApplicationVersion];
     CellData *cellData5 = [[CellData alloc] initWithTitle:@"版本" subTitle:s icon:@"my-version" showArrow:NO tag:5];
-    CellData *cellData6 = [[CellData alloc] initWithTitle:@"设置" subTitle:nil icon:@"my-option" showArrow:NO tag:6];
-    CellData *cellData7 = [[CellData alloc] initWithTitle:@"退出" subTitle:nil icon:@"my-exit" showArrow:NO tag:7];
+    CellData *cellData6 = [[CellData alloc] initWithTitle:@"设置" subTitle:nil icon:@"my-option" showArrow:YES tag:6];
+    CellData *cellData7 = [[CellData alloc] initWithTitle:@"退出" subTitle:nil icon:@"my-exit" showArrow:YES tag:7];
     NSArray *sectionArray2 = [NSArray arrayWithObjects:cellData5,cellData6,cellData7, nil];
     [self.dataArray addObject:sectionArray2];
 }
@@ -150,7 +139,7 @@
     _headView = [[MemberHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, _headHeight)];
     [_headView addTarget:self action:@selector(action_info) forControlEvents:UIControlEventTouchUpInside];
     [_headView.zuanQianBtn addTarget:self action:@selector(zuanQian) forControlEvents:UIControlEventTouchUpInside];
-    [_headView.zhangDanBtn addTarget:self action:@selector(helpCenter) forControlEvents:UIControlEventTouchUpInside];
+    [_headView.zhangDanBtn addTarget:self action:@selector(becomeAgent) forControlEvents:UIControlEventTouchUpInside];
     _headView.backgroundColor = [UIColor clearColor];
 
     _tableView = [UITableView groupTable];
@@ -161,6 +150,7 @@
     _tableView.dataSource = self;
     _tableView.delegate = self;
     _tableView.separatorColor = TBSeparaColor;
+    _tableView.separatorInset = UIEdgeInsetsMake(0, 50, 0, 0);
     _tableView.tableHeaderView = _headView;
     _tableView.rowHeight = 50.f;
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
@@ -221,8 +211,8 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
     if(section == 0)
-        return 9;
-    return 5.0f;
+        return 8;
+    return 3.0f;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
@@ -243,10 +233,7 @@
         }];
         cell.itemIcon.image = [UIImage imageNamed:cellData.icon];
         cell.itemLabel.text = cellData.title;
-        if(cellData.showArrow)
-            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-        else
-            cell.accessoryType = UITableViewCellAccessoryNone;
+        cell.accessoryType = UITableViewCellAccessoryNone;
         
         if(cellData.tag == 1){
             cell.rightArrowImage.hidden = YES;
@@ -261,19 +248,19 @@
             copyLabel.text = @"复制";
             copyLabel.font = [UIFont systemFontOfSize2:13];
             [copyLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.right.equalTo(cell.contentView).offset(-15);
+                make.right.equalTo(cell.contentView).offset(-19);
                 make.centerY.equalTo(cell.contentView);
-                make.width.equalTo(@60);
+                make.width.equalTo(@46);
                 make.height.equalTo(@26);
             }];
 
             [cell.rightLabel mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.right.equalTo(cell.contentView).offset(-83);
+                make.right.equalTo(cell.contentView).offset(-74);
             }];
         }
-        if(indexPath.section == 1 && indexPath.row == 0){
-            cell.rightArrowImage.hidden = YES;
-        }
+        if(cellData.showArrow)
+            cell.rightArrowImage.hidden = NO;
+        else cell.rightArrowImage.hidden = YES;
     }
     cell.rightLabel.text = cellData.subTitle;
     return cell;
@@ -339,11 +326,7 @@
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
     } else if(data.tag == 10){
-        BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
-        vc.hidesBottomBarWhenPushed = YES;
-        vc.hiddenNavBar = YES;
-        vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
-        [self.navigationController pushViewController:vc animated:YES];
+        [self helpCenter];
     } else if(data.tag == 11){
         GuideView *guideView = [[GuideView alloc] initWithArray:@[@"guide0",@"guide1",@"guide2"] target:nil selector:nil];
         [guideView showWithAnimationWithAni:YES];
@@ -352,7 +335,7 @@
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
     } else if(data.tag == 13){
-        NSString *url = [NSString stringWithFormat:@"%@%@",kDownloadPageURL,APP_MODEL.user.invitecode];
+        NSString *url = [NSString stringWithFormat:@"%@?code=%@",APP_MODEL.commonInfo[@"website.address"],APP_MODEL.user.invitecode];
         if([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:url]])
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
 //        WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
@@ -391,7 +374,19 @@
 }
 
 -(void)zhangDan{
-    PUSH_C(self, BillViewController, YES);
+    PUSH_C(self, BillTypeViewController, YES);
+}
+
+-(void)becomeAgent{
+    AgentCenterViewController *vc = [[AgentCenterViewController alloc] init];
+    vc.hidesBottomBarWhenPushed = YES;
+    [self.navigationController pushViewController:vc animated:YES];
+
+    //    BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
+//    vc.hidesBottomBarWhenPushed = YES;
+//    vc.hiddenNavBar = YES;
+//    vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
+//    [self.navigationController pushViewController:vc animated:YES];
 }
 
 -(void)helpCenter{
@@ -399,8 +394,7 @@
 //    [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
 //    return;
     
-    NSString *url = [NSString stringWithFormat:@"%@/dist/#/index/helpCenter?accesstoken=%@", [AppModel shareInstance].commonInfo[@"website.address"], [AppModel shareInstance].user.token];
-    HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:url];
+    HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:nil];
     vc.hidesBottomBarWhenPushed = YES;
     [self.navigationController pushViewController:vc animated:YES];
 }

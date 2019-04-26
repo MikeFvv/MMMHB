@@ -74,3 +74,21 @@ target 'ProjectWBHB' do
     pod 'JSPatch'
     pod 'Bugtags'
 end
+
+target 'ProjectCSHB' do
+    # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+    # use_frameworks!
+    pod 'SVProgressHUD'
+    pod 'MJExtension'
+    pod 'MJRefresh'
+    pod 'RongCloudIM'
+    pod 'AFNetworking'
+    pod 'SDWebImage'
+    pod 'Masonry'
+    pod 'WHC_ModelSqliteKit'
+    pod 'WechatOpenSDK'
+    pod 'IQKeyboardManager'
+    pod 'YYCache'
+    pod 'JSPatch'
+    pod 'Bugtags'
+end

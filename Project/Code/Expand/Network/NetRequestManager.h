@@ -63,6 +63,14 @@ typedef enum{
     ActSubmitRechargeInfo,//提交用户充值信息（去支付）
     ActRequestShareUrl,//获取分享URL
     ActRequestGuideImageList,//获取新手引导图片列表
+    
+    ActRequestActivityList2,//活动奖励列表
+    ActRequestQiaoBaoReward,//获取抢包奖励金额
+    ActRequestFaBaoReward,//获取发包奖励金额
+    ActRequestQiaoBaoList,//获取抢包活动阶段
+    ActRequestFaBaoList,//获取发包活动阶段
+    ActRequestActivityDetail,//获取活动详情
+    ActAll,//通用
 }Act;
 
 @interface RequestInfo : NSObject
@@ -186,17 +194,22 @@ typedef enum{
 #pragma mark 我的下线列表
 -(void)requestMyPlayerWithPage:(NSInteger)page
                       pageSize:(NSInteger)pageSize
-                    orderField:(NSString *)field
-                           asc:(NSInteger)asc
+                    userString:(NSString *)userString
+                          type:(NSInteger)type
                        success:(CallbackBlock)successBlock
                           fail:(CallbackBlock)failBlock;
 
+#pragma mark 获取下线基础信息
+-(void)requestMyPlayerCommonInfoWithSuccess:(CallbackBlock)successBlock
+                                       fail:(CallbackBlock)failBlock;
+
 #pragma mark 账单类型   线上充值 人工充值 抢包 踩雷...
--(void)requestBillTypeWithSuccess:(CallbackBlock)successBlock
-                             fail:(CallbackBlock)failBlock;
+-(void)requestBillTypeWithType:(NSString *)type success:(CallbackBlock)successBlock
+                          fail:(CallbackBlock)failBlock;
 
 #pragma mark 获取账单列表
--(void)requestBillListWithType:(NSInteger)type
+-(void)requestBillListWithName:(NSString *)billName
+                   categoryStr:(NSString *)categoryStr
                      beginTime:(NSString *)beginTime
                        endTime:(NSString *)endTime
                           page:(NSInteger)page
@@ -303,4 +316,27 @@ typedef enum{
 
 #pragma mark 获取新手引导图片列表
 -(void)getGuideImageListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 活动奖励列表
+-(void)getActivityListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 获取抢包活动阶段
+-(void)getActivityQiaoBaoListWithId:(NSString *)activityId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 获取发包活动阶段
+-(void)getActivityFaBaoListWithId:(NSString *)activityId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 获取活动详情
+-(void)getActivityDetailWithId:(NSString *)activityId type:(NSInteger)type success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 获取发包抢包奖励
+-(void)getRewardWithId:(NSString *)activityId type:(NSInteger)type success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+
+#pragma mark 个人报表信息
+-(void)requestUserReportInfoWithId:(NSString *)userId success:(CallbackBlock)successBlock
+                              fail:(CallbackBlock)failBlock;
+
+#pragma mark 查询所有推广教程
+-(void)requestCopyListWithSuccess:(CallbackBlock)successBlock
+                             fail:(CallbackBlock)failBlock;
 @end

@@ -14,6 +14,15 @@
 
 @implementation HelpCenterWebController
 
+    - (instancetype)initWithUrl:(NSString *)url{
+        self = [super init];
+        if (self) {
+            NSString *url = [NSString stringWithFormat:@"%@/dist/#/index/helpCenter?accesstoken=%@", [AppModel shareInstance].commonInfo[@"website.address"], [AppModel shareInstance].user.token];
+            _url = url;
+        }
+        return self;
+    }
+    
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = @"帮助中心";
@@ -48,7 +57,14 @@
         self.navigationItem.rightBarButtonItem = nil;
         return;
     }
-    GuideView *guideView = [[GuideView alloc] initWithArray:self.guideArray target:nil selector:nil];
+    self.webView.userInteractionEnabled = NO;
+    GuideView *guideView = [[GuideView alloc] initWithArray:self.guideArray target:self selector:@selector(funa)];
     [guideView showWithAnimationWithAni:YES];
+    [self.webView reload];
+
+}
+
+-(void)funa{
+    self.webView.userInteractionEnabled = YES;
 }
 @end

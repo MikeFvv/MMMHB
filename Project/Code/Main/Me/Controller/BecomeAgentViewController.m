@@ -16,36 +16,42 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = @"申请代理";
+    self.title = @"代理规则";
     // Do any additional setup after loading the view.
-    UIView *view = [[UIView alloc] init];
-    view.backgroundColor = [UIColor whiteColor];
-    [self.view addSubview:view];
-    [view mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.bottom.equalTo(self.view);
-        make.height.equalTo(@56);
-    }];
+//    UIView *view = [[UIView alloc] init];
+//    view.backgroundColor = [UIColor whiteColor];
+//    [self.view addSubview:view];
+//    [view mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.right.bottom.equalTo(self.view);
+//        make.height.equalTo(@56);
+//    }];
     
-    UIButton *loginBtn = [UIButton new];
-    [view addSubview:loginBtn];
-    loginBtn.layer.cornerRadius = 8;
-    loginBtn.layer.masksToBounds = YES;
-    loginBtn.backgroundColor = MBTNColor;
-    loginBtn.titleLabel.font = [UIFont boldSystemFontOfSize2:17];
-    [loginBtn setTitle:@"申请代理" forState:UIControlStateNormal];
-    [loginBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [loginBtn addTarget:self action:@selector(toBeAgent) forControlEvents:UIControlEventTouchUpInside];
-    [loginBtn delayEnable];
-    [loginBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(view.mas_left).offset(30);
-        make.right.equalTo(view.mas_right).offset(-30);
-        make.height.equalTo(@(44));
-        make.centerY.equalTo(view.mas_centerY);
-    }];
-    
-    CGRect rect = self.scrollView.frame;
-    rect.size.height -= 56;
-    self.scrollView.frame = rect;
+//    UIButton *loginBtn = [UIButton new];
+//    [view addSubview:loginBtn];
+//    loginBtn.layer.cornerRadius = 8;
+//    loginBtn.layer.masksToBounds = YES;
+//    loginBtn.titleLabel.font = [UIFont boldSystemFontOfSize2:17];
+//    if(APP_MODEL.user.agentFlag){
+//        [loginBtn setTitle:@"已经是代理" forState:UIControlStateNormal];
+//        loginBtn.backgroundColor = COLOR_X(160, 160, 160);
+//    }
+//    else{
+//        [loginBtn setTitle:@"申请代理" forState:UIControlStateNormal];
+//        loginBtn.backgroundColor = MBTNColor;
+//    }
+//    [loginBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//    [loginBtn addTarget:self action:@selector(toBeAgent) forControlEvents:UIControlEventTouchUpInside];
+//    [loginBtn delayEnable];
+//    [loginBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.equalTo(view.mas_left).offset(30);
+//        make.right.equalTo(view.mas_right).offset(-30);
+//        make.height.equalTo(@(44));
+//        make.centerY.equalTo(view.mas_centerY);
+//    }];
+//
+//    CGRect rect = self.scrollView.frame;
+//    rect.size.height -= 56;
+//    self.scrollView.frame = rect;
 }
 
 -(void)toBeAgent{
@@ -62,6 +68,11 @@
 -(void)back{
     [self.navigationController popViewControllerAnimated:YES];
 }
+
+//-(NSString *)imageUrl{
+//    NSString *url = [AppModel shareInstance].commonInfo[@""];
+//    return url;
+//}
 /*
 #pragma mark - Navigation
 

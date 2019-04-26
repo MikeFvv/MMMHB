@@ -2,7 +2,7 @@
 //  SystemAlertTextCell.m
 //  Project
 //
-//  Created by 罗耀生 on 2019/3/20.
+//  Created by Mike on 2019/3/20.
 //  Copyright © 2019 CDJay. All rights reserved.
 //
 
@@ -24,7 +24,10 @@
 
 + (instancetype)cellWithTableView:(UITableView *)tableView reusableId:(NSString *)ID
 {
-    SystemAlertTextCell *cell = [[SystemAlertTextCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    SystemAlertTextCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+    if (!cell) {
+        cell = [[SystemAlertTextCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
@@ -45,7 +48,7 @@
     [self addSubview:_contentLabel];
     _contentLabel.font = [UIFont vvFontOfSize:15];
     _contentLabel.numberOfLines = 0;
-    _contentLabel.textColor = [UIColor colorWithRed:0.525 green:0.525 blue:0.525 alpha:1.000];
+    _contentLabel.textColor = COLOR_X(80, 80, 80);
     
     [_contentLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.mas_left).offset(30);

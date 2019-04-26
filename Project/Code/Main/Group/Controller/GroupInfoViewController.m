@@ -264,8 +264,8 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 
                 UILabel *label = [UILabel new];
                 [cell.contentView addSubview:label];
-                label.font = [UIFont systemFontOfSize2:16];
-                label.text = @"群聊名称";
+                label.font = [UIFont systemFontOfSize2:15];
+                label.text = @"群名称";
                 label.textColor = Color_0;
                 cell.accessoryType = 0;
                 [label mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -278,7 +278,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 [cell.contentView addSubview:value];
                 value.textColor = Color_6;
                 value.text = _groupInfo.chatgName;
-                value.font = [UIFont systemFontOfSize2:13];
+                value.font = [UIFont systemFontOfSize2:15];
                 [value mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.right.equalTo(cell.contentView.mas_right).offset(-15);
                     make.centerY.equalTo(cell.contentView);
@@ -286,7 +286,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
             } else if (indexPath.row == 1){
                 UILabel *label = [UILabel new];
                 [cell.contentView addSubview:label];
-                label.font = [UIFont systemFontOfSize2:16];
+                label.font = [UIFont systemFontOfSize2:15];
                 label.text = @"群公告";
                 label.textColor = Color_0;
                 
@@ -297,7 +297,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 
                 UILabel *right = [UILabel new];
                 [cell.contentView addSubview:right];
-                right.font = [UIFont systemFontOfSize2:14];
+                right.font = [UIFont systemFontOfSize2:15];
                 right.text = _groupInfo.notice;
                 right.textColor = Color_6;
                 right.textAlignment = NSTextAlignmentRight;
@@ -317,7 +317,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
             } else if (indexPath.row == 2){
                 UILabel *label = [UILabel new];
                 [cell.contentView addSubview:label];
-                label.font = [UIFont systemFontOfSize2:16];
+                label.font = [UIFont systemFontOfSize2:15];
                 label.text = @"须知";
                 label.textColor = Color_0;
                 
@@ -328,11 +328,11 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 
                 UILabel *bot = [UILabel new];
                 [cell.contentView addSubview:bot];
-                bot.font = [UIFont systemFontOfSize2:14];
+                bot.font = [UIFont systemFontOfSize2:15];
                 bot.text = _groupInfo.know;
                 bot.numberOfLines = 0;
                 
-                CGFloat height =  [_groupInfo.know heightWithFont:[UIFont systemFontOfSize2:14] constrainedToWidth:SCREEN_WIDTH-(85+15)];
+                CGFloat height =  [_groupInfo.know heightWithFont:[UIFont systemFontOfSize2:15] constrainedToWidth:SCREEN_WIDTH-(85+15)];
                 if (height > 20) {
                     bot.textAlignment = NSTextAlignmentLeft;
                 } else {
@@ -377,6 +377,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 case 0: {
                     [cellee setCellStyle:SwitchStyle];
                     cellee.leftLabel.text = @"消息免打扰";
+                    cellee.leftLabel.font = [UIFont systemFontOfSize2:15];
                     cellee.switchButton.hidden = NO;
  
                     NSString *switchKeyStr = [NSString stringWithFormat:@"%@-%@", APP_MODEL.user.userId,_groupInfo.groupId];

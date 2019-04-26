@@ -9,6 +9,8 @@
 #import "NetResponseManager.h"
 #import "NetRequestManager.h"
 #import "RongCloudManager.h"
+#import "GTMBase64.h"
+#import "NSData+AES.h"
 
 @implementation NetResponseManager
 
@@ -96,6 +98,7 @@
     UserModel *user = [UserModel mj_objectWithKeyValues:dict];
     user.token = APP_MODEL.user.token;
     user.fullToken = APP_MODEL.user.fullToken;
+    user.groupowenFlag = [dict[@"groupowenFlag"] boolValue];
     APP_MODEL.user = user;
     APP_MODEL.user.isLogined = YES;
     [APP_MODEL saveAppModel];
@@ -107,7 +110,18 @@
 }
 
 -(void)getCommonInfoBack:(NSDictionary *)dict{
+    if([dict isKindOfClass:[NSString class]]){
+        NSString *s = (NSString *)dict;
+        NSData *data = [GTMBase64 decodeString:s];
+        NSString *key = @"1234567887654321";
+        data = [data AES128DecryptWithKey:key gIv:key];
+        NSString *json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        dict = [json mj_JSONObject];
+    }
     APP_MODEL.commonInfo = dict;
+    NSString *authKey = APP_MODEL.commonInfo[@"app_client_id"];
+    if(authKey)
+        APP_MODEL.authKey = authKey;
 }
 
 -(void)getSystemNoticeBack:(NSDictionary *)dict{

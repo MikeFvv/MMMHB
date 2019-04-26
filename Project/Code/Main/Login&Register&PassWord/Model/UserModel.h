@@ -23,7 +23,9 @@
 @property(nonatomic,copy)NSString *jointime;
 @property(nonatomic,copy)NSString *token;
 @property(nonatomic,assign)NSInteger agentFlag;//是否是代理
+@property(nonatomic,assign)BOOL groupowenFlag;//是否是群主
 
+@property (nonatomic ,assign) BOOL innerNumFlag; // yes  内部号 不限制说话字符
 /**
  后台Token
  */

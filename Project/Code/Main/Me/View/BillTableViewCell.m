@@ -139,8 +139,11 @@
     _name.text = tStr;
     _money.text = item.money;
     _money.textColor = (b)?HexColor(@"#ff4646"):HexColor(@"#369b3c");
-    
-    switch ([obj[@"billtId"] integerValue]) {
+    id objj = obj[@"billtId"];
+    NSInteger va = 0;
+    if(![objj isKindOfClass:[NSNull class]])
+        va = [objj integerValue];
+    switch (va) {
         case 3:
         case 4:
         case 16:

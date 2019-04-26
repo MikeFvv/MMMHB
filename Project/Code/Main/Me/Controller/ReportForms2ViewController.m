@@ -10,10 +10,9 @@
 #import "ExchangeBtnView.h"
 #import "ActivityView.h"
 #import "ReportFormsView.h"
+#import "MyReportFormsView.h"
 
 @interface ReportForms2ViewController ()<UIScrollViewDelegate>
-@property(nonatomic,strong)ActivityView *activityView;
-@property(nonatomic,strong)ReportFormsView *reportFormsView;
 @property(nonatomic,strong)ExchangeBtnView *exchangeBtnView;
 @property(nonatomic,strong)UIScrollView *scrollView;
 
@@ -47,22 +46,33 @@
         scrollView.contentSize = CGSizeMake(self.view.frame.size.width *2, scrollView.frame.size.height);
         self.scrollView = scrollView;
         
-        ActivityView *activityView = [[ActivityView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, scrollView.frame.size.height)];
-        activityView.userId = self.userId;
-        activityView.hiddenGetRewardBtn = YES;
-        [scrollView addSubview:activityView];
+//        ActivityView *activityView = [[ActivityView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, scrollView.frame.size.height)];
+//        activityView.userId = self.userId;
+//        activityView.hiddenGetRewardBtn = YES;
+//        [scrollView addSubview:activityView];
+        
+        MyReportFormsView *myReportFormsView = [[MyReportFormsView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, scrollView.frame.size.height)];
+        myReportFormsView.userId = self.userId;
+        [scrollView addSubview:myReportFormsView];
         
         ReportFormsView *reportFormsView = [[ReportFormsView alloc] initWithFrame:CGRectMake(self.view.frame.size.width, 0, self.view.frame.size.width, scrollView.frame.size.height)];
         reportFormsView.userId = self.userId;
         [scrollView addSubview:reportFormsView];
     }else{
-        ActivityView *activityView = [[ActivityView alloc] init];
-        [self.view addSubview:activityView];
-        activityView.hiddenGetRewardBtn = YES;
-        [activityView mas_makeConstraints:^(MASConstraintMaker *make) {
+//        ActivityView *activityView = [[ActivityView alloc] init];
+//        [self.view addSubview:activityView];
+//        activityView.hiddenGetRewardBtn = YES;
+//        [activityView mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.edges.equalTo(self.view);
+//        }];
+//        activityView.userId = self.userId;
+        self.title = @"个人报表";
+        MyReportFormsView *myReportFormsView = [[MyReportFormsView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+        myReportFormsView.userId = self.userId;
+        [self.view addSubview:myReportFormsView];
+        [myReportFormsView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.edges.equalTo(self.view);
         }];
-        activityView.userId = self.userId;
     }
     
 }

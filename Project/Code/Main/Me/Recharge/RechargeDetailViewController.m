@@ -7,7 +7,7 @@
 //
 
 #import "RechargeDetailViewController.h"
-#import "WebViewController2.h"
+#import "WebViewController.h"
 #import "DepositOrderController.h"
 #import "UIImageView+WebCache.h"
 
@@ -466,9 +466,8 @@
 
 -(void)openByWeb{
     NSString *url = [NSString stringWithFormat:@"%@%@?userId=%@&amount=%@&id=%@&typeCode=%zd",APP_MODEL.serverUrl,self.infoDic[@"url"],APP_MODEL.user.userId,self.moneyTextField.text,self.infoDic[@"id"],[self.infoDic[@"typeCode"] integerValue]];
-    WebViewController2 *vc = [[WebViewController2 alloc] init];
+    WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
     vc.navigationItem.title = @"充值";
-    [vc loadWithURL:url];
     [self.navigationController pushViewController:vc animated:YES];
 }
 

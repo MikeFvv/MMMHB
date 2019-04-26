@@ -13,8 +13,8 @@
 #import "NSData+AES.h"
 #import "GTMBase64.h"
 #import "JSPatchManager.h"
-#import <Bugtags/Bugtags.h>
-
+#import <objc/runtime.h>
+#import "MTA.h"
 @interface AppDelegate ()
 
 @end
@@ -22,8 +22,15 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
-    [Bugtags startWithAppKey:@"649128dfaa30636b9272ebbeb7d4838c" invocationEvent:BTGInvocationEventNone];
+    NSLog(@"服务器地址 %@",kServerUrl);
+    NSLog(@"融云key %@",kRongYunKey);
+    NSLog(@"微信key %@ 微信secret %@",kWXKey,kWXSecret);
+    [self check];
+    [NET_REQUEST_MANAGER requestAppConfigWithSuccess:^(id object) {
+        
+    } fail:^(id object) {
+        
+    }];
 #if TARGET_IPHONE_SIMULATOR
     [JPEngine startEngine];
     NSString *sourcePath = [[NSBundle mainBundle] pathForResource:@"main" ofType:@"js"];
@@ -32,9 +39,13 @@
 #elif TARGET_OS_IPHONE
         // 热更新加载
     [JSPatchManager asyncUpdate:YES];
+    if(kMTAKey.length > 1)
+        [MTA startWithAppkey:kMTAKey];
 #endif
-    
-    [NSThread sleepForTimeInterval:2];
+#if DEBUG
+#else
+    [NSThread sleepForTimeInterval:2.0];
+#endif
     [self applicationRoot];
 
     return YES;
@@ -46,14 +57,13 @@
     self.window.backgroundColor = CDCOLOR(245, 245, 245);
     self.window.rootViewController = [APP_MODEL rootVc];
     
-    [NSThread sleepForTimeInterval:1.0];
     
     [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
     [self AFNReachability];
     [APP_MODEL initSetUp];
     
-    [FUNCTION_MANAGER checkVersion:NO];
-    [NET_REQUEST_MANAGER requestSystemNoticeWithSuccess:nil fail:nil];
+    if(APP_MODEL.user.isLogined)
+        [NET_REQUEST_MANAGER requestSystemNoticeWithSuccess:nil fail:nil];
 }
 
 /**
@@ -125,6 +135,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     [self requestJSPatchInfo];
+    
+    [FUNCTION_MANAGER checkVersion:NO];
+
 }
 
 
@@ -179,4 +192,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     [manager startMonitoring];
 }
 
+//用来防止建新的app时忘了配置某些参数
+-(void)check{
+#if DEBUG
+    NSDictionary *infoPlist = [[NSBundle mainBundle] infoDictionary];
+    NSString *wKey = [[[infoPlist valueForKeyPath:@"CFBundleURLTypes.CFBundleURLSchemes"] lastObject] lastObject];
+    NSCAssert([wKey isEqualToString:kWXKey],@"info.plist里微信key配置不一致");
+#endif
+}
 @end

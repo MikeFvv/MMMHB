@@ -121,7 +121,7 @@
     ShareDetailViewController *vc = [[ShareDetailViewController alloc] init];
     vc.title = self.tempDic[@"title"];
     vc.shareInfo = self.tempDic;
-    vc.shareUrl = self.shareUrl;
+    vc.shareUrl = [NSString stringWithFormat:@"%@%@",self.shareUrl,[AppModel shareInstance].user.invitecode];
     [self.navigationController pushViewController:vc animated:YES];
 }
 @end

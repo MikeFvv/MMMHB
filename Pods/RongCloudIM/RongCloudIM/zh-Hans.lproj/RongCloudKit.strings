@@ -83,7 +83,7 @@
 "SearchPublicService"="查找服务号";
 "PublicService"="服务号";
 "NOT_IN_DISCUSSION"="您当前不在此讨论组";
-"NOT_IN_GROUP"="您当前不在此群组";
+"NOT_IN_GROUP"="请您退出群组，重新加入";
 "FORBIDDEN_IN_GROUP"="当前群组已禁言";
 "NOT_IN_CHATROOM"="您当前不在此聊天室";
 "Message rejected"="您的消息已发出，但被对方拒绝";

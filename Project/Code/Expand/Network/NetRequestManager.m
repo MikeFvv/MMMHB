@@ -49,9 +49,13 @@
     else{
         auth = APP_MODEL.user.fullToken;
     }
-    if(auth == nil){
-        NSLog(@"auth 为空");
-        return;
+    if(requestInfo.act != ActRequestCommonInfo){
+        if(auth == nil){
+            NSLog(@"auth 为空");
+            if(failBlock)
+                failBlock(@"系统错误，请退出重新登录");
+            return;
+        }
     }
     requestInfo.startTime = [[NSDate date] timeIntervalSince1970];
     requestInfo.url = [requestInfo.url stringByReplacingOccurrencesOfString:@" " withString:@""];
@@ -257,7 +261,8 @@
 }
 
 #pragma mark 获取账单列表
--(void)requestBillListWithType:(NSInteger)type
+-(void)requestBillListWithName:(NSString *)billName
+                   categoryStr:(NSString *)categoryStr
                      beginTime:(NSString *)beginTime
                        endTime:(NSString *)endTime
                           page:(NSInteger)page
@@ -265,19 +270,21 @@
                        success:(CallbackBlock)successBlock
                           fail:(CallbackBlock)failBlock{
     RequestInfo *info = [self requestInfoWithAct:ActRequestBillList];
-    NSString *url = nil;
-    if(type == 999)
-        url = [NSString stringWithFormat:@"%@?start_time=%@&end_time=%@&page=%ld&orderByField=id&isAsc=0&limit=%ld",info.url,beginTime,endTime,(long)page,(long)pageSize];
-    else
-        url = [NSString stringWithFormat:@"%@?billt_id=%ld&start_time=%@&end_time=%@&page=%ld&orderByField=id&isAsc=0&limit=%ld",info.url,(long)type,beginTime,endTime,(long)page,(long)pageSize];
+    NSMutableString *url = [[NSMutableString alloc] initWithFormat:@"%@?start_time=%@&end_time=%@&page=%ld&orderByField=id&isAsc=0&limit=%ld",info.url,beginTime,endTime,(long)page,(long)pageSize];
+    if(billName.length > 0)
+        [url appendFormat:@"&billt_name=%@",billName];
+    if(categoryStr.length > 0)
+        [url appendFormat:@"&category=%@",categoryStr];
     info.url = url;
     [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
 }
 
 #pragma mark 账单类型   线上充值 人工充值 抢包 踩雷...
--(void)requestBillTypeWithSuccess:(CallbackBlock)successBlock
+-(void)requestBillTypeWithType:(NSString *)type success:(CallbackBlock)successBlock
                              fail:(CallbackBlock)failBlock{
     RequestInfo *info = [self requestInfoWithAct:ActRequestBillTypeList];
+    NSString *url = [NSString stringWithFormat:@"%@?category=%@",info.url,type];
+    info.url = url;
     [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
 }
 
@@ -346,13 +353,17 @@
 #pragma mark 我的下线列表
 -(void)requestMyPlayerWithPage:(NSInteger)page
                       pageSize:(NSInteger)pageSize
-                    orderField:(NSString *)field
-                           asc:(NSInteger)asc
+                    userString:(NSString *)userString
+                          type:(NSInteger)type
                        success:(CallbackBlock)successBlock
                           fail:(CallbackBlock)failBlock{
     RequestInfo *info = [self requestInfoWithAct:ActMyPlayer];
-    NSString *url = [NSString stringWithFormat:@"%@?page=%ld&limit=%ld&orderByField=%@&isAsc=%ld",info.url,(long)page,(long)pageSize,field,(long)asc];
-    info.url = url;
+    NSMutableString *s = [[NSMutableString alloc] initWithFormat:@"%@?page=%ld&limit=%ld&orderByField=id&isAsc=0",info.url,page,pageSize];
+    if(userString.length > 0)
+        [s appendFormat:@"&userId=%@",userString];
+    if(type >= 0)
+        [s appendFormat:@"&type=%zd",type];
+    info.url = s;
     [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
 }
 
@@ -577,6 +588,104 @@
     [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
 }
 
+#pragma mark 活动奖励列表
+-(void)getActivityListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActRequestActivityList2];
+    NSMutableDictionary *bodyDic = [self createDicWithHead];
+    [bodyDic setObject:@"page" forKey:@"1"];
+    [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 获取抢包活动阶段
+-(void)getActivityQiaoBaoListWithId:(NSString *)activityId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActRequestQiaoBaoList];
+    NSString *url = [NSString stringWithFormat:@"%@/%@",info.url,activityId];
+    info.url = url;
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 获取发包活动阶段
+-(void)getActivityFaBaoListWithId:(NSString *)activityId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [self requestInfoWithAct:ActRequestFaBaoList];
+    NSString *url = [NSString stringWithFormat:@"%@/%@",info.url,activityId];
+    info.url = url;
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 获取活动详情
+-(void)getActivityDetailWithId:(NSString *)activityId type:(NSInteger)type success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [[RequestInfo alloc] init];
+    info.requestType = RequestType_get;
+    info.act = ActAll;
+    NSString *urlTail = nil;
+    if(type == RewardType_bzsz)//6000豹子顺子奖励 5000直推流水佣金 2000邀请好友充值 1100充值奖励  3000发包奖励 4000抢包奖励
+        urlTail = @"promotion/skPromot/bzsz/detail";
+    else if(type == RewardType_ztlsyj)
+        urlTail = @"promotion/skPromot/commission/detail";
+    else if(type == RewardType_yqhycz)
+        urlTail = @"promotion/skPromot/invite/detail";
+    else if(type == RewardType_czjl)
+        urlTail = @"promotion/skPromot/recharge/detail";
+//    else if(type == RewardType_fbjl){
+//        urlTail = @"promotion/skPromot/get/send/reward/money";
+//        info.requestType = RequestType_post;
+//    }
+//    else if(type == RewardType_qbjl){
+//        urlTail = @"promotion/skPromot/get/rob/reward/money";
+//        info.requestType = RequestType_post;
+//    }
+    urlTail = [NSString stringWithFormat:@"%@/%@",urlTail,activityId];
+    info.url = [NSString stringWithFormat:@"%@%@",APP_MODEL.serverUrl,urlTail];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 获取发包抢包奖励
+-(void)getRewardWithId:(NSString *)activityId type:(NSInteger)type success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [[RequestInfo alloc] init];
+    info.requestType = RequestType_post;
+    info.act = ActAll;
+    NSString *urlTail = nil;
+    if(type == RewardType_qbjl)//4000抢包奖励 3000发包奖励
+        urlTail = @"promotion/skPromot/get/rob/reward/money";
+    else
+        urlTail = @"promotion/skPromot/get/send/reward/money";
+    urlTail = [NSString stringWithFormat:@"%@/%@",urlTail,activityId];
+    info.url = [NSString stringWithFormat:@"%@%@",APP_MODEL.serverUrl,urlTail];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 获取下线基础信息
+-(void)requestMyPlayerCommonInfoWithSuccess:(CallbackBlock)successBlock
+                                       fail:(CallbackBlock)failBlock{
+    RequestInfo *info = [[RequestInfo alloc] init];
+    info.requestType = RequestType_get;
+    info.act = ActAll;
+    info.url = [NSString stringWithFormat:@"%@proxy/skUserBaseinfoRankModel/team/count",APP_MODEL.serverUrl];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 个人报表信息
+-(void)requestUserReportInfoWithId:(NSString *)userId success:(CallbackBlock)successBlock
+                              fail:(CallbackBlock)failBlock{
+    
+    RequestInfo *info = [[RequestInfo alloc] init];
+    info.requestType = RequestType_get;
+    info.act = ActAll;
+    info.url = [NSString stringWithFormat:@"%@proxy/skUserBaseinfoRankModel/team/user/report/%@",APP_MODEL.serverUrl,userId];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
+#pragma mark 查询所有推广教程
+-(void)requestCopyListWithSuccess:(CallbackBlock)successBlock
+                              fail:(CallbackBlock)failBlock{
+    
+    RequestInfo *info = [[RequestInfo alloc] init];
+    info.requestType = RequestType_post;
+    info.act = ActAll;
+    info.url = [NSString stringWithFormat:@"%@promotion/skPromoteCourse/queryPromoteCourse",APP_MODEL.serverUrl];
+    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
+}
+
 #pragma mark act
 -(RequestInfo *)requestInfoWithAct:(Act)act{
     RequestInfo *info = [[RequestInfo alloc] init];
@@ -639,7 +748,7 @@
             break;
         case ActMyPlayer:
             info.requestType = RequestType_get;
-            urlTail = @"social/skUserBaseinfoRankModel/page";
+            urlTail = @"proxy/skUserBaseinfoRankModel/page";//@"social/skUserBaseinfoRankModel/page";
             break;
         case ActRequestDrawRecordList:
             info.requestType = RequestType_get;
@@ -722,6 +831,17 @@
             break;
         case ActRequestGuideImageList:
             urlTail = @"promotion/skHelpCenter/querySkHelpCenter";
+            break;
+        case ActRequestActivityList2:
+            urlTail = @"promotion/skPromot/new/page";
+            break;
+        case ActRequestFaBaoList:
+            info.requestType = RequestType_get;
+            urlTail = @"promotion/skPromot/send/detail";
+            break;
+        case ActRequestQiaoBaoList:
+            info.requestType = RequestType_get;
+            urlTail = @"promotion/skPromot/rob/detail";
             break;
         case ActNil:
             urlTail = @"";

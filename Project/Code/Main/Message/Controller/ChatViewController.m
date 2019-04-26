@@ -15,7 +15,6 @@
 #import "SendRedPacketController.h"
 #import "MessageItem.h"
 #import "RedPackedAnimationView.h"
-#import "GroupRuleView.h"
 #import "GroupInfoViewController.h"
 #import "WebViewController.h"
 #import "IQKeyboardManager.h"
@@ -37,6 +36,7 @@
 #import "RechargeViewController.h"
 #import "HelpCenterWebController.h"
 #import "CustomerServiceAlertView.h"
+#import "AgentCenterViewController.h"
 
 @interface ChatViewController ()<RCPluginBoardViewDelegate,RCMessageCellDelegate>
 
@@ -87,11 +87,20 @@ static ChatViewController *_chatVC;
     //设置会话的类型，如单聊、群聊、聊天室、客服、公众服务会话等
     _chatVC.messageItem = obj;
     //设置聊天会话界面要显示的标题
-    if (obj.chatgName.length > 12) {
-        _chatVC.title = [NSString stringWithFormat:@"%@...", [obj.chatgName substringToIndex:12]];
-    } else {
-        _chatVC.title = obj.chatgName;
-    }
+    NSString *title = obj.chatgName;
+    NSRange range = [title rangeOfString:@"("];
+    if(range.length == 0)
+        range = [title rangeOfString:@"（"];
+    if(range.length > 0)
+        title = [title substringToIndex:range.location];
+    if(title.length == 0)
+        title = @"群组";
+    if (title.length > 12) {
+        _chatVC.title = [NSString stringWithFormat:@"%@...", [title substringToIndex:12]];
+    }else
+        _chatVC.title = title;
+
+    
     return _chatVC;
 }
 
@@ -109,20 +118,20 @@ static ChatViewController *_chatVC;
 
 
 - (void)notifyUpdateUnreadMessageCount {
-    if (self.allowsMessageCellSelection) {
-        [super notifyUpdateUnreadMessageCount];
-        return;
-    }
     // 解决点击 更多... 取消返回不了的bug
     self.navigationItem.leftBarButtonItem = self.leftBtn;
     self.navigationItem.rightBarButtonItems = self.rightBtnArray;
     
+    if (self.allowsMessageCellSelection) {
+        [super notifyUpdateUnreadMessageCount];
+        return;
+    }
 }
 
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor whiteColor];
+    //self.view.backgroundColor = BaseColor;
     
     [self initSubviews];
     [self initLayout];
@@ -130,7 +139,8 @@ static ChatViewController *_chatVC;
     self.enveModel = [EnvelopeNet shareInstance];
     self.enableUnreadMessageIcon = YES;
     self.enableNewComingMessageIcon = YES;
-    
+    self.defaultHistoryMessageCountOfChatRoom = 1;
+
     [self unreadMessage];
     
     self.leftBtn = self.navigationItem.leftBarButtonItem;
@@ -212,6 +222,15 @@ static ChatViewController *_chatVC;
     self.chatSessionInputBarControl.pluginBoardView.pluginBoardDelegate = self;
     
     [self.chatSessionInputBarControl setInputBarType:RCChatSessionInputBarControlDefaultType style:RC_CHAT_INPUT_BAR_STYLE_CONTAINER_EXTENTION];
+    
+//    /*!
+//     添加被@的用户
+//
+//     @param userInfo    被@的用户信息
+//     */
+//    - (void)addMentionedUser:(RCUserInfo *)userInfo;
+//
+//    self.chatSessionInputBarControl addMentionedUser
     
     [self registerClass:[RedPackedCollectionViewCell class] forMessageClass:[EnvelopeMessage class]];
     [self registerClass:[EnvelopeTipCell class] forMessageClass:[EnvelopeTipMessage class]];
@@ -301,14 +320,16 @@ static ChatViewController *_chatVC;
     } else if (tag == 2004){   // 赚钱
         PUSH_C(self, ShareViewController, YES);
     } else if (tag == 2005){  // 加盟
-        BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
+//        BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
+//        vc.hidesBottomBarWhenPushed = YES;
+//        vc.hiddenNavBar = YES;
+//        vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
+//        [self.navigationController pushViewController:vc animated:YES];
+        AgentCenterViewController *vc = [[AgentCenterViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
-        vc.hiddenNavBar = YES;
-        vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
         [self.navigationController pushViewController:vc animated:YES];
     } else if (tag == 2006){  // 帮助
-        NSString *url = [NSString stringWithFormat:@"%@/dist/#/index/helpCenter?accesstoken=%@", [AppModel shareInstance].commonInfo[@"website.address"], [AppModel shareInstance].user.token];
-        HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:url];
+        HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:nil];
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
         
@@ -335,9 +356,6 @@ static ChatViewController *_chatVC;
 
 #pragma mark -  群规
 - (void)groupRuleView {
-    //    GroupRuleView *view = [[GroupRuleView alloc]initWithFrame:self.view.bounds];
-    //    [view updateView:self.messageItem];
-    //    [view showInView:self.view];
     
     ImageDetailViewController *vc = [[ImageDetailViewController alloc] init];
     vc.imageUrl = self.messageItem.ruleImg;
@@ -463,8 +481,25 @@ static ChatViewController *_chatVC;
 // 点击头像事件
 - (void)didTapCellPortrait:(NSString *)userId {
     [self.view endEditing:YES];
-    [self didLongPressCellPortrait:userId];
+//    [self didLongPressCellPortrait:userId];
     
+    
+    if ([self.messageItem.userId isEqualToString:[AppModel shareInstance].user.userId]) {
+        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+        [view showWithText:[NSString stringWithFormat:@"ID：%@",userId] button:@"好的" callBack:nil];
+        return;
+    }
+    
+    for (RCMessageModel *model in self.conversationDataRepository) {
+        if ([model.senderUserId isEqualToString:userId]) {
+            if (model.userInfo == nil) {
+                NSLog(@"🔴======> %@" , model.userInfo);
+                model.userInfo = model.content.senderUserInfo;
+            }
+            [self.chatSessionInputBarControl addMentionedUser:model.userInfo];
+            return;
+        }
+    }
     
     //    ChatUserInfoController *vc = [[ChatUserInfoController alloc] init];
     //    vc.userId = userId;
@@ -476,7 +511,7 @@ static ChatViewController *_chatVC;
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark 抢红包
+#pragma mark - 抢红包
 - (void)action_tapCustom:(RCMessageModel *)messageModel {
     
     EnvelopeMessage *message = (EnvelopeMessage*)messageModel.content;
@@ -496,7 +531,7 @@ static ChatViewController *_chatVC;
     entity.urlString = [NSString stringWithFormat:@"%@%@?type=%@&packetId=%@",APP_MODEL.serverUrl,@"social/redpacket/grab",[dic objectForKey:@"type"],[dic objectForKey:@"redpacketId"]];
     entity.needCache = NO;
     
-    
+    self.response = nil;
     _timerView = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(uploadTimer:) userInfo:nil repeats:NO];
     
     //    SVP_SHOW;
@@ -769,6 +804,10 @@ static ChatViewController *_chatVC;
     RCMessageModel *model = self.conversationDataRepository[indexPath.row];
     RCTextMessage *textMessage = (RCTextMessage *)model.content;
     RCUserInfo *user = textMessage.senderUserInfo;
+    if (model.userInfo == nil) {
+        model.userInfo = user;
+    }
+    
     if([textMessage isKindOfClass:[RCTextMessage class]]){
         NSString *conten = textMessage.content;
         if([conten isEqualToString:RedPacketString]){
@@ -881,7 +920,7 @@ static ChatViewController *_chatVC;
         RCTextMessage *textMessage = (RCTextMessage *)messageContent;
         NSString *conten = textMessage.content;
         
-        if (self.messageItem.userId != [AppModel shareInstance].user.userId) {
+        if (self.messageItem.userId != [AppModel shareInstance].user.userId && ![AppModel shareInstance].user.innerNumFlag) {
             if (self.isChatTimer == NO) {
                 
                 if (self.messageItem.chatWord > 0 && textMessage.content.length <= self.messageItem.chatWord) {
@@ -945,8 +984,10 @@ static ChatViewController *_chatVC;
             NSString *extra = textMessage.extra;
             NSDictionary *dict = [extra mj_JSONObject];
             EnvelopeMessage *messageCus = [[EnvelopeMessage alloc] initWithObj:dict];
-            if(user.userId == nil)
+            if(user.userId == nil) {
                 user.userId = message.senderUserId;
+                messageCus.senderUserInfo.userId = message.senderUserId;
+            }
             messageCus.senderUserInfo = user;
             message.content = messageCus;
         } else  if([conten isEqualToString:CowCowMessageString]){

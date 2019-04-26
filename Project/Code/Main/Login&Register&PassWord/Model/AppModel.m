@@ -19,34 +19,51 @@
 static NSString *Path = @"COM.XMFX.path";
 
 @implementation AppModel
-
-MJCodingImplementation
-
+    
+    MJCodingImplementation
+    
 + (void)load{
     [self performSelectorOnMainThread:@selector(shareInstance) withObject:nil waitUntilDone:NO];
 }
-
+    
 + (instancetype)shareInstance{
     static AppModel *instance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        if(instance == nil)
-            instance = [[self alloc] init];
+        if(instance == nil){
+            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+            NSString* filename = [[paths objectAtIndex:0] stringByAppendingPathComponent:Path];
+            if ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
+                instance = [NSKeyedUnarchiver unarchiveObjectWithFile:filename];
+                if(instance == nil){
+                    instance = [[AppModel alloc] init];
+                }
+            }else
+            instance = [[AppModel alloc] init];
+        }
+        instance.turnOnSound = [RCIM sharedRCIM].disableMessageAlertSound;
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        NSInteger serverIndex = [[ud objectForKey:@"serverIndex"] integerValue];
+        NSArray *arr = [instance ipArray];
+        if(serverIndex >= arr.count)
+            serverIndex = 0;
+        NSDictionary *dic = arr[serverIndex];
+        instance.serverUrl = dic[@"url"];
+        instance.rongYunKey = dic[@"rongYunKey"];
+        instance.debugMode = [dic[@"isBeta"] boolValue];
+        NSString *authKey = instance.commonInfo[@"app_client_id"];
+        if(authKey)
+            instance.authKey = authKey;
+        else
+            instance.authKey = dic[@"baseKey"];
     });
     return instance;
 }
-
+    
 - (instancetype)init{
     self = [super init];
     if (self) {
-        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-        NSString* filename = [[paths objectAtIndex:0] stringByAppendingPathComponent:Path];
-        if ([NSKeyedUnarchiver unarchiveObjectWithFile:filename]) {
-            self = [NSKeyedUnarchiver unarchiveObjectWithFile:filename];
-        }else{
-            self.turnOnSound = [RCIM sharedRCIM].disableMessageAlertSound;
-        }
-        self.authKey = @"Basic YXBwOmFwcA==";
+
     }
     return self;
 }
@@ -55,30 +72,30 @@ MJCodingImplementation
     _turnOnSound = Sound;
     [RCIM sharedRCIM].disableMessageAlertSound = Sound;
 }
-
+    
 - (void)saveAppModel {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString* filename = [[paths objectAtIndex:0] stringByAppendingPathComponent:Path];
     [NSKeyedArchiver archiveRootObject:self toFile:filename];
 }
-
+    
 -(UserModel *)user{
     if(_user == nil)
-        _user = [[UserModel alloc] init];
+    _user = [[UserModel alloc] init];
     return _user;
 }
-
+    
 - (void)logout {
+    [[RongCloudManager shareInstance] disConnect];
     self.user = [UserModel new];
     APP_MODEL.unReadCount = 0;
     APP_MODEL.rongYunToken = nil;
     [APP_MODEL saveAppModel];
     [self reSetRootAnimation:YES];
-    [[RongCloudManager shareInstance] disConnect];
 }
-
+    
 #pragma mark method
-
+    
 - (void)initSetUp{
     //融云
     [[RongCloudManager shareInstance] initWithMode];
@@ -86,7 +103,7 @@ MJCodingImplementation
     //开启消息撤回功能
     [RCIM sharedRCIM].enableMessageRecall = YES;
     //开启消息@功能（只支持群聊和讨论组, App需要实现群成员数据源groupMemberDataSource）
-//    [RCIM sharedRCIM].enableMessageMentioned = YES;
+    //    [RCIM sharedRCIM].enableMessageMentioned = YES;
     
     //svp
     [SVProgressHUD setMinimumDismissTimeInterval:1.2f];
@@ -111,19 +128,19 @@ MJCodingImplementation
     [[UINavigationBar appearance] setShadowImage:[UIImage new]];
     [[UINavigationBar appearance] setTitleTextAttributes:@{NSFontAttributeName:[UIFont boldSystemFontOfSize2:18],NSForegroundColorAttributeName:Color_F}];
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
-    if(![AppModel shareInstance].isReleaseOrBeta)
-        [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"navBarBg"] forBarMetrics:UIBarMetricsDefault];
+    if(!APP_MODEL.debugMode)
+    [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"navBarBg"] forBarMetrics:UIBarMetricsDefault];
     else
-        [[UINavigationBar appearance] setBarTintColor:COLOR_X(70, 70, 70)];
+    [[UINavigationBar appearance] setBarTintColor:COLOR_X(70, 70, 70)];
     //COLOR_X(235, 235, 235, 1.0)
     //    [[UITabBar appearance]setTintColor:TABSelectColor];
 }
-
+    
 -(void)login{
     if([[FUNCTION_MANAGER currentViewController] isKindOfClass:[LoginBySMSViewController class]] || [[FUNCTION_MANAGER currentViewController] isKindOfClass:[LoginViewController class]])
-        [self reSetRootAnimation:YES];
+    [self reSetRootAnimation:YES];
 }
-
+    
 - (UIViewController *)rootVc{
     [BANetManager initialize];
     
@@ -139,7 +156,7 @@ MJCodingImplementation
         }
     }
 }
-
+    
 -(void)reSetRootAnimation:(BOOL)b{
     UIWindow* window = [UIApplication sharedApplication].keyWindow;
     if (b) {
@@ -147,7 +164,7 @@ MJCodingImplementation
     }
     window.rootViewController = self.rootVc;
 }
-
+    
 - (CATransition *)animation{
     CATransition *animation = [CATransition animation];
     animation.duration = 0.5;
@@ -158,63 +175,25 @@ MJCodingImplementation
     animation.subtype = kCATransitionFromTop;
     return animation;
 }
-
+    
 -(NSString *)serverUrl {
-    if(_serverUrl == nil) {
-#if TARGET_IPHONE_SIMULATOR
-        if ([AppModel shareInstance].testVersionIndex <= 0) {
-            [AppModel shareInstance].testVersionIndex = 1;
-        }
-        NSDictionary *dict = self.ipArray[[AppModel shareInstance].testVersionIndex];
-//        _serverUrl = kServerUrlTest1;
-//        _rongYunKey = kRongfYunKeyTest1;
-        
-        _serverUrl = dict[@"url"];
-        _rongYunKey = dict[@"rongYunKey"];
-        self.isReleaseOrBeta = YES;
-#elif TARGET_OS_IPHONE
-        _serverUrl = kServerUrl;
-        _rongYunKey = kRongYunKey;
-        self.isReleaseOrBeta = NO;
-#endif
-    } else {
-        if([_serverUrl rangeOfString:@"/api"].length > 0 || [_serverUrl rangeOfString:@".com"].length > 0) {
-            self.isReleaseOrBeta = NO;
-        } else {
-            self.isReleaseOrBeta = YES;
-        }
-        
-        if (self.isReleaseOrBeta && ![_rongYunKey isEqualToString:kRongfYunKeyTest1]) {
-            if ([AppModel shareInstance].testVersionIndex <= 0) {
-                [AppModel shareInstance].testVersionIndex = 1;
-            }
-            NSDictionary *dict = self.ipArray[[AppModel shareInstance].testVersionIndex];
-            _rongYunKey = dict[@"rongYunKey"];
-//            _rongYunKey = kRongfYunKeyTest1;
-        } else {
-            if (!self.isReleaseOrBeta && ![_rongYunKey isEqualToString:kRongYunKey]) {
-                _rongYunKey = kRongYunKey;
-            }
-        }
-    }
-    return _serverUrl;
+    return [self serverUrl2:_serverUrl];
 }
-
--(NSString *)rongYunKey {
-    [self serverUrl];
-    return _rongYunKey;
+    
+-(NSString *)serverUrl2:(NSString *)url{
+    url = [url stringByReplacingOccurrencesOfString:@"10.15" withString:@"10.95"];
+    return url;
 }
-
+    
 -(NSArray *)ipArray{
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSArray *arr = [ud objectForKey:@"ipArray"];
-    NSDictionary *dic1 = @{@"url":kServerUrl,@"rongYunKey":kRongYunKey, @"isReleaseOrBeta":@(NO)};
-    NSDictionary *dic2 = @{@"url":kServerUrlTest1,@"rongYunKey":kRongfYunKeyTest1, @"isReleaseOrBeta":@(YES)};
-    NSDictionary *dic3 = @{@"url":kServerUrlTest2,@"rongYunKey":kRongfYunKeyTest2, @"isReleaseOrBeta":@(YES)};
-
-    NSMutableArray *array = [NSMutableArray arrayWithObjects:dic1,dic2,dic3, nil];
+    NSDictionary *dic1 = @{@"url":kServerUrl,@"rongYunKey":kRongYunKey, @"isBeta":@(NO),@"baseKey":kBaseKey};
+    NSMutableArray *array = [NSMutableArray arrayWithObjects:dic1, nil];
+    NSArray *testArr = [kServerJson mj_JSONObject];
+    [array addObjectsFromArray:testArr];
     if(arr)
-        [array addObjectsFromArray:arr];
+    [array addObjectsFromArray:arr];
     return array;
 }
-@end
+    @end

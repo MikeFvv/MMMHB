@@ -7,7 +7,7 @@
 //
 
 import UIKit
-typealias SwiftClosure = (_ selectIndex:Int) -> Void
+typealias SelectBlock = (_ selectIndex:Int) -> Void
 
 @objc protocol ActionSheetDelegate:NSObjectProtocol{
     func actionSheetDelegate(actionSheet:ActionSheetCus,index:NSInteger)
@@ -17,7 +17,7 @@ class ActionSheetCus: UIView,UITableViewDelegate,UITableViewDataSource {
     var dataArray:NSArray?
     var bgView:UIView?
     var containView:UIView?
-    @objc var callbackFunc:SwiftClosure?
+    @objc var selectBlock:SelectBlock?
     
     @objc var delegate:ActionSheetDelegate?
     @objc var titleLabel:UILabel?
@@ -61,11 +61,19 @@ class ActionSheetCus: UIView,UITableViewDelegate,UITableViewDataSource {
         self.containView?.layer.borderWidth = 0.5
         self.containView?.layer.borderColor = UIColor.init(red: 0, green: 0, blue: 0, alpha: 0.1).cgColor
         
+        let barImageview:UIImageView = UIImageView.init(image: UIImage.init(named: "navBarBg"))
+        self.containView?.addSubview(barImageview)
+        barImageview.mas_makeConstraints { (make:MASConstraintMaker!) in
+            make?.left.equalTo()(self.containView)
+            make.right.equalTo()(self.containView)
+            make.top.equalTo()(self.containView)
+            make.height.equalTo()(44)
+        }
         self.titleLabel = UILabel()
         self.titleLabel?.font = UIFont.systemFont(ofSize: 17)
         self.titleLabel?.textAlignment = NSTextAlignment.center;
         self.titleLabel?.textColor = UIColor.init(white: 1.0, alpha: 1.0);
-        self.titleLabel?.backgroundColor = UIColor.init(red: 254/255.0, green: 57/255.0, blue: 98/255.0, alpha: 1.0)
+        self.titleLabel?.backgroundColor = UIColor.clear
         self.containView?.addSubview(self.titleLabel!);
         self.titleLabel?.mas_makeConstraints({ (make:MASConstraintMaker!) in
             make?.left.equalTo()(self.containView)
@@ -133,8 +141,8 @@ class ActionSheetCus: UIView,UITableViewDelegate,UITableViewDataSource {
         if self.delegate != nil{
             self.delegate?.actionSheetDelegate(actionSheet: self, index: indexPath.row)
         }
-        if self.callbackFunc != nil{
-            self.callbackFunc!(indexPath.row)
+        if self.selectBlock != nil{
+            self.selectBlock!(indexPath.row)
         }
         self.hiddenWithAnimation(ani: true)
     }

@@ -14,7 +14,7 @@
 #import "LoginBySMSViewController.h"
 #import "AddIpViewController.h"
 
-@interface LoginViewController ()<UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate>{
+@interface LoginViewController ()<UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate,ActionSheetDelegate>{
     UITableView *_tableView;
     UITextField *_textField[2];
     NSMutableDictionary *_wxRegister;
@@ -45,7 +45,7 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    if(![AppModel shareInstance].isReleaseOrBeta)
+    if(!APP_MODEL.debugMode)
         self.navigationItem.title = @"登录";
     else
         self.navigationItem.title = APP_MODEL.serverUrl;
@@ -186,7 +186,11 @@
     [self.view addSubview:versionLabel];
     versionLabel.font = [UIFont systemFontOfSize:13];
     versionLabel.textAlignment = NSTextAlignmentCenter;
-    versionLabel.text = [NSString stringWithFormat:@"v%@",[FUNCTION_MANAGER getApplicationVersion]];
+    #ifdef DEBUG
+        versionLabel.text = [NSString stringWithFormat:@"debug v%@",[FUNCTION_MANAGER getApplicationVersion]];
+    #else
+        versionLabel.text = [NSString stringWithFormat:@"v%@",[FUNCTION_MANAGER getApplicationVersion]];
+    #endif
     versionLabel.textColor = COLOR_X(200, 200, 200);
     
     [versionLabel mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -208,7 +212,7 @@
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *mobile = [ud objectForKey:@"mobile"];
     _textField[0].text = mobile;
-    if([AppModel shareInstance].isReleaseOrBeta)
+    if(APP_MODEL.debugMode)
         _textField[1].text = @"123456";
     if(_textField[0].text.length == 0)
         [_textField[0] becomeFirstResponder];
@@ -291,41 +295,34 @@
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"请选择服务器地址" preferredStyle:UIAlertControllerStyleActionSheet];
     NSArray *arr = [APP_MODEL ipArray];
     
-    NSInteger index = 0;
+    NSMutableArray *newArr = [NSMutableArray array];
     for (NSDictionary *dic in arr) {
-        
-        UIAlertAction *action = [UIAlertAction actionWithTitle:dic[@"url"] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            APP_MODEL.serverUrl = dic[@"url"];
-            APP_MODEL.rongYunKey = dic[@"rongYunKey"];
-            APP_MODEL.isReleaseOrBeta = [dic[@"isReleaseOrBeta"] boolValue];
-            APP_MODEL.testVersionIndex = index;
-            APP_MODEL.authKey = dic[@"authKey"];
-            [APP_MODEL saveAppModel];
-            SVP_SUCCESS_STATUS(@"切换成功，重启生效");
-            [FUNCTION_MANAGER performSelector:@selector(exitApp) withObject:nil afterDelay:1.0];
-        }];
-        [alertController addAction:action];
-        index++;
+        NSString *bankName = dic[@"url"];
+        [newArr addObject:bankName];
     }
-    
-    
-    UIAlertAction *action = [UIAlertAction actionWithTitle:@"添加ip" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        AddIpViewController *vc = [[AddIpViewController alloc] init];
-        [strongSelf.navigationController pushViewController:vc animated:YES];
-    }];
-    [alertController addAction:action];
-    action = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-    }];
-    [alertController addAction:action];
-    
-    [alertController modifyColor];
-    
-    [self presentViewController:alertController animated:YES completion:^{
-        
-    }];
+    [newArr addObject:@"添加ip"];
+    ActionSheetCus *sheet = [[ActionSheetCus alloc] initWithArray:newArr];
+    sheet.titleLabel.text = @"请选择地址";
+    sheet.delegate = self;
+    [sheet showWithAnimationWithAni:YES];
 }
 
+-(void)actionSheetDelegateWithActionSheet:(ActionSheetCus *)actionSheet index:(NSInteger)index{
+    NSArray *arr = [APP_MODEL ipArray];
+    if(index > arr.count)
+    return;
+    if(index == arr.count){
+        AddIpViewController *vc = [[AddIpViewController alloc] init];
+        [self.navigationController pushViewController:vc animated:YES];
+    }else{
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        [ud setObject:INT_TO_STR(index) forKey:@"serverIndex"];
+        [ud synchronize];
+        SVP_SUCCESS_STATUS(@"切换成功，重启生效");
+        [FUNCTION_MANAGER performSelector:@selector(exitApp) withObject:nil afterDelay:1.0];
+    }
+}
+    
 - (void)failData:(id)object {
     if([object isKindOfClass:[NSDictionary class]]){
         if ([[object objectForKey:@"error"] isEqualToString:@"unauthorized"]) {

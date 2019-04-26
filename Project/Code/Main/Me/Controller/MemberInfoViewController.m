@@ -10,13 +10,16 @@
 #import "RongCloudManager.h"
 
 @interface MemberInfoViewController ()<UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate,ActionSheetDelegate>{
-    UITableView *_tableView;
     UIImageView *_headIcon;
     UILabel *_nickName;
     UILabel *_sexLabel;
     NSInteger _sexType;
     NSString *_headUrl;
 }
+@property(atomic,strong)NSString *shareUrl;
+@property(atomic,strong)UIImageView *qrCodeImageView;
+    @property(nonatomic,assign)NSInteger rowNum;
+    @property(atomic,strong)UITableView *tableView;
 @end
 
 @implementation MemberInfoViewController
@@ -27,6 +30,8 @@
     [self initSubviews];
     [self initLayout];
     [self addObserver];
+    self.rowNum = 4;
+    [self requestShareInfo];
 }
 
 #pragma mark ----- Data
@@ -100,7 +105,7 @@
 
 #pragma mark UITableViewDataSource
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return 3;
+    return self.rowNum;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -130,23 +135,53 @@
             [cell.contentView addSubview:_nickName];
             _nickName.font = [UIFont systemFontOfSize2:16];
             _nickName.text = APP_MODEL.user.nick;
+            _nickName.textColor = Color_6;
             
             [_nickName mas_makeConstraints:^(MASConstraintMaker *make) {
                 make.right.equalTo(cell.contentView.mas_right).offset(-12);
                 make.centerY.equalTo(cell.contentView);
             }];
-        }else{
+        }else if(indexPath.row == 2){
+
             cell.textLabel.text = @"性别";
             _sexLabel = [UILabel new];
             [cell.contentView addSubview:_sexLabel];
             _sexLabel.font = [UIFont systemFontOfSize2:16];
             _sexLabel.text = (APP_MODEL.user.gender == 1)?@"女":@"男";
-            
+            _sexLabel.textColor = Color_6;
+
             [_sexLabel mas_makeConstraints:^(MASConstraintMaker *make) {
                 make.right.equalTo(cell.contentView.mas_right).offset(-12);
                 make.centerY.equalTo(cell.contentView);
             }];
+        }else if(indexPath.row == 3){
+            cell.textLabel.text = @"手机号";
+            UILabel *label = [UILabel new];
+            [cell.contentView addSubview:label];
+            label.font = [UIFont systemFontOfSize2:16];
+            label.textColor = Color_6;
+            label.text = APP_MODEL.user.mobile;
+            
+            [label mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.right.equalTo(cell.contentView.mas_right).offset(-12);
+                make.centerY.equalTo(cell.contentView);
+            }];
         }
+        else if(indexPath.row == 4){
+            cell.textLabel.text = @"二维码";
+            UIImageView *img = [[UIImageView alloc] init];
+            [cell.contentView addSubview:img];
+            [img mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.right.equalTo(cell.contentView.mas_right).offset(-12);
+                make.centerY.equalTo(cell.contentView);
+                make.width.height.equalTo(@40);
+            }];
+            if(self.shareUrl){
+                img.image = CD_QrImg(self.shareUrl, 120);
+            }
+            self.qrCodeImageView = img;
+        }
+
         //cell.accessoryType = 1;//(indexPath.row <2)?1:0;
     }
     return cell;
@@ -277,5 +312,20 @@
         pick.allowsEditing = YES;
         [self presentViewController:pick animated:YES completion:nil];
     }
+}
+    
+-(void)requestShareInfo{
+    WEAK_OBJ(weakSelf, self);
+    [NET_REQUEST_MANAGER getShareUrlWithCode:@"1" success:^(id object) {
+        weakSelf.shareUrl = object[@"data"];
+        if(weakSelf.shareUrl == nil){
+            SVP_ERROR_STATUS(@"获取分享地址失败");
+            return;
+        }
+        SVP_DISMISS;
+        weakSelf.rowNum = 5;
+        [weakSelf.tableView reloadData];
+    } fail:^(id object) {
+    }];
 }
 @end

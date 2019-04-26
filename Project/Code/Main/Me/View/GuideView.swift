@@ -12,13 +12,17 @@ class GuideView: UIView,UICollectionViewDelegate,UICollectionViewDataSource {
     var collectionView:UICollectionView?
     var dataArray:NSArray?
     var action:ActionSheetCus?
+    var saveSel:Selector?
+    var saveTar:Any?
     @objc var button:UIButton?
     
     @objc init(array:NSArray, target:Any, selector:Selector){
-        var rect:CGRect = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+        saveSel = selector
+        saveTar = target
+        let rect:CGRect = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
         super.init(frame: rect)
 
-        self.backgroundColor = UIColor.white
+        self.backgroundColor = UIColor.init(red: 245/255.0, green: 245/255.0, blue: 245/255.0, alpha: 1.0)
         self.dataArray = array
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = UICollectionView.ScrollDirection.horizontal
@@ -45,13 +49,13 @@ class GuideView: UIView,UICollectionViewDelegate,UICollectionViewDataSource {
         btn.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         btn.backgroundColor = UIColor.clear//UIColor(red: 244/255.0, green: 112/255.0, blue: 35/255.0, alpha: 1.0)
         btn.setTitle("关闭 X", for: UIControl.State.normal)
-        btn.setTitleColor(UIColor.darkGray, for: UIControl.State.normal)
+        btn.setTitleColor(UIColor.white, for: UIControl.State.normal)
 //        btn.layer.cornerRadius = 12;
 //        btn.layer.borderColor = UIColor.white.cgColor
 //        btn.layer.borderWidth = 1.0
         btn.mas_makeConstraints { (make:MASConstraintMaker?) in
             make?.right.equalTo()(self.mas_right)?.offset()(-15)
-            make?.top.equalTo()(self.mas_top)?.offset()(20)
+            make?.top.equalTo()(self.mas_top)?.offset()(30)
             make?.height.equalTo()(42)
             make?.width.equalTo()(80)
         }
@@ -78,10 +82,40 @@ class GuideView: UIView,UICollectionViewDelegate,UICollectionViewDataSource {
                 make?.edges.equalTo()(cell)
             }
             imageV = imageView
+            
+            let btn:UIButton = UIButton.init(type: UIButton.ButtonType.custom)
+            btn.frame = CGRect.init(x: 0, y: 0, width: 0, height: 0)
+            btn.addTarget(self, action: #selector(self.hiddenSelf), for: UIControl.Event.touchUpInside)
+            imageView.addSubview(btn)
+            btn.tag = 3
         }
         let imageView:UIImageView = imageV as! UIImageView
         let imageUrl:String = self.dataArray?[indexPath.row] as! String
-        imageView.sd_setImage(with: URL.init(string: imageUrl), completed: nil)
+        weak var weakSelf = self
+        imageView.sd_setImage(with: URL.init(string: imageUrl)) { (UIImage, Error, SDImageCacheType, URL) in
+            if indexPath.row == (weakSelf?.dataArray)!.count - 1{
+                imageView.isUserInteractionEnabled = true;
+                if imageView.image != nil{
+                    let rate:CGFloat = UIScreen.main.bounds.size.height/1920.0
+                    let h:NSInteger = NSInteger(1630 * rate)
+                    let btn = imageView.viewWithTag(3)
+                    btn?.frame = CGRect.init(x: Int(UIScreen.main.bounds.size.width/2.0 - 70), y: h - 30, width: 140, height: 60)
+                }
+            }else{
+                imageView.isUserInteractionEnabled = false;
+            }
+        }
+        if indexPath.row == self.dataArray!.count - 1{
+            imageView.isUserInteractionEnabled = true;
+            if imageView.image != nil{
+                let rate:CGFloat = UIScreen.main.bounds.size.height/1920.0
+                let h:NSInteger = NSInteger(1630 * rate)
+                let btn = imageView.viewWithTag(3)
+                btn?.frame = CGRect.init(x: Int(UIScreen.main.bounds.size.width/2.0 - 70), y: h - 30, width: 140, height: 60)
+            }
+        }else{
+            imageView.isUserInteractionEnabled = false;
+        }
         return cell
     }
     
@@ -133,8 +167,13 @@ class GuideView: UIView,UICollectionViewDelegate,UICollectionViewDataSource {
             }) { (end:Bool) in
                 self.removeFromSuperview()
             }
+            
         }else{
             self.removeFromSuperview()
+        }
+        if(saveTar != nil){
+            var control:UIControl = UIControl();
+            control.sendAction(saveSel!, to: saveTar!, for: nil)
         }
     }
     

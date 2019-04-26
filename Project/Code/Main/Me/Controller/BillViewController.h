@@ -9,5 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface BillViewController : SuperViewController
-
+@property(nonatomic,strong)NSDictionary *infoDic;
 @end

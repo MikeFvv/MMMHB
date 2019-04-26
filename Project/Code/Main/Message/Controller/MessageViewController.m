@@ -24,7 +24,7 @@
 #import "HelpCenterWebController.h"
 
 #import "VVAlertModel.h"
-
+#import "AgentCenterViewController.h"
 
 @interface MessageViewController ()<UITableViewDelegate,UITableViewDataSource>
 
@@ -119,7 +119,7 @@
     
     CDWeakSelf(self);
     __weak MessageNet *weakModel = _model;
-    if(![AppModel shareInstance].isReleaseOrBeta)
+    if(!APP_MODEL.debugMode)
         self.navigationItem.title = @"消息";
     else
         self.navigationItem.title = APP_MODEL.serverUrl;
@@ -230,7 +230,11 @@
     __weak __typeof(self)weakSelf = self;
     [_model getMyJoinedGroupListSuccessBlock:^(NSDictionary *dic) {
         SVP_DISMISS;
-        [weakSelf delayReload];
+        if ([dic[@"status"] integerValue] >= 1) {
+            SVP_ERROR_STATUS(dic[@"error"]);
+        } else {
+            [weakSelf delayReload];
+        }
     } failureBlock:^(NSError *err) {
         [FUNCTION_MANAGER handleFailResponse:err];
         [weakSelf reload];
@@ -359,7 +363,7 @@
         [[EasyOperater sharedInstance] show];
 }
 
-#pragma mark - 客服弹框
+#pragma mark - 客服弹框  常见问题
 - (void)actionShowCustomerServiceAlertView:(NSString *)messageModel {
     
     NSString *imageUrl = [AppModel shareInstance].commonInfo[@"customer.service.window"];
@@ -411,13 +415,17 @@
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
                                          }],
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_agent"]
-                                          title:@"申请代理"
+                                          title:@"代理中心"
                                          action:^(FYMenuItem *item) {
-                                             BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
+//                                             BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
+//                                             vc.hidesBottomBarWhenPushed = YES;
+//                                             vc.hiddenNavBar = YES;
+//                                             vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
+//                                             [weakSelf.navigationController pushViewController:vc animated:YES];
+                                             AgentCenterViewController *vc = [[AgentCenterViewController alloc] init];
                                              vc.hidesBottomBarWhenPushed = YES;
-                                             vc.hiddenNavBar = YES;
-                                             vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
+
                                          }],
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_help"]
                                           title:@"帮助中心"
@@ -425,8 +433,7 @@
                                              //                                              AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
                                              //                                              [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
                                              
-                                             NSString *url = [NSString stringWithFormat:@"%@/dist/#/index/helpCenter?accesstoken=%@", [AppModel shareInstance].commonInfo[@"website.address"], [AppModel shareInstance].user.token];
-                                             HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:url];
+                                             HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:nil];
                                              vc.hidesBottomBarWhenPushed = YES;
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
                                              

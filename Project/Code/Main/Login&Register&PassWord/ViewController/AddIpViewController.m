@@ -10,7 +10,6 @@
 
 @interface AddIpViewController ()<UITextFieldDelegate>{
     UITextField *_textField;
-    NSInteger _netType;
 }
 @end
 
@@ -19,7 +18,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    _netType = 0;
     self.edgesForExtendedLayout = UIRectEdgeNone;
     [self.navigationController.navigationBar setTranslucent:NO];
     self.title = @"添加ip";
@@ -29,7 +27,8 @@
     view.backgroundColor = COLOR_X(240, 240, 240);
     view.font = [UIFont systemFontOfSize2:16];
     view.delegate = self;
-    view.placeholder = @"请输入地址 如：http://10.10.15.176:8099/";
+    view.placeholder = @"请输入地址 如：http://10.10.95.176:8099/";
+    view.text = @"http://10.10.95.";
     _textField = view;
     [self.view addSubview:view];
     [view mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -41,29 +40,16 @@
     
     UILabel *label = [[UILabel alloc] init];
     label.textColor = Color_6;
-    label.font = [UIFont systemFontOfSize:15];
+    label.font = [UIFont systemFontOfSize:13];
     label.textAlignment = NSTextAlignmentCenter;
-    label.text = @"类型：";
+    
+    NSDictionary *ipDic = APP_MODEL.ipArray[2];
+    label.text = [NSString stringWithFormat:@"如：%@ 融云key:%@",ipDic[@"url"],ipDic[@"rongYunKey"]];
     [view addSubview:label];
     [label mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(view.mas_left);
         make.height.equalTo(@44);
-        make.top.equalTo(view.mas_bottom).offset(15);
-    }];
-    
-    UIButton *typeBtn = [UIButton new];
-    [self.view addSubview:typeBtn];
-    typeBtn.layer.masksToBounds = YES;
-    typeBtn.backgroundColor = COLOR_X(100, 100, 100);
-    typeBtn.titleLabel.font = [UIFont boldSystemFontOfSize:15];
-    [typeBtn setTitle:@"外网" forState:UIControlStateNormal];
-    [typeBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [typeBtn addTarget:self action:@selector(changeNetType:) forControlEvents:UIControlEventTouchUpInside];
-    [typeBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(label.mas_right).offset(10);
-        make.top.equalTo(view.mas_bottom).offset(15);
-        make.height.equalTo(@(44));
-        make.width.equalTo(@80);
+        make.top.equalTo(view.mas_bottom).offset(8);
     }];
     
     UIButton *addBtn = [UIButton new];
@@ -79,23 +65,9 @@
     [addBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.view.mas_left).offset(20);
         make.right.equalTo(self.view.mas_right).offset(-20);
-        make.top.equalTo(typeBtn.mas_bottom).offset(38);
+        make.top.equalTo(label.mas_bottom).offset(38);
         make.height.equalTo(@(44));
     }];
-}
-
--(void)changeNetType:(UIButton *)btn{
-    btn.selected = !btn.selected;
-    if(btn.selected){
-        [btn setTitle:@"内网" forState:UIControlStateNormal];
-        _netType = 1;
-        [AppModel shareInstance].isReleaseOrBeta = YES;
-    }
-    else{
-        [btn setTitle:@"外网" forState:UIControlStateNormal];
-        _netType = 0;
-        [AppModel shareInstance].isReleaseOrBeta = NO;
-    }
 }
 
 -(void)addAction{
@@ -109,18 +81,14 @@
         [mArr removeObjectAtIndex:0];
     NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
     [dic setObject:ip forKey:@"url"];
-    if(_netType == 0)
-        [dic setObject:kRongYunKey forKey:@"rongYunKey"];
-    else
-        [dic setObject:kRongfYunKeyTest1 forKey:@"rongYunKey"];
-
+    NSDictionary *ipDic = APP_MODEL.ipArray[2];
+    [dic setObject:ipDic[@"rongYunKey"] forKey:@"rongYunKey"];
+    [dic setObject:@"1" forKey:@"isBeta"];
+    [dic setObject:@"Basic YXBwOmFwcA==" forKey:@"baseKey"];
     [mArr addObject:dic];
     [ud setObject:mArr forKey:@"ipArray"];
     [ud synchronize];
-    if(_netType == 0)
-        SVP_SUCCESS_STATUS(@"添加外网ip成功");
-    else
-        SVP_SUCCESS_STATUS(@"添加内网ip成功");
+    SVP_SUCCESS_STATUS(@"添加ip成功");
     [self.navigationController popViewControllerAnimated:YES];
 }
 

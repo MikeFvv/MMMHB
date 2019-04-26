@@ -11,7 +11,5 @@
 
 @interface NoRobSendRPController : UIViewController
 
-@property (nonatomic,assign) BOOL isFu;
-
 @end
 

@@ -28,7 +28,6 @@
 #include <mach/mach_time.h>
 
 @interface FunctionManager()
-@property(nonatomic,assign)AppType appType;
 
 @end
 @implementation FunctionManager
@@ -45,7 +44,6 @@
 
 -(id)init{
     if(self = [super init]){
-        _appType = AppType_nil;
     }
     return self;
 }
@@ -420,6 +418,8 @@
 }
 
 -(void)checkVersion:(BOOL)showAlert{
+    if(APP_MODEL.user.isLogined == NO)
+        return;
     WEAK_OBJ(weakObj, self);
     [NET_REQUEST_MANAGER requestAppConfigWithSuccess:^(id object) {
         SVP_DISMISS;
@@ -437,8 +437,9 @@
     if([appVersion compare:newestVersion] == NSOrderedAscending){
         NSInteger forceUpate = [dict[@"ios.force.update.flag"] integerValue];
         NSString *desc = dict[@"ios.version.update.content"];
-        
+      
         AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+        view.textLabel.font = [UIFont systemFontOfSize2:16];
         if(forceUpate == 0){
             [view showWithText:desc button1:@"取消" button2:@"更新" callBack:^(id object) {
                 NSInteger tag = [object integerValue];
@@ -481,22 +482,6 @@
     }
 }
 
-
--(AppType)appType{
-    if(_appType == AppType_nil){
-        NSString *bid = [[NSBundle mainBundle] bundleIdentifier];
-        if([bid isEqualToString:@"com.xmfx.tthb"])
-            _appType = AppType_TTHB;
-        else if([bid isEqualToString:@"com.xmfx.wwhb"])
-            _appType = AppType_WWHB;
-        else if([bid isEqualToString:@"com.xmfx.wbhb"])
-            _appType = AppType_WBHB;
-        else
-            _appType = AppType_XZHB;
-    }
-    return _appType;
-}
-
 -(NSArray *)orderBombArray:(NSArray *)bombArray{
     if(bombArray.count < 2)
         return bombArray;
@@ -536,5 +521,42 @@
     NSDictionary *infoPlist = [[NSBundle mainBundle] infoDictionary];
     NSString *icon = [[infoPlist valueForKeyPath:@"CFBundleIcons.CFBundlePrimaryIcon.CFBundleIconFiles"] lastObject];
     return icon;
+}
+
+- (UIImage*)imageWithView:(UIView*) view{
+    // 创建一个bitmap的context
+    // 并把它设置成为当前正在使用的context
+    CGSize size = view.bounds.size;
+    UIGraphicsBeginImageContext(size);
+    CGContextRef currnetContext = UIGraphicsGetCurrentContext();
+    [view.layer renderInContext:currnetContext];
+    // 从当前context中创建一个改变大小后的图片
+    UIImage* image = UIGraphicsGetImageFromCurrentImageContext();
+    // 使当前的context出堆栈
+    UIGraphicsEndImageContext();
+    return image;
+}
+
+-(UIImage *)grayImage:(UIImage *)oldImage{
+    int bitmapInfo = kCGImageAlphaNone;
+    int width = oldImage.size.width;
+    int height = oldImage.size.height;
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceGray();
+    CGContextRef context = CGBitmapContextCreate (nil,
+                                                  width,
+                                                  height,
+                                                  8,
+                                                  0,
+                                                  colorSpace,
+                                                  bitmapInfo);
+    CGColorSpaceRelease(colorSpace);
+    if (context == NULL) {
+        return nil;
+    }
+    CGContextDrawImage(context,
+                       CGRectMake(0, 0, width, height), oldImage.CGImage);
+    UIImage *grayImage = [UIImage imageWithCGImage:CGBitmapContextCreateImage(context)];
+    CGContextRelease(context);
+    return grayImage;
 }
 @end

@@ -21,6 +21,7 @@
     self.automaticallyAdjustsScrollViewInsets = NO;
     [self.navigationController.navigationBar setTranslucent:NO];
     // Do any additional setup after loading the view from its nib.
+    //self.scrollView.frame = self.view.bounds;
     [self fill];
 }
 
@@ -45,5 +46,12 @@
         self.remarkLabel.text = cause;
     else
         self.remarkLabel.text = @"无";
+    [self.remarkLabel sizeToFit];
+    NSInteger bottom = self.remarkLabel.frame.size.height + self.remarkLabel.frame.origin.y;
+    UIView *view = self.remarkLabel.superview;
+    CGRect rect = view.frame;
+    rect.size.height = bottom + 20;
+    view.frame = rect;
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width, view.frame.size.height + view.frame.origin.y + 33);
 }
 @end

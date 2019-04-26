@@ -7,13 +7,9 @@
 //
 
 #import "WebViewController.h"
-#import <WebKit/WebKit.h>
-#import "WebProgressView.h"
 
 @interface WebViewController ()<WKUIDelegate,WKNavigationDelegate,UINavigationBarDelegate>{
-    WKWebView *_webView;
     WebProgressView *_progress;
-    NSString *_url;
     NSString *_htmlString;
 }
 @end
@@ -51,11 +47,11 @@
     [openBySafariBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     openBySafariBtn.titleLabel.font = [UIFont systemFontOfSize2:15];
     [openBySafariBtn setTitle:@"Safari" forState:UIControlStateNormal];
+    //[openBySafariBtn setImage:[UIImage imageNamed:@"safari"] forState:UIControlStateNormal];
     [openBySafariBtn addTarget:self action:@selector(openBySafari) forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:openBySafariBtn];
     self.navigationItem.rightBarButtonItems = @[item];
 }
-
 
 #pragma mark Data
 - (void)initData{
@@ -72,6 +68,7 @@
     _webView.UIDelegate = self;
     _webView.navigationDelegate = self;
     _webView.backgroundColor = CDCOLOR(245, 245, 245);
+    
     
     [_webView addObserver:self forKeyPath:@"estimatedProgress"options:NSKeyValueObservingOptionNew context:NULL];
     
@@ -134,7 +131,7 @@
 // 页面加载完成之后调用
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
     [_progress setProgress:0 animated:NO];
-    self.navigationItem.title = webView.title;
+    //self.navigationItem.title = webView.title;
 //    NSLog(@"%@",webView.title);
 }
 

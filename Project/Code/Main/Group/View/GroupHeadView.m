@@ -61,6 +61,11 @@
     [_collectionView reloadData];
     
     NSString *count = [NSString stringWithFormat:@"全部群成员(%ld)>",model.total];
+    if(APP_MODEL.user.innerNumFlag || APP_MODEL.user.groupowenFlag){
+    }else{
+        count = [NSString stringWithFormat:@"全部群成员(%ld)",model.total];
+        _allBtn.userInteractionEnabled = NO;
+    }
     NSMutableAttributedString *AttributedStr = [[NSMutableAttributedString alloc]initWithString:count];
     NSRange rang = NSMakeRange(0, count.length);
     [AttributedStr addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize2:14] range:rang];
@@ -130,8 +135,10 @@
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
-    if (self.click) {
-        self.click(indexPath.row);
+    if(APP_MODEL.user.innerNumFlag || APP_MODEL.user.groupowenFlag){
+        if (self.click) {
+            self.click(indexPath.row);
+        }
     }
 }
 

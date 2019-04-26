@@ -54,7 +54,7 @@
     if(img == nil)
         return;
     self.imageView.frame = CGRectMake(0, 0,img.size.width, img.size.height);
-    float qrWith = img.size.width * 0.250;
+    float qrWith = img.size.width * 0.230;
     UIImageView *qrImage = [UIImageView new];
     qrImage.contentMode = UIViewContentModeScaleAspectFit;
     NSString *shareUrl = self.shareUrl;
@@ -71,10 +71,15 @@
         qrImage.frame = CGRectMake((self.imageView.frame.size.width - qrWith)/2.0, 1010, qrWith, qrWith);
     [self.imageView addSubview:qrImage];
     
+    NSInteger labelFontSize = 54;
+    
+    NSInteger labelX = 180;
+    if(SCREEN_WIDTH == 320)
+        labelX = 160;
     UILabel *label = [[UILabel alloc] init];
     label.textColor = [UIColor whiteColor];
     label.backgroundColor = [UIColor clearColor];
-    label.font = [UIFont systemFontOfSize2:54];
+    label.font = [UIFont boldSystemFontOfSize2:labelFontSize];
     [self.imageView addSubview:label];
     label.text = [NSString stringWithFormat:@"邀请码   %@",APP_MODEL.user.invitecode];
     label.shadowColor = [UIColor blackColor];
@@ -85,28 +90,31 @@
         CGRect rect = CGRectMake([arr[0] integerValue], [arr[1] integerValue], [arr[2] integerValue], [arr[3] integerValue]);
         label.frame = rect;
     }else
-        label.frame = CGRectMake(170, 1330, 700, 60);
+        label.frame = CGRectMake(labelX, 1315, self.imageView.frame.size.width - labelX * 2, 60);
+    label.textAlignment = NSTextAlignmentCenter;
     [self.imageView addSubview:qrImage];
     
     self.shareImage = [self imageWithUIView:self.imageView];
-    self.imageView.image = self.shareImage;
     float rate = img.size.width/img.size.height;
     float x = 15;
     float width = SCREEN_WIDTH - x * 2;
     float height = width/rate;
     float xRate = width/self.shareImage.size.width;
-    float yRate = height/self.shareImage.size.height;
     self.imageView.frame = CGRectMake(x, 15,width, height);
-    CGPoint point = CGPointMake(label.frame.origin.x * xRate + self.imageView.frame.origin.x, (label.frame.origin.y + label.frame.size.height/2.0) * yRate + self.imageView.frame.origin.y);
+    qrImage.frame = CGRectMake(qrImage.frame.origin.x * xRate, qrImage.frame.origin.y * xRate, qrImage.frame.size.width * xRate, qrImage.frame.size.height * xRate);
+    label.frame = CGRectMake(label.frame.origin.x * xRate, label.frame.origin.y * xRate, label.frame.size.width * xRate, label.frame.size.height * xRate);
+    label.font = [UIFont boldSystemFontOfSize2:labelFontSize * xRate];
+    CGPoint point = CGPointMake(label.frame.origin.x + self.imageView.frame.origin.x, (label.frame.origin.y + label.frame.size.height/2.0) + self.imageView.frame.origin.y);
 
     NSInteger mm = self.view.frame.size.height - height;
     NSInteger h = self.view.frame.size.height - mm + 150 + 30;
     if(h <= self.scrollView.frame.size.height)
         h = self.scrollView.frame.size.height + 1;
     self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width, h);
-    [qrImage removeFromSuperview];
-    [label removeFromSuperview];
-    
+//    [qrImage removeFromSuperview];
+//    [label removeFromSuperview];
+    label.textAlignment = NSTextAlignmentLeft;
+
     
     NSInteger btnWidth = 90;
     NSInteger btnHeight = 40;
@@ -215,8 +223,9 @@
     model.content = WXShareDescription;
     //CGSize size = self.shareImage.size;
     if(mediaType == MediaType_url){
-        NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.user.invitecode];
-        model.link = shareUrl;
+//        NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.user.invitecode];
+        model.link = self.shareUrl;
+        NSLog(@"url= %@",model.link);
         model.imageData = UIImageJPEGRepresentation([UIImage imageNamed:[FUNCTION_MANAGER getAppIconName]],1.0);
     }
     else{

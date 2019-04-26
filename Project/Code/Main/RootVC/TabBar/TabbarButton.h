@@ -21,6 +21,8 @@
 @property (nonatomic ,strong) NSString *badeValue;
 @property (nonatomic ,strong) UIColor *badeColor;
 @property (nonatomic ,assign) BOOL tabbarSelected;
+@property (nonatomic ,assign)float scaleX;
+@property (nonatomic ,assign)float scaleY;
 
 @property (nonatomic ,assign) NSInteger animationType;
 + (TabbarButton *)tabbar;

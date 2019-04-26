@@ -10,12 +10,14 @@
 #import "Public.h"
 #import "TabMessageAniView.h"
 #import "AniView.h"
+#import "TabTaskAniView.h"
 
 @interface TabbarButton()<CAAnimationDelegate>{
     UILabel *_titleLabel;
     UILabel *_badeLabel;
     UIView *_badeBack;
 }
+@property(nonatomic,strong)TabTaskAniView *aniView;
 @end
 
 @implementation TabbarButton
@@ -151,9 +153,24 @@
     }
 }
 
+-(void)setAnimationType:(NSInteger)animationType{
+    _animationType = animationType;
+    if(_animationType == 5){//活动奖励
+        TabTaskAniView *aniView = [[TabTaskAniView alloc] initWithFrame:CGRectMake(0, 0, 158, 75)];
+        [self insertSubview:aniView atIndex:0];
+        aniView.transform = CGAffineTransformMakeScale(self.scaleX,self.scaleY);
+        self.aniView = aniView;
+        CGPoint center = aniView.center;
+        center.x = self.frame.size.width/2.0;
+        center.y = self.frame.size.height/2.0 - 8;
+        aniView.center = center;
+        [aniView resetView];
+    }
+}
+
 -(void)runAni{
     AniView *imgView = [self viewWithTag:99];
-    if(imgView == nil && self.animationType != 4){
+    if(imgView == nil && self.animationType != 4 && self.animationType != 5){
         imgView = [[AniView alloc] init];
         imgView.clipsToBounds = YES;
         [self addSubview:imgView];
@@ -219,6 +236,8 @@
                 weakSelf.iconImg.image = weakSelf.selectImg;
             }
         };
+    }else if(self.animationType == 5){
+        [self.aniView startAni];
     }
 }
 
@@ -230,4 +249,6 @@
         NSLog(@"set select iconimg");
     }
 }
+
+
 @end

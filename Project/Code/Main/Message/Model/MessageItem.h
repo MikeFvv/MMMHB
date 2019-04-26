@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "GroupRuleModel.h"
 
 
 @interface MessageItem : NSObject
@@ -73,7 +72,7 @@
 @property (nonatomic,copy) NSString *lastUpdateBy;
 // 最后更新时间
 @property (nonatomic,copy) NSString *lastUpdateTime;
-// 群类型 0 福利  1、扫雷群；2、牛牛群 
+// 群类型 0 福利  1、扫雷群；2、牛牛群  3 禁抢
 @property (nonatomic ,assign) NSInteger type;
 
 @property (nonatomic ,assign) BOOL isMyJoined;

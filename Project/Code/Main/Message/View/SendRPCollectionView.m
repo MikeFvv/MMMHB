@@ -11,9 +11,9 @@
 
 #define kColumn 5
 #define kSpacingWidth 4
-#define kTableViewImageWidth 20
+#define kTableViewMarginWidth 20
 
-static NSString * const kCellSendRPCollectionViewId = @"SendRedPackedSelectNumCell";
+static NSString * const kCellSendRPCollectionViewId = @"SelectMineNumCell";
 
 @interface SendRPCollectionView ()<UICollectionViewDataSource, UICollectionViewDelegateFlowLayout>
 
@@ -141,8 +141,13 @@ static NSString * const kCellSendRPCollectionViewId = @"SendRedPackedSelectNumCe
 {
     if(self.tag != 99)
         return YES;
-    if(self.collectionView.indexPathsForSelectedItems.count >= self.maxNum)
+    if(self.collectionView.indexPathsForSelectedItems.count >= self.maxNum) {
+        if (self.selectMoreMaxCollectionViewBlock) {
+            self.selectMoreMaxCollectionViewBlock();
+        }
         return NO;
+    }
+    
     return YES;
 }
 

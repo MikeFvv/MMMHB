@@ -38,6 +38,10 @@
     SystemAlertViewController *instance = [SystemAlertViewController new];
     instance.titleStr = title;
     instance.dataArray = dataArray;
+    if(dataArray.count == 1){
+        VVAlertModel *model = dataArray[0];
+        model.expend = YES;
+    }
     return instance;
 }
 
@@ -81,8 +85,9 @@
 //#pragma mark - TableView
 - (UITableView *)tableView {
     if (!_tableView) {
-        _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 45, _contentViewWidth, _shadowView.bounds.size.height - 45) style:UITableViewStylePlain];
+        _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 50, _contentViewWidth, _shadowView.bounds.size.height - 50) style:UITableViewStylePlain];
         _tableView.backgroundColor = [UIColor whiteColor];
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         _tableView.dataSource = self;
         _tableView.delegate = self;
         //        self.tableView.tableHeaderView = self.headView;
@@ -113,8 +118,11 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     VVAlertModel *model = self.dataArray[indexPath.section];
-    
-    SystemAlertTextCell *cell = [SystemAlertTextCell cellWithTableView:tableView reusableId:@"SystemAlertTextCell"];
+    static NSString *cellId = @"SystemAlertTextCell";
+    SystemAlertTextCell *cell = [tableView dequeueReusableCellWithIdentifier:cellId];
+    if(cell == nil)
+        cell = [SystemAlertTextCell cellWithTableView:tableView reusableId:cellId];
+    //SystemAlertTextCell *cell = [SystemAlertTextCell cellWithTableView:tableView reusableId:@"SystemAlertTextCell"];
     // 倒序
     cell.model = model.friends[indexPath.row];
     return cell;
@@ -184,8 +192,9 @@
             model.expend = NO;
         }
     }
-    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:headerView.tag];
-    [self.tableView reloadData];
+
+    NSIndexSet *set = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, self.dataArray.count)];
+    [self.tableView reloadSections:set withRowAnimation:UITableViewRowAnimationFade];
 //    [self.tableView reloadSections:indexSet withRowAnimation:UITableViewRowAnimationNone];
 }
 
@@ -283,9 +292,9 @@
     //    _contentView.backgroundColor = [UIColor redColor];
     [_shadowView addSubview:_contentView];
     
-    UIView *topView = [[UIView alloc] init];
-    topView.backgroundColor = MBTNColor;
+    UIImageView *topView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"navBarBg"]];
     [_contentView addSubview:topView];
+    topView.userInteractionEnabled = YES;
     [topView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.left.right.mas_equalTo(self->_contentView);
         make.height.mas_equalTo(50);

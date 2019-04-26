@@ -12,8 +12,8 @@
 
 #define kColumn 5
 #define kSpacingWidth 4
-#define kTableViewImageWidth 20
-#define kBtnWidth 65
+#define kTableViewMarginWidth 20
+#define kBtnWidth 60
 
 @interface SendRPNumTableViewCell ()
 
@@ -36,7 +36,10 @@
 
 + (instancetype)cellWithTableView:(UITableView *)tableView reusableId:(NSString *)ID
 {
-    SendRPNumTableViewCell *cell = [[SendRPNumTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    SendRPNumTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+    if (!cell) {
+        cell = [[SendRPNumTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
@@ -56,35 +59,48 @@
     
     self.backgroundColor = [UIColor clearColor];
     
+    UIView *backView = [[UIView alloc] init];
+    backView.backgroundColor = [UIColor whiteColor];
+    backView.layer.cornerRadius = 5;
+    backView.layer.masksToBounds = YES;
+    [self addSubview:backView];
+    
+    [backView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.mas_top).offset(10);
+        make.left.mas_equalTo(self.mas_left).offset(kTableViewMarginWidth);
+        make.right.mas_equalTo(self.mas_right).offset(-kTableViewMarginWidth);
+        make.bottom.mas_equalTo(self.mas_bottom);
+    }];
+    
     _titleLabel = [UILabel new];
     _titleLabel.text = @"红包个数";
-    _titleLabel.font = [UIFont systemFontOfSize2:14];
-    _titleLabel.textColor = Color_0;
-    [self.contentView addSubview:_titleLabel];
+    _titleLabel.font = [UIFont systemFontOfSize2:15];
+    _titleLabel.textColor = [UIColor colorWithRed:0.388 green:0.388 blue:0.388 alpha:1.000];;
+    [backView addSubview:_titleLabel];
     
     [_titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.contentView.mas_left).offset(kTableViewImageWidth+15);
-        make.centerY.equalTo(self.contentView.mas_centerY);
+        make.left.equalTo(backView.mas_left).offset(10);
+        make.centerY.equalTo(backView.mas_centerY);
     }];
     
     
     _unitLabel = [UILabel new];
     _unitLabel.text = @"包";
     _unitLabel.font = [UIFont systemFontOfSize2:16];
-    _unitLabel.textColor = Color_0;
-    [self.contentView addSubview:_unitLabel];
+    _unitLabel.textColor = [UIColor colorWithRed:0.388 green:0.388 blue:0.388 alpha:1.000];
+    [backView addSubview:_unitLabel];
     
     [_unitLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.right.equalTo(self.contentView.mas_right).offset(-(kTableViewImageWidth+15));
-        make.centerY.equalTo(self.contentView.mas_centerY);
+        make.right.equalTo(backView.mas_right).offset(-10);
+        make.centerY.equalTo(backView.mas_centerY);
     }];
     
     
-    CGFloat itemWidth = ([UIScreen mainScreen].bounds.size.width - kSendRPTitleCellWidth - kBtnWidth - kTableViewImageWidth * 2 - (kColumn + 1) * kSpacingWidth) / kColumn;
+    CGFloat itemWidth = ([UIScreen mainScreen].bounds.size.width -kTableViewMarginWidth*2 - kSendRPTitleCellWidth - kBtnWidth - (kColumn + 1) * kSpacingWidth) / kColumn;
     
     CGFloat height = itemWidth * 1 + kSpacingWidth * 2;
     CGFloat frameHeight = (CD_Scal(60, 812) - height) / 2;
-    SendRPCollectionView *sendRPCollectionView = [[SendRPCollectionView alloc] initWithFrame:CGRectMake(kTableViewImageWidth+kSendRPTitleCellWidth, frameHeight, [UIScreen mainScreen].bounds.size.width -kSendRPTitleCellWidth - kBtnWidth - kTableViewImageWidth * 2, height)];
+    SendRPCollectionView *sendRPCollectionView = [[SendRPCollectionView alloc] initWithFrame:CGRectMake(kSendRPTitleCellWidth, frameHeight, [UIScreen mainScreen].bounds.size.width -kTableViewMarginWidth*2 -kSendRPTitleCellWidth - kBtnWidth, height)];
 //    sendRPCollectionView.backgroundColor = [UIColor redColor];
     sendRPCollectionView.collectionView.allowsMultipleSelection = NO;
     sendRPCollectionView.selectNumCollectionViewBlock = ^{
@@ -92,20 +108,9 @@
             self.selectNumBlock(self.sendRPCollectionView.collectionView.indexPathsForSelectedItems);
         }
     };
-    [self addSubview:sendRPCollectionView];
+    [backView addSubview:sendRPCollectionView];
     _sendRPCollectionView = sendRPCollectionView;
     
-    
-    UIView *lineView = [[UIView alloc] init];
-    lineView.backgroundColor = [UIColor colorWithRed:0.945 green:0.945 blue:0.945 alpha:1.000];
-    [self.contentView addSubview:lineView];
-    
-    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.mas_equalTo(self.contentView.mas_left).offset(kTableViewImageWidth +10);
-        make.right.mas_equalTo(self.contentView.mas_right).offset(-(kTableViewImageWidth +10));
-        make.height.mas_equalTo(@(1));
-        make.bottom.mas_equalTo(self.contentView.mas_bottom);
-    }];
     
 }
 

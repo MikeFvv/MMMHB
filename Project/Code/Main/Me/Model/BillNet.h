@@ -14,7 +14,9 @@
 @property (nonatomic ,assign) NSInteger page;
 @property (nonatomic ,assign) NSInteger total;
 @property (nonatomic ,assign) NSInteger pageSize;
-@property (nonatomic ,assign) NSInteger type;
+@property (nonatomic ,strong) NSString *billName;
+@property (nonatomic ,strong) NSString *categoryStr;
+
 
 @property (nonatomic ,copy) NSString *beginTime;
 @property (nonatomic ,strong) NSString *endTime;

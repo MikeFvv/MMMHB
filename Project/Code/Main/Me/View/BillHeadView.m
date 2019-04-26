@@ -24,16 +24,20 @@
 }
 */
 
-+ (BillHeadView *)headView{
++ (BillHeadView *)headView:(BOOL)isAll{
     CGFloat w = (CDScreenWidth-1)/2;
     CGFloat h = w / BSCAL;
-    BillHeadView *headView = [[BillHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, h*2+2)];
+    NSInteger n = 2;
+    if(isAll)
+        n = 1;
+    BillHeadView *headView = [[BillHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, h*n+2) isAll:isAll];
     return headView;
 }
 
-- (instancetype)initWithFrame:(CGRect)frame{
+- (instancetype)initWithFrame:(CGRect)frame isAll:(BOOL)isAll{
     self = [super initWithFrame:frame];
     if (self) {
+        self.isAll = isAll;
         [self initData];
         [self initSubviews];
         [self initLayout];
@@ -58,9 +62,14 @@
     CGFloat h = w / BSCAL;
     NSArray *list = @[@"my-icon1",@"my-icon6",@"my-icon3",@"my-icon4"];
     NSArray *titles = @[[NSString stringWithFormat:@"余额：%@元",user.balance],@"全部",@"",@""];
-    for (int i = 0; i<list.count; i++) {
-        UIButton *b = [self item:list[i] title:titles[i] frame:CGRectMake((1+w)*(i%2), (1+h)*(i/2), w, h)];//[[UIButton alloc]initWithFrame:];
-        b.tag = BClickTAG + i;
+    NSArray *tags = @[@0,@1,@2,@3];
+    NSInteger a = 0;
+    if(self.isAll)
+        a = 2;
+    for (int i = a; i<list.count; i++) {
+        NSInteger m = i - a;
+        UIButton *b = [self item:list[i] title:titles[i] frame:CGRectMake((1+w)*(m%2), (1+h)*(m/2), w, h)];//[[UIButton alloc]initWithFrame:];
+        b.tag = BClickTAG + [tags[i] integerValue];
         [b addTarget:self action:@selector(handle:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:b];
         if(i == 0){
@@ -104,8 +113,8 @@
     [label mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(btn.mas_left).offset(4);
         make.right.equalTo(btn.mas_right).offset(-4);
-        make.top.equalTo(imgView.mas_bottom).offset(4);
-        make.bottom.greaterThanOrEqualTo(btn.mas_bottom).offset(-4);
+        make.top.equalTo(imgView.mas_bottom).offset(0);
+//        make.bottom.greaterThanOrEqualTo(btn.mas_bottom).offset(-4);
     }];
     
     return btn;

@@ -26,9 +26,8 @@
 @property (nonatomic ,copy) NSString *rongYunKey;
 @property (nonatomic ,copy) NSString *authKey;
 
-// NO 生产正式版    YES Beta测试版
-@property (nonatomic ,assign) BOOL isReleaseOrBeta;
-@property (nonatomic ,assign) NSInteger testVersionIndex;
+// NO 正式版    YES 测试版
+@property (nonatomic ,assign) BOOL debugMode;
 
 + (instancetype)shareInstance;
 - (void)saveAppModel;///<登录存档

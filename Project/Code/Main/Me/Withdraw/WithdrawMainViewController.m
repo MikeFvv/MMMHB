@@ -82,6 +82,7 @@
 -(void)addNewCard:(NSNotification *)notification{
     self.isAddNewCard = YES;
 }
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     return self.historyArray.count;
 }

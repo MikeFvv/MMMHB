@@ -30,18 +30,21 @@
 //    self.layer.masksToBounds = YES;
     self.layer.cornerRadius = self.frame.size.width/2;
     self.layer.masksToBounds = YES;
+    self.layer.borderWidth = 1;
+    self.layer.borderColor = [UIColor colorWithRed:1.000 green:0.443 blue:0.247 alpha:1.000].CGColor;
     if (self.selected) {
-        self.backgroundColor = [UIColor colorWithRed:0.231 green:0.459 blue:0.796 alpha:1.000];
+        self.backgroundColor = [UIColor colorWithRed:1.000 green:0.443 blue:0.247 alpha:1.000];
     } else {
-        self.backgroundColor = [UIColor colorWithRed:0.725 green:0.761 blue:0.843 alpha:1.000];
+        self.backgroundColor = [UIColor colorWithRed:1.000 green:0.890 blue:0.847 alpha:1.000];
     }
-    self.backgroundColor = [UIColor colorWithRed:0.725 green:0.761 blue:0.843 alpha:1.000];
+    
+    
     UILabel *numLabel = [[UILabel alloc] init];
     //    numLabel.layer.masksToBounds = YES;
     //    numLabel.layer.cornerRadius = self.frame.size.width/2;
     numLabel.textAlignment = NSTextAlignmentCenter;
     numLabel.font = [UIFont boldSystemFontOfSize:16];
-    numLabel.textColor = [UIColor whiteColor];
+    numLabel.textColor = [UIColor colorWithRed:1.000 green:0.443 blue:0.247 alpha:1.000];
     [self addSubview:numLabel];
     _numLabel = numLabel;
     
@@ -54,10 +57,12 @@
 -(void)setSelected:(BOOL)selected{
     [super setSelected:selected];
     
-    if (selected) {
-        self.backgroundColor = [UIColor colorWithRed:0.231 green:0.459 blue:0.796 alpha:1.000];
+    if (self.selected) {
+        self.backgroundColor = [UIColor colorWithRed:1.000 green:0.443 blue:0.247 alpha:1.000];
+        self.numLabel.textColor = [UIColor whiteColor];
     } else {
-        self.backgroundColor = [UIColor colorWithRed:0.725 green:0.761 blue:0.843 alpha:1.000];
+        self.backgroundColor = [UIColor colorWithRed:1.000 green:0.890 blue:0.847 alpha:1.000];
+        self.numLabel.textColor = [UIColor colorWithRed:1.000 green:0.443 blue:0.247 alpha:1.000];
     }
 }
 

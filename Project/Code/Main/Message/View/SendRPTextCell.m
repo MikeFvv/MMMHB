@@ -10,7 +10,6 @@
 #import "SendRPCollectionViewCell.h"
 #import "SendRedPacketController.h"
 
-static NSString * const kCellSendRedPackedTextId = @"SendRedPackedTextCell";
 
 @interface SendRPTextCell ()
 
@@ -27,7 +26,10 @@ static NSString * const kCellSendRedPackedTextId = @"SendRedPackedTextCell";
 
 + (instancetype)cellWithTableView:(UITableView *)tableView reusableId:(NSString *)ID
 {
-    SendRPTextCell *cell = [[SendRPTextCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    SendRPTextCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+    if (!cell) {
+        cell = [[SendRPTextCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }

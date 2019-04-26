@@ -23,7 +23,7 @@
 #import "HelpCenterWebController.h"
 #import "SystemAlertViewController.h"
 #import "VVAlertModel.h"
-
+#import "AgentCenterViewController.h"
 
 @interface GroupViewController ()<UITableViewDelegate,UITableViewDataSource>
 
@@ -71,7 +71,6 @@
 
 #pragma mark ----- subView
 - (void)initSubviews {
-    
     self.navigationItem.title = @"群组";
     CDWeakSelf(self);
     __weak MessageNet *weakModel = _model;
@@ -130,7 +129,6 @@
     });
 }
 
-
 #pragma mark -  获取所有群组列表
 /**
  获取所有群组列表
@@ -169,7 +167,8 @@
     //        SVP_ERROR_STATUS(@"余额不足。");
     //        return;
     //    }
-    
+    [self groupChat:item];
+    return;
     SVP_SHOW;
     __weak __typeof(self)weakSelf = self;
     [[MessageNet shareInstance] checkGroupId:item.groupId Completed:^(BOOL complete) {
@@ -182,27 +181,25 @@
             [[MessageNet shareInstance] joinGroup:item.groupId successBlock:^(NSDictionary *dict) {
                 SVP_DISMISS;
                  __strong __typeof(weakSelf)strongSelf = weakSelf;
-                [strongSelf sendWelcomeMessage:item.groupId];
                 
                 if ([[dict objectForKey:@"code"] integerValue] == 0) {
+                    [strongSelf sendWelcomeMessage:item.groupId];
                      [strongSelf groupChat:item];
                 } else if ([[dict objectForKey:@"code"] integerValue] == 19) {
                     SVP_ERROR_STATUS([dict objectForKey:@"msg"]);
+                    [strongSelf sendWelcomeMessage:item.groupId];
                     [strongSelf groupChat:item];
                 } else {
                      SVP_ERROR_STATUS([dict objectForKey:@"msg"]);
                 }
-                
             } failureBlock:^(NSError *error) {
                 SVP_ERROR(error);
             }];
         }
     }];
-    
 }
 
 - (void)sendWelcomeMessage:(NSString *)groupId {
-
     NSString *content = [NSString stringWithFormat:@"大家好，我是%@", [AppModel shareInstance].user.nick];
     RCTextMessage *txtMsg = [RCTextMessage messageWithContent:content];
     [[RCIM sharedRCIM] sendMessage:ConversationType_GROUP targetId:groupId content:txtMsg pushContent:nil pushData:nil success:^(long messageId) {
@@ -295,11 +292,8 @@
 #pragma mark - 下拉菜单
 - (NSMutableArray *)menuItems {
     if (!_menuItems) {
-        
         __weak __typeof(self)weakSelf = self;
-        
         _menuItems = [[NSMutableArray alloc] initWithObjects:
-                      
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_recharge"]
                                           title:@"快速充值"
                                          action:^(FYMenuItem *item) {
@@ -315,12 +309,10 @@
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
                                          }],
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_agent"]
-                                          title:@"申请代理"
+                                          title:@"代理中心"
                                          action:^(FYMenuItem *item) {
-                                             BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
+                                             AgentCenterViewController *vc = [[AgentCenterViewController alloc] init];
                                              vc.hidesBottomBarWhenPushed = YES;
-                                             vc.hiddenNavBar = YES;
-                                             vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
                                          }],
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_help"]
@@ -328,22 +320,18 @@
                                          action:^(FYMenuItem *item) {
                                              //                                              AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
                                              //                                              [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
-                                             
-                                             NSString *url = [NSString stringWithFormat:@"%@/dist/#/index/helpCenter?accesstoken=%@", [AppModel shareInstance].commonInfo[@"website.address"], [AppModel shareInstance].user.token];
-                                             HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:url];
+                                            
+                                             HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:nil];
                                              vc.hidesBottomBarWhenPushed = YES;
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
-                                             
                                          }], nil];
     }
-    
     return _menuItems;
 }
 
 
 //导航栏弹出
-- (void)rightBarButtonDown:(UIBarButtonItem *)sender
-{
+- (void)rightBarButtonDown:(UIBarButtonItem *)sender{
     FYMenu *menu = [[FYMenu alloc] initWithItems:self.menuItems];
     menu.menuCornerRadiu = 5;
     menu.showShadow = NO;

@@ -31,7 +31,10 @@
 
 + (instancetype)cellWithTableView:(UITableView *)tableView reusableId:(NSString *)ID
 {
-    CharUserInfoCell *cell = [[CharUserInfoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    CharUserInfoCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+    if (!cell) {
+        cell = [[CharUserInfoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }

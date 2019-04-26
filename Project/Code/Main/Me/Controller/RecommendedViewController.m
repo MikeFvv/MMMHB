@@ -11,11 +11,16 @@
 #import "RecommendCell.h"
 #import "ReportForms2ViewController.h"
 
-@interface RecommendedViewController ()<UITableViewDelegate,UITableViewDataSource>{
+@interface RecommendedViewController ()<UITableViewDelegate,UITableViewDataSource,ActionSheetDelegate>{
     UITableView *_tableView;
     RecommendNet *_model;
 }
+@property(nonatomic,strong)UIImageView *bgView;
+@property(nonatomic,strong)UILabel *totalNumLabel;
+@property(nonatomic,strong)UILabel *descLabel;
 
+@property(nonatomic,strong)UITextField *accountTextField;
+@property(nonatomic,strong)UITextField *levelTextField;
 @end
 
 @implementation RecommendedViewController
@@ -24,7 +29,6 @@
     self.title = @"下级玩家";
     [self initData];
     [self initSubviews];
-    [self initLayout];
 }
 
 #pragma mark ----- Data
@@ -35,36 +39,30 @@
     }
 }
 
-#pragma mark ----- Layout
-- (void)initLayout{
-    [_tableView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.equalTo(self.view);
-    }];
-}
-
 #pragma mark ----- subView
 - (void)initSubviews{
     
 //    self.navigationItem.title = @"我的玩家";
+    self.view.backgroundColor = BaseColor;
     CDWeakSelf(self);
     __weak RecommendNet *weakModel = _model;
     
-    _tableView = [UITableView groupTable];
+    UIView *headView = [self headView];
+    [self.view addSubview:headView];
+    
+    _tableView = [UITableView normalTable];
     [self.view addSubview:_tableView];
-    UIView *view = [[UIView alloc] init];
-    view.backgroundColor = BaseColor;
-    _tableView.backgroundView = view;
+    _tableView.backgroundColor = [UIColor clearColor];
     _tableView.delegate = self;
     _tableView.dataSource = self;
-    _tableView.rowHeight = 114;
-    _tableView.separatorColor = TBSeparaColor;
-    _tableView.separatorInset = UIEdgeInsetsMake(0, 70, 0, 0);
-
+    _tableView.rowHeight = 130;
+//    _tableView.separatorColor = TBSeparaColor;
+//    _tableView.separatorInset = UIEdgeInsetsMake(0, 70, 0, 0);
+    _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
         CDStrongSelf(self);
         [self getData:0];
     }];
-    
     _tableView.StateView = [StateView StateViewWithHandle:^{
         
     }];
@@ -74,6 +72,10 @@
         if (!weakModel.isMost) {
             [self getData:weakModel.page];
         }
+    }];
+    [_tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.bottom.right.equalTo(self.view);
+        make.top.equalTo(headView.mas_bottom);
     }];
     SVP_SHOW;
     [self getData:0];
@@ -86,8 +88,29 @@
         SVP_DISMISS;
         [weakObj reload];
     } failure:^(NSError *error) {
+        [weakObj reload];
         [FUNCTION_MANAGER handleFailResponse:error];
     }];
+    
+    WEAK_OBJ(weakSelf, self);
+    [_model requestCommonInfoWithSuccess:^(NSDictionary *obj) {
+        [weakSelf updateHeadInfo];
+    } failure:^(NSError *error) {
+        [weakObj reload];
+        [FUNCTION_MANAGER handleFailResponse:error];
+    }];
+}
+
+-(void)updateHeadInfo{
+    NSInteger agent = 0;
+    if(_model.commonInfo[@"agent"])
+        agent = [_model.commonInfo[@"agent"] integerValue];
+    NSInteger user = 0;
+    if(_model.commonInfo[@"user"])
+        user = [_model.commonInfo[@"user"] integerValue];
+    NSString *s = [NSString stringWithFormat:@"团队成员：代理%zd 玩家%zd",agent,user];
+    self.descLabel.text = s;
+    self.totalNumLabel.text = INT_TO_STR((agent + user));
 }
 
 - (void)reload{
@@ -113,7 +136,10 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     RecommendCell *cell = (RecommendCell *)[tableView CDdequeueReusableCellWithIdentifier:_model.dataList[indexPath.row]];
+    cell.backgroundColor = [UIColor clearColor];
+    cell.contentView.backgroundColor = [UIColor clearColor];
     [cell.detailButton addTarget:self action:@selector(detailAction:) forControlEvents:UIControlEventTouchUpInside];
+    //cell.detailButton.hidden = YES;
     return cell;
 }
 
@@ -150,4 +176,178 @@
     vc.isAgent = [dic[@"agentFlag"] boolValue];
     [self.navigationController pushViewController:vc animated:YES];
 }
+
+-(UIView *)headView{
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 168)];
+    view.backgroundColor = [UIColor clearColor];
+    
+    UIImage *img = [UIImage imageNamed:@"navBarBg"];
+    UIImageView *bgView = [[UIImageView alloc] initWithImage:img];
+    bgView.frame = view.bounds;
+    [view addSubview:bgView];
+    
+    UILabel *titleLabel = [[UILabel alloc] init];
+    titleLabel.textAlignment = NSTextAlignmentCenter;
+    titleLabel.font = [UIFont boldSystemFontOfSize2:23];
+    titleLabel.textColor = COLOR_X(255, 255, 255);
+    titleLabel.backgroundColor = [UIColor clearColor];
+    [view addSubview:titleLabel];
+    [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.equalTo(view);
+        make.height.equalTo(@35);
+    }];
+    titleLabel.text = @"-";
+    self.totalNumLabel = titleLabel;
+    
+    UILabel *descLabel = [[UILabel alloc] init];
+    descLabel.textAlignment = NSTextAlignmentCenter;
+    descLabel.font = [UIFont systemFontOfSize2:15];
+    descLabel.textColor = COLOR_X(255, 255, 255);
+    descLabel.backgroundColor = [UIColor clearColor];
+    [view addSubview:descLabel];
+    [descLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(view);
+        make.height.equalTo(@20);
+        make.top.equalTo(titleLabel.mas_bottom);
+    }];
+    descLabel.text = @"-";
+    self.descLabel = descLabel;
+    
+    UIView *accountView = [[UIView alloc] init];
+    accountView.backgroundColor = [UIColor clearColor];
+    [view addSubview:accountView];
+    [accountView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@10);
+        make.width.equalTo(view).multipliedBy(0.4);
+        make.height.equalTo(@70);
+        make.top.equalTo(descLabel.mas_bottom).offset(20);
+    }];
+    
+    UITextField *textField = [[UITextField alloc] init];
+    textField.placeholder = @"点击输入";
+    textField.textColor = Color_0;
+    textField.font = [UIFont systemFontOfSize2:15];
+    textField.backgroundColor = [UIColor whiteColor];
+    textField.layer.masksToBounds = YES;
+    textField.layer.cornerRadius = 5;
+    textField.keyboardType = UIKeyboardTypeNumberPad;
+    textField.leftView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 8, 0)];
+    //设置显示模式为永远显示(默认不显示)
+    textField.leftViewMode = UITextFieldViewModeAlways;
+    [accountView addSubview:textField];;
+    [textField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(accountView);
+        make.height.equalTo(@40);
+    }];
+    self.accountTextField = textField;
+    
+    UILabel *tLabel = [[UILabel alloc] init];
+    tLabel.font = [UIFont systemFontOfSize2:15];
+    tLabel.textColor = [UIColor whiteColor];
+    tLabel.text = @"用户账号";
+    [accountView addSubview:tLabel];
+    [tLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(textField).offset(5);
+        make.height.equalTo(@20);
+        make.bottom.equalTo(textField.mas_top).offset(-3);
+    }];
+    
+    UIView *levelView = [[UIView alloc] init];
+    levelView.backgroundColor = [UIColor clearColor];
+    [view addSubview:levelView];
+    [levelView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(accountView.mas_right).offset(10);
+        make.width.equalTo(view).multipliedBy(0.4);
+        make.height.equalTo(@70);
+        make.top.equalTo(accountView.mas_top);
+    }];
+    
+    textField = [[UITextField alloc] init];
+    textField.text = @"全部";
+    textField.textColor = Color_0;
+    textField.font = [UIFont systemFontOfSize2:15];
+    textField.backgroundColor = [UIColor whiteColor];
+    textField.layer.masksToBounds = YES;
+    textField.layer.cornerRadius = 5;
+    textField.leftView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 8, 0)];
+    //设置显示模式为永远显示(默认不显示)
+    textField.leftViewMode = UITextFieldViewModeAlways;
+    [levelView addSubview:textField];;
+    [textField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(levelView);
+        make.height.equalTo(@40);
+    }];
+    self.levelTextField = textField;
+    
+    UIButton *btn1 = [UIButton buttonWithType:UIButtonTypeCustom];
+    [levelView addSubview:btn1];
+    [btn1 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(textField);
+    }];
+    [btn1 addTarget:self action:@selector(showTypes) forControlEvents:UIControlEventTouchUpInside];
+    
+    tLabel = [[UILabel alloc] init];
+    tLabel.font = [UIFont systemFontOfSize2:15];
+    tLabel.textColor = [UIColor whiteColor];
+    tLabel.text = @"用户级别";
+    [levelView addSubview:tLabel];
+    [tLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(textField).offset(5);
+        make.height.equalTo(@20);
+        make.bottom.equalTo(textField.mas_top).offset(-3);
+    }];
+    
+    
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btn setImage:[UIImage imageNamed:@"agentSearch"] forState:UIControlStateNormal];
+    btn.imageEdgeInsets = UIEdgeInsetsMake(6, 6, 6, 6);
+    [view addSubview:btn];
+    [btn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(levelView.mas_right);
+        make.right.equalTo(view.mas_right);
+        make.bottom.equalTo(levelView.mas_bottom);
+        make.height.equalTo(@40);
+    }];
+    [btn addTarget:self action:@selector(searchAction) forControlEvents:UIControlEventTouchUpInside];
+    return view;
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    [self.view endEditing:YES];
+    CGPoint point = scrollView.contentOffset;
+    CGRect rect = self.bgView.frame;
+    rect.origin.y = -point.y;
+    self.bgView.frame = rect;
+}
+
+-(void)searchAction{
+    [self.view endEditing:YES];
+    _model.userString = self.accountTextField.text;
+    SVP_SHOW;
+    [self getData:0];
+}
+
+-(void)showTypes{
+    [self.view endEditing:YES];
+    ActionSheetCus *sheet = [[ActionSheetCus alloc] initWithArray:@[@"全部",@"代理用户",@"会员用户"]];
+    sheet.titleLabel.text = @"请选择用户类型";
+    sheet.delegate = self;
+    [sheet showWithAnimationWithAni:YES];
+}
+
+-(void)actionSheetDelegateWithActionSheet:(ActionSheetCus *)actionSheet index:(NSInteger)index{
+    if(index == 0){
+        self.levelTextField.text = @"全部";
+        _model.type = -1;
+    }
+    else if(index == 1){
+        self.levelTextField.text = @"代理用户";
+        _model.type = 1;
+    }
+    else if(index == 2){
+        self.levelTextField.text = @"会员用户";
+        _model.type = 0;
+    }
+}
+
 @end

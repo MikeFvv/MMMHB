@@ -10,9 +10,7 @@
 #import "SendRPCollectionViewCell.h"
 #import "SendRedPacketController.h"
 
-#define kTableViewImageWidth 20
-
-static NSString * const kCellSendRedPackedTextId = @"SendRedPackedTextCell";
+#define kTableViewMarginWidth 20
 
 @interface SendRedPackedTextCell ()
 
@@ -29,7 +27,10 @@ static NSString * const kCellSendRedPackedTextId = @"SendRedPackedTextCell";
 
 + (instancetype)cellWithTableView:(UITableView *)tableView reusableId:(NSString *)ID
 {
-    SendRedPackedTextCell *cell = [[SendRedPackedTextCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    SendRedPackedTextCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+    if (!cell) {
+        cell = [[SendRedPackedTextCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
@@ -48,15 +49,28 @@ static NSString * const kCellSendRedPackedTextId = @"SendRedPackedTextCell";
     
     self.backgroundColor = [UIColor clearColor];
     
+    UIView *backView = [[UIView alloc] init];
+    backView.backgroundColor = [UIColor whiteColor];
+    backView.layer.cornerRadius = 5;
+    backView.layer.masksToBounds = YES;
+    [self addSubview:backView];
+    
+    [backView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.mas_top).offset(kTableViewMarginWidth);
+        make.left.mas_equalTo(self.mas_left).offset(kTableViewMarginWidth);
+        make.right.mas_equalTo(self.mas_right).offset(-kTableViewMarginWidth);
+        make.bottom.mas_equalTo(self.mas_bottom);
+    }];
+    
     _titleLabel = [UILabel new];
     _titleLabel.text = @"-";
     _titleLabel.font = [UIFont systemFontOfSize2:16];
-    _titleLabel.textColor = Color_0;
-    [self.contentView addSubview:_titleLabel];
+    _titleLabel.textColor = [UIColor colorWithRed:0.388 green:0.388 blue:0.388 alpha:1.000];
+    [backView addSubview:_titleLabel];
     
     [_titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.contentView.mas_left).offset(kTableViewImageWidth+15);
-        make.centerY.equalTo(self.contentView.mas_centerY);
+        make.left.equalTo(backView.mas_left).offset(10);
+        make.centerY.equalTo(backView.mas_centerY);
     }];
     
     
@@ -70,35 +84,26 @@ static NSString * const kCellSendRedPackedTextId = @"SendRedPackedTextCell";
     _deTextField.clearButtonMode = UITextFieldViewModeAlways;
     
 //    [_deTextField addTarget:self action:@selector(onNoButton) forControlEvents:UIControlEventTouchUpInside];
-    [self.contentView addSubview:_deTextField];
+    [backView addSubview:_deTextField];
     
     [_deTextField mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.right.equalTo(self.contentView.mas_right).offset(-(kTableViewImageWidth+50));
-        make.centerY.equalTo(self.contentView.mas_centerY);
-        make.size.mas_equalTo(CGSizeMake(200, 35));
+        make.right.equalTo(backView.mas_right).offset(-(10 + kTableViewMarginWidth));
+        make.centerY.equalTo(backView.mas_centerY);
+        make.left.mas_equalTo(backView.mas_left).offset(90);
+        make.height.mas_equalTo(35);
     }];
     
     _unitLabel = [UILabel new];
     _unitLabel.text = @"-";
     _unitLabel.font = [UIFont systemFontOfSize2:16];
-    _unitLabel.textColor = Color_0;
-    [self.contentView addSubview:_unitLabel];
+    _unitLabel.textColor = [UIColor colorWithRed:0.388 green:0.388 blue:0.388 alpha:1.000];
+    [backView addSubview:_unitLabel];
     
     [_unitLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.right.equalTo(self.contentView.mas_right).offset(-(kTableViewImageWidth+20));
-        make.centerY.equalTo(self.contentView.mas_centerY);
+        make.right.equalTo(backView.mas_right).offset(-10);
+        make.centerY.equalTo(backView.mas_centerY);
     }];
-    
-    UIView *lineView = [[UIView alloc] init];
-    lineView.backgroundColor = [UIColor colorWithRed:0.945 green:0.945 blue:0.945 alpha:1.000];
-    [self.contentView addSubview:lineView];
-    
-    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.mas_equalTo(self.contentView.mas_left).offset(kTableViewImageWidth +10);
-        make.right.mas_equalTo(self.contentView.mas_right).offset(-(kTableViewImageWidth +10));
-        make.height.mas_equalTo(@(1));
-        make.bottom.mas_equalTo(self.contentView.mas_bottom);
-    }];
+
 }
 
 

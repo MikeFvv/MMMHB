@@ -37,7 +37,7 @@
                  failureBlock:(void (^)(NSError *))failureBlock {
 
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@?page=%zd&limit=%zd&orderByField=id&isAsc=false&groupId=%@",APP_MODEL.serverUrl,@"social/skChatGroup/groupUsers", self.page,self.pageSize,groupId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@?page=%zd&limit=%zd&orderByField=id&isAsc=true&groupId=%@",APP_MODEL.serverUrl,@"social/skChatGroup/groupUsers", self.page,self.pageSize,groupId];
     entity.needCache = NO;
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
@@ -60,9 +60,14 @@
                 [self.dataList removeAllObjects];
             }
             self.total = [[data objectForKey:@"total"]integerValue];
+            NSInteger baseNum = [APP_MODEL.commonInfo[@"group_membership"] integerValue];
+            self.total += baseNum;
             NSArray *list = [data objectForKey:@"records"];
             for (id obj in list) {
-                [self.dataList addObject:obj];
+                if([obj isKindOfClass:[NSNull class]]){
+                    [self.dataList addObject:@{}];
+                }else
+                    [self.dataList addObject:obj];
             }
             self.isEmpty = (self.dataList.count == 0)?YES:NO;
             self.isMost = ((self.dataList.count % self.pageSize == 0)&(list.count>0))?NO:YES;

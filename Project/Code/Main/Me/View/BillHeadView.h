@@ -13,7 +13,7 @@ typedef void (^TypeBlock)(NSInteger type);
 
 @interface BillHeadView : UIView<ActionSheetDelegate>
 
-+ (BillHeadView *)headView;
++ (BillHeadView *)headView:(BOOL)isAll;
 
 @property (nonatomic ,copy) TimeBlock beginChange;
 @property (nonatomic ,copy) TimeBlock endChange;
@@ -22,4 +22,6 @@ typedef void (^TypeBlock)(NSInteger type);
 @property (nonatomic ,copy) NSString *endTime;
 @property(nonatomic,strong)NSMutableArray *billTypeList;
 @property (nonatomic,strong)UILabel *balanceLabel;
+@property(nonatomic,assign)BOOL isAll;
+- (instancetype)initWithFrame:(CGRect)frame isAll:(BOOL)isAll;
 @end

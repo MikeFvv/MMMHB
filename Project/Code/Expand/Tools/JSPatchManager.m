@@ -43,8 +43,12 @@ static BOOL _async;
 //    NSRange range = NSMakeRange(startRange.location + startRange.length, endRange.location - startRange.location - startRange.length);
 //    NSString *resultStr = [string substringWithRange:range];
     
+//    https://www.5858hb.com/appLoad/xzhb/iOSPatch/ProjectWBHB1903241/v1.zip  // 58
+//      https://www.96hongbao.com/appLoad/xzhb/iOSPatch/ProjectTTHB1903241/v1.zip  // 天天
+//    https://www.520qun.com/appLoad/xzhb/iOSPatch/ProjectXZHB1903241/v1.zip  // 小猪
+//    https://www.wangwanghb.com/appLoad/xzhb/iOSPatch/ProjectWWHB1903241/v1.zip  // 旺旺
     NSString *resultStr = kJSPatchURL;
-    NSString *requestUrl = [NSString stringWithFormat:@"%@/appLoad/xzhb/iOSPatch/%@%@/patchVersion.js",resultStr,projectName,appVersion];
+    NSString *requestUrl = [NSString stringWithFormat:@"%@/appLoad/iOSPatch/%@%@/patchVersion.js",resultStr,projectName,appVersion];
     [JSPatchManager patchVersionCheck:requestUrl];
     
 }
@@ -117,6 +121,8 @@ static dispatch_semaphore_t semaphore;
     }
     NSString *filename = [urlString lastPathComponent];
     NSString *pathExtension = filename.pathExtension;
+    
+    #pragma mark - zip文件获取
     if ([pathExtension isEqualToString:@"zip"]) {
         
         [JPLoader updateToVersion:[dict[@"js_version"] integerValue] loadURL:dict[@"js_url"] callback:^(NSError *error) {

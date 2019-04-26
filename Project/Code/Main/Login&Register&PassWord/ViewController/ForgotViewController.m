@@ -160,7 +160,7 @@
         return;
     }
     if (_textField[1].text.length < 3) {
-        SVP_ERROR_STATUS(@"请入正确的验证码");
+        SVP_ERROR_STATUS(@"请输入正确的验证码");
         return;
     }
     if (_textField[2].text.length > 16 || _textField[2].text.length < 6) {

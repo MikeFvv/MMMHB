@@ -17,7 +17,6 @@
         _dataList = [[NSMutableArray alloc]init];
         _pageSize = 15;
         _page = 0;
-        self.type = 999;
         _beginTime = dateString_date([NSDate date], CDDateDay);
         _endTime = dateString_date([NSDate date], CDDateDay);
     }
@@ -28,7 +27,7 @@
            success:(void (^)(NSDictionary *))success
            failure:(void (^)(NSError *))failue{
     CDWeakSelf(self);
-    [NET_REQUEST_MANAGER requestBillListWithType:self.type beginTime:self.beginTime endTime:self.endTime page:page+1 pageSize:self.pageSize success:^(id object) {
+    [NET_REQUEST_MANAGER requestBillListWithName:self.billName categoryStr:self.categoryStr beginTime:self.beginTime endTime:self.endTime page:page+1 pageSize:self.pageSize success:^(id object) {
         NSDictionary *dic = (NSDictionary *)object;
         CDStrongSelf(self);
         if (dic[@"code"] && [dic[@"code"] integerValue] == ResultCodeSuccess) {

@@ -19,6 +19,7 @@
         _pageSize = 15;
         _isMost = NO;
         _isEmpty = NO;
+        _type = -1;
     }
     return self;
 }
@@ -26,14 +27,14 @@
 - (void)getPlayerWithPage:(NSInteger)page success:(void (^)(NSDictionary *))success
              failure:(void (^)(NSError *))failue{
     WEAK_OBJ(weakSelf, self);
-    [NET_REQUEST_MANAGER requestMyPlayerWithPage:page + 1 pageSize:self.pageSize orderField:@"id" asc:0 success:^(id object) {
+    [NET_REQUEST_MANAGER requestMyPlayerWithPage:page + 1 pageSize:self.pageSize userString:self.userString type:self.type success:^(id object) {
         NSDictionary *data = [object objectForKey:@"data"];
         NSArray *list = data[@"records"];
         weakSelf.page = [data[@"current"] integerValue];
+        if (weakSelf.page == 1) {
+            [weakSelf.dataList removeAllObjects];
+        }
         if (list.count != 0) {
-            if (weakSelf.page == 1) {
-                [weakSelf.dataList removeAllObjects];
-            }
             for (id obj in list) {
                 CDTableModel *model = [CDTableModel new];
                 model.obj = obj;
@@ -49,4 +50,14 @@
     }];
 }
 
+- (void)requestCommonInfoWithSuccess:(void (^)(NSDictionary *))success
+                  failure:(void (^)(NSError *))failue{
+    WEAK_OBJ(weakSelf, self);
+    [NET_REQUEST_MANAGER requestMyPlayerCommonInfoWithSuccess:^(id object) {
+        weakSelf.commonInfo = object[@"data"];
+        success(object);
+    } fail:^(id object) {
+        failue(object);
+    }];
+}
 @end

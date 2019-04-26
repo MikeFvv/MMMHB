@@ -2,7 +2,7 @@
 //  SystemAlertTextCell.h
 //  Project
 //
-//  Created by 罗耀生 on 2019/3/20.
+//  Created by Mike on 2019/3/20.
 //  Copyright © 2019 CDJay. All rights reserved.
 //
 
