@@ -81,7 +81,7 @@
     label.backgroundColor = [UIColor clearColor];
     label.font = [UIFont boldSystemFontOfSize2:labelFontSize];
     [self.imageView addSubview:label];
-    label.text = [NSString stringWithFormat:@"邀请码   %@",APP_MODEL.user.invitecode];
+    label.text = [NSString stringWithFormat:@"邀请码   %@",[AppModel shareInstance].userInfo.invitecode];
     label.shadowColor = [UIColor blackColor];
     label.shadowOffset = CGSizeMake(1, 1);
     NSString *codeFrame = self.shareInfo[@"codeFrame"];
@@ -223,7 +223,7 @@
     model.content = WXShareDescription;
     //CGSize size = self.shareImage.size;
     if(mediaType == MediaType_url){
-//        NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.user.invitecode];
+//        NSString *shareUrl = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].commonInfo[@"share.url"],[AppModel shareInstance].user.invitecode];
         model.link = self.shareUrl;
         NSLog(@"url= %@",model.link);
         model.imageData = UIImageJPEGRepresentation([UIImage imageNamed:[FUNCTION_MANAGER getAppIconName]],1.0);
@@ -270,7 +270,7 @@
 
 -(void)copyCode{
     UIPasteboard *pastboard = [UIPasteboard generalPasteboard];
-    pastboard.string = APP_MODEL.user.invitecode;
+    pastboard.string = [AppModel shareInstance].userInfo.invitecode;
     SVP_SUCCESS_STATUS(@"复制成功");
 }
 @end

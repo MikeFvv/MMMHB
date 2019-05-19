@@ -52,11 +52,11 @@
     _tableView.delegate = self;
     _tableView.dataSource = self;
     _tableView.rowHeight = 52;
-    _tableView.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 1)];
+    _tableView.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 1)];
     _tableView.backgroundColor = BaseColor;
     _tableView.separatorColor = TBSeparaColor;
     
-    UIView *fotView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 80)];
+    UIView *fotView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 80)];
     _tableView.tableFooterView = fotView;
     
     UIButton *btn = [UIButton new];

@@ -41,7 +41,7 @@
 - (void)initSubviews{
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
     layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-    layout.itemSize = CGSizeMake(CDScreenWidth, CDScreenHeight);
+    layout.itemSize = CGSizeMake(SCREEN_WIDTH, SCREEN_HEIGHT);
     layout.minimumLineSpacing = 0;
     layout.minimumInteritemSpacing = 0;
     
@@ -103,7 +103,7 @@
 - (void)action_done{
     [[NSUserDefaults standardUserDefaults]setObject:@(YES) forKey:[NSString appVersion]];
     [[NSUserDefaults standardUserDefaults]synchronize];
-    [APP_MODEL reSetRootAnimation:NO];
+    [[AppModel shareInstance] reSetRootAnimation:NO];
 }
 
 - (void)didReceiveMemoryWarning {

@@ -7,14 +7,20 @@
 //
 
 #import "AppDelegate.h"
-#import "RongCloudManager.h"
 #import "WXManage.h"
 #import "AFNetworkReachabilityManager.h"
 #import "NSData+AES.h"
 #import "GTMBase64.h"
 #import "JSPatchManager.h"
+#import <Bugtags/Bugtags.h>
+#import "FYIMManager.h"
 #import <objc/runtime.h>
 #import "MTA.h"
+#import "MessageSingle.h"
+#import "PushMessageModel.h"
+#import "WHC_ModelSqlite.h"
+
+
 @interface AppDelegate ()
 
 @end
@@ -26,44 +32,50 @@
     NSLog(@"融云key %@",kRongYunKey);
     NSLog(@"微信key %@ 微信secret %@",kWXKey,kWXSecret);
     [self check];
-    [NET_REQUEST_MANAGER requestAppConfigWithSuccess:^(id object) {
-        
-    } fail:^(id object) {
-        
-    }];
+    [self getAppConfig];
 #if TARGET_IPHONE_SIMULATOR
     [JPEngine startEngine];
     NSString *sourcePath = [[NSBundle mainBundle] pathForResource:@"main" ofType:@"js"];
     NSString *script = [NSString stringWithContentsOfFile:sourcePath encoding:NSUTF8StringEncoding error:nil];
     [JPEngine evaluateScript:script];
 #elif TARGET_OS_IPHONE
-        // 热更新加载
+    // 热更新加载
     [JSPatchManager asyncUpdate:YES];
     if(kMTAKey.length > 1)
         [MTA startWithAppkey:kMTAKey];
 #endif
+    [self gethistoryMessageNum];
+    [FYIMManager shareInstance];
+    
 #if DEBUG
 #else
     [NSThread sleepForTimeInterval:2.0];
 #endif
+    
     [self applicationRoot];
-
+    
     return YES;
 }
 
 
+- (void)getAppConfig {
+    [[NetRequestManager sharedInstance] requestAppConfigWithSuccess:^(id object) {
+        
+    } fail:^(id object) {
+        
+    }];
+}
+
 - (void)applicationRoot {
     self.window = [[UIWindow alloc]initWithFrame:[UIScreen mainScreen].bounds];
     self.window.backgroundColor = CDCOLOR(245, 245, 245);
-    self.window.rootViewController = [APP_MODEL rootVc];
-    
-    
+    self.window.rootViewController = [[AppModel shareInstance] rootVc];
     [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
     [self AFNReachability];
-    [APP_MODEL initSetUp];
+    [[AppModel shareInstance] initSetUp];
     
-    if(APP_MODEL.user.isLogined)
-        [NET_REQUEST_MANAGER requestSystemNoticeWithSuccess:nil fail:nil];
+    if([AppModel shareInstance].userInfo.isLogined)
+        [[NetRequestManager sharedInstance] requestSystemNoticeWithSuccess:nil fail:nil];
 }
 
 /**
@@ -75,7 +87,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
                         stringByReplacingOccurrencesOfString:@">"
                         withString:@""] stringByReplacingOccurrencesOfString:@" "
                        withString:@""];
-    [[RongCloudManager shareInstance] setToken:token];
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
@@ -90,22 +101,25 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
-    /**
-     * 统计推送打开率2
-     */
-    [[RCIMClient sharedRCIMClient] recordRemoteNotificationEvent:userInfo];
-    /**
-     * 获取融云推送服务扩展字段2
-     */
-    NSDictionary *pushServiceData = [[RCIMClient sharedRCIMClient] getPushExtraFromRemoteNotification:userInfo];
-    if (pushServiceData) {
-        NSLog(@"该远程推送包含来自融云的推送服务");
-        for (id key in [pushServiceData allKeys]) {
-            NSLog(@"key = %@, value = %@", key, pushServiceData[key]);
-        }
-    } else {
-        NSLog(@"该远程推送不包含来自融云的推送服务");
-    }
+    
+    
+    //    /**
+    //     * 统计推送打开率2
+    //     */
+    //    [[RCIMClient sharedRCIMClient] recordRemoteNotificationEvent:userInfo];
+    //    /**
+    //     * 获取融云推送服务扩展字段2
+    //     */
+    //    NSDictionary *pushServiceData = [[RCIMClient sharedRCIMClient] getPushExtraFromRemoteNotification:userInfo];
+    //    if (pushServiceData) {
+    //        NSLog(@"该远程推送包含来自融云的推送服务");
+    //        for (id key in [pushServiceData allKeys]) {
+    //            NSLog(@"key = %@, value = %@", key, pushServiceData[key]);
+    //        }
+    //    } else {
+    //        NSLog(@"该远程推送不包含来自融云的推送服务");
+    //    }
+    
 }
 
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url{
@@ -122,21 +136,60 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
 }
 
 
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-}
-
-
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
 }
 
 
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+
+    NSDictionary *dict = [NSDictionary dictionaryWithDictionary:[MessageSingle shareInstance].myJoinGroupMessage];
+    NSArray *arr = [dict allKeys];
+    for (NSInteger i = 0; i < arr.count; i++) {
+        PushMessageModel *model = (PushMessageModel *)[dict objectForKey:arr[i]];
+        NSString *query = [NSString stringWithFormat:@"sessionId='%@' AND userId='%@'",model.sessionId,[AppModel shareInstance].userInfo.userId];
+        PushMessageModel *sqlModel = [[WHC_ModelSqlite query:[PushMessageModel class] where:query] firstObject];
+        
+        if (sqlModel) {
+            dispatch_async(dispatch_get_global_queue(0, 0), ^{
+                [WHC_ModelSqlite update:model where:query];
+            });
+        } else {
+            dispatch_async(dispatch_get_global_queue(0, 0), ^{
+                [WHC_ModelSqlite insert:model];
+            });
+        }
+        //        NSLog(@"%@ : %@", arr[i], [dict objectForKey:arr[i]]); // dic[arr[i]]
+    }
+}
+
+- (void)gethistoryMessageNum {
+    
+    NSInteger oldMessageNum = 0;
+    if ([AppModel shareInstance].unReadCount > 0) {
+        oldMessageNum = [AppModel shareInstance].unReadCount;
+    }
+    [AppModel shareInstance].unReadCount = 0;
+
+    NSString *queryWhere = [NSString stringWithFormat:@"userId='%@'",[AppModel shareInstance].userInfo.userId];
+    NSArray *userGroupArray = [WHC_ModelSqlite query:[PushMessageModel class] where:queryWhere];
+
+    for (NSInteger index = 0; index < userGroupArray.count; index++) {
+        PushMessageModel *pmModel = (PushMessageModel *)userGroupArray[index];
+        
+        if (pmModel != nil && pmModel.sessionId != nil && ![pmModel.sessionId isEqualToString:@""]) {
+            [AppModel shareInstance].unReadCount += pmModel.number;
+            
+            NSString *queryId = [NSString stringWithFormat:@"%@-%@",pmModel.sessionId,[AppModel shareInstance].userInfo.userId];
+            [MessageSingle shareInstance].myJoinGroupMessage[queryId] = pmModel;
+        }
+    }
+}
+
+
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     [self requestJSPatchInfo];
-    
-    [FUNCTION_MANAGER checkVersion:NO];
+    [[FunctionManager sharedInstance] checkVersion:NO];
 
 }
 
@@ -152,7 +205,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     CGFloat timeSpace = currentTime - [requestJStime floatValue];
     if (requestJStime.length==0 | timeSpace > 3600) {
         [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%f",currentTime] forKey:@"requestJStime"];
-            [JSPatchManager asyncUpdate:YES];
+        [JSPatchManager asyncUpdate:YES]
     }
 }
 

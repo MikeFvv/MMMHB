@@ -41,7 +41,7 @@
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
     layout.minimumLineSpacing = 0;
     layout.minimumInteritemSpacing = 0;
-    NSInteger width = CDScreenWidth/2;
+    NSInteger width = SCREEN_WIDTH/2;
     layout.itemSize = CGSizeMake(width, width * 0.55);
     self.collectionView = [[UICollectionView alloc]initWithFrame:self.bounds collectionViewLayout:layout];
     [self addSubview:_collectionView];
@@ -62,7 +62,7 @@
     }];
     self.dataArray = [[NSMutableArray alloc] init];
     SVP_SHOW;
-    if(APP_MODEL.user.agentFlag == NO)
+    if([AppModel shareInstance].userInfo.agentFlag == NO)
         return;
 }
 
@@ -244,7 +244,7 @@
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section{
     if(section == 0)
-        return CGSizeMake(self.frame.size.width, 38 + CDScreenWidth/2 * 0.55);
+        return CGSizeMake(self.frame.size.width, 38 + SCREEN_WIDTH/2 * 0.55);
     else
         return CGSizeMake(self.frame.size.width, 38);
 }
@@ -317,7 +317,7 @@
                 };
                 pView.tag = 97;
                 [reusableview addSubview:pView];
-                NSInteger width = CDScreenWidth/2;
+                NSInteger width = SCREEN_WIDTH/2;
                 [pView mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.top.left.right.equalTo(reusableview);
                     make.height.equalTo(@(width * 0.55));
@@ -519,7 +519,7 @@
 -(BOOL)isSelf{
     if(self.userId == nil)
         return NO;
-    if([self.userId integerValue] == [APP_MODEL.user.userId integerValue])
+    if([self.userId integerValue] == [[AppModel shareInstance].userInfo.userId integerValue])
         return YES;
     return NO;
 }

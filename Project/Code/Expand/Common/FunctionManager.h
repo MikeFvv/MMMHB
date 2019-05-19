@@ -17,11 +17,29 @@ typedef NS_ENUM(NSInteger, FixTypes)
 #define FUNCTION_MANAGER [FunctionManager sharedInstance]
 
 @interface FunctionManager : NSObject<CLLocationManagerDelegate,UIAlertViewDelegate>{
-
+    
 }
 
 +(FunctionManager *)sharedInstance;
 
++ (BOOL)isIphoneX;
+/** iphone 底部额外的高度 */
++ (CGFloat)iphoneBottomHeight;
+
+/** 标签栏高度 */
++ (CGFloat)tabBarHeight;
+
+/** 状态栏高度 */
++ (CGFloat)statusBarHeight;
+
+/** 导航栏高度 */
++ (CGFloat)navigationBarHeight;
+-(id)getCacheDataByKey:(NSString*)key;
+
+-(void)setCacheDataWithKey:(NSString*)key data:(id)data;
++(BOOL)isEmpty:(NSString *)text;
++(BOOL)getDataSuccessed:(NSDictionary *)dic;
++ (CGFloat)getContentHeightWithParagraphStyleLineSpacing:(CGFloat)lineSpacing fontWithString:(NSString*)fontWithString fontOfSize:(CGFloat)fontOfSize boundingRectWithWidth:(CGFloat)width;
 -(NSString *)getDeviceModel;//机器型号 如iPod4,1,
 -(NSString *)getIosVersion;//系统版本号 如4.3.5
 -(NSString *)getApplicationVersion;//软件版本
@@ -96,4 +114,6 @@ typedef NS_ENUM(NSInteger, FixTypes)
 - (UIImage*)imageWithView:(UIView*) view;
 
 -(UIImage *)grayImage:(UIImage *)oldImage;
+
+-(NSMutableDictionary *)removeNull:(NSDictionary *)dict;
 @end

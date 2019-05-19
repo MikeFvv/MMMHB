@@ -103,7 +103,7 @@
     _content.textColor = Color_3;
     _content.hidden = YES;
     
-    UIImageView *line = [[UIImageView alloc]initWithFrame:CGRectMake(0, 71, CDScreenWidth, 2)];
+    UIImageView *line = [[UIImageView alloc]initWithFrame:CGRectMake(0, 71, SCREEN_WIDTH, 2)];
     [self.contentView addSubview:line];
     line.image = CD_DRline(line);
    

@@ -14,7 +14,7 @@
     NSString *_url;
 }
 @property(nonatomic,strong)WKWebView *webView;
-
+- (void)actionBlock:(DataBlock)block;
 - (instancetype)initWithUrl:(NSString *)url;
 - (instancetype)initWithHtmlString:(NSString *)string;
 

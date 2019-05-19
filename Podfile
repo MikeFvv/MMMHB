@@ -8,7 +8,6 @@ target 'ProjectXZHB' do
     pod 'SVProgressHUD'
     pod 'MJExtension'
     pod 'MJRefresh'
-    pod 'RongCloudIM'
     pod 'AFNetworking'
     pod 'SDWebImage'
     pod 'Masonry'
@@ -18,8 +17,49 @@ target 'ProjectXZHB' do
     pod 'YYCache'
     pod 'JSPatch'
     pod 'Bugtags'
+    pod 'SocketRocket'
+    pod 'SSKeychain'
+
+end
+target 'ProjectBBHB' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  # use_frameworks!
+  pod 'SVProgressHUD'
+  pod 'MJExtension'
+  pod 'MJRefresh'
+  pod 'AFNetworking'
+  pod 'SDWebImage'
+  pod 'Masonry'
+  pod 'WHC_ModelSqliteKit'
+  pod 'WechatOpenSDK'
+  pod 'IQKeyboardManager'
+  pod 'YYCache'
+  pod 'JSPatch'
+  pod 'Bugtags'
+  pod 'SocketRocket'
+  pod 'SSKeychain'
+  
 end
 
+target 'ProjectXLHB' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  # use_frameworks!
+  pod 'SVProgressHUD'
+  pod 'MJExtension'
+  pod 'MJRefresh'
+  pod 'AFNetworking'
+  pod 'SDWebImage'
+  pod 'Masonry'
+  pod 'WHC_ModelSqliteKit'
+  pod 'WechatOpenSDK'
+  pod 'IQKeyboardManager'
+  pod 'YYCache'
+  pod 'JSPatch'
+  pod 'Bugtags'
+  pod 'SocketRocket'
+  pod 'SSKeychain'
+  
+end
 
 target 'ProjectTTHB' do
     # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
@@ -27,7 +67,6 @@ target 'ProjectTTHB' do
     pod 'SVProgressHUD'
     pod 'MJExtension'
     pod 'MJRefresh'
-    pod 'RongCloudIM'
     pod 'AFNetworking'
     pod 'SDWebImage'
     pod 'Masonry'
@@ -37,6 +76,8 @@ target 'ProjectTTHB' do
     pod 'YYCache'
     pod 'JSPatch'
     pod 'Bugtags'
+    pod 'SocketRocket'
+    pod 'SSKeychain'
 end
 
 target 'ProjectWWHB' do
@@ -45,7 +86,6 @@ target 'ProjectWWHB' do
     pod 'SVProgressHUD'
     pod 'MJExtension'
     pod 'MJRefresh'
-    pod 'RongCloudIM'
     pod 'AFNetworking'
     pod 'SDWebImage'
     pod 'Masonry'
@@ -55,6 +95,8 @@ target 'ProjectWWHB' do
     pod 'YYCache'
     pod 'JSPatch'
     pod 'Bugtags'
+    pod 'SocketRocket'
+    pod 'SSKeychain'
 end
 
 target 'ProjectWBHB' do
@@ -63,7 +105,6 @@ target 'ProjectWBHB' do
     pod 'SVProgressHUD'
     pod 'MJExtension'
     pod 'MJRefresh'
-    pod 'RongCloudIM'
     pod 'AFNetworking'
     pod 'SDWebImage'
     pod 'Masonry'
@@ -73,6 +114,8 @@ target 'ProjectWBHB' do
     pod 'YYCache'
     pod 'JSPatch'
     pod 'Bugtags'
+    pod 'SocketRocket'
+    pod 'SSKeychain'
 end
 
 target 'ProjectCSHB' do
@@ -81,7 +124,6 @@ target 'ProjectCSHB' do
     pod 'SVProgressHUD'
     pod 'MJExtension'
     pod 'MJRefresh'
-    pod 'RongCloudIM'
     pod 'AFNetworking'
     pod 'SDWebImage'
     pod 'Masonry'
@@ -91,4 +133,45 @@ target 'ProjectCSHB' do
     pod 'YYCache'
     pod 'JSPatch'
     pod 'Bugtags'
+    pod 'SocketRocket'
+    pod 'SSKeychain'
+end
+
+target 'ProjectQQHB' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  # use_frameworks!
+  pod 'SVProgressHUD'
+  pod 'MJExtension'
+  pod 'MJRefresh'
+  pod 'AFNetworking'
+  pod 'SDWebImage'
+  pod 'Masonry'
+  pod 'WHC_ModelSqliteKit'
+  pod 'WechatOpenSDK'
+  pod 'IQKeyboardManager'
+  pod 'YYCache'
+  pod 'JSPatch'
+  pod 'Bugtags'
+  pod 'SocketRocket'
+  pod 'SSKeychain'
+end
+
+
+target 'ProjectDFSHB' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  # use_frameworks!
+  pod 'SVProgressHUD'
+  pod 'MJExtension'
+  pod 'MJRefresh'
+  pod 'AFNetworking'
+  pod 'SDWebImage'
+  pod 'Masonry'
+  pod 'WHC_ModelSqliteKit'
+  pod 'WechatOpenSDK'
+  pod 'IQKeyboardManager'
+  pod 'YYCache'
+  pod 'JSPatch'
+  pod 'Bugtags'
+  pod 'SocketRocket'
+  pod 'SSKeychain'
 end

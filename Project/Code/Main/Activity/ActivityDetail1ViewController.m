@@ -23,7 +23,6 @@
     // Do any additional setup after loading the view.
     self.aniObjArray = [NSMutableArray array];
 
-    SVP_SHOW;
     [self getData];
     
     self.timer = [NSTimer scheduledTimerWithTimeInterval:4.2 target:self selector:@selector(update) userInfo:nil repeats:YES];
@@ -56,10 +55,13 @@
     }
 }
 
-
 -(void)getData{
     WEAK_OBJ(weakSelf, self);
-    [NET_REQUEST_MANAGER getActivityDetailWithId:self.infoDic[@"id"] type:[self.infoDic[@"type"] integerValue] success:^(id object) {
+    NSInteger type = [self.infoDic[@"type"] integerValue];
+    if(type == RewardType_zcdljl)
+        return;
+    SVP_SHOW;
+    [NET_REQUEST_MANAGER getActivityDetailWithId:self.infoDic[@"id"] type:type success:^(id object) {
         [weakSelf getDataBack:object];
     } fail:^(id object) {
         [FUNCTION_MANAGER handleFailResponse:object];
@@ -103,8 +105,12 @@
     CGPoint center = CGPointMake(0, 0);
     
     NSInteger imgWidth = self.imageView.frame.size.width;
-    if(type == RewardType_czjl)
-        center = CGPointMake(imgWidth * 0.32, imgWidth * 0.9683);
+    if(type == RewardType_czjl){
+        center = CGPointMake(imgWidth * 0.32, imgWidth * 0.9683);//0.32
+#ifdef QQHB
+        center = CGPointMake(imgWidth * 0.5, imgWidth * 0.9683);//0.32
+#endif
+    }
     else if(type == RewardType_yqhycz)
         center = CGPointMake(imgWidth * 0.33, imgWidth * 0.9287);
     else if(type == RewardType_ztlsyj)
@@ -115,7 +121,11 @@
 
     [self.imageView addSubview:label];
     
-    if(type == RewardType_czjl || type == RewardType_yqhycz){
+    BOOL va = (type == RewardType_yqhycz || type == RewardType_czjl);
+#ifdef QQHB
+    va = (type == RewardType_yqhycz);
+#endif
+    if(va){
         label = [[UILabel alloc] init];
         label.font = [UIFont boldSystemFontOfSize2:17];
         label.textAlignment = NSTextAlignmentCenter;
@@ -143,8 +153,12 @@
     iconImage.clipsToBounds = YES;
     [self.imageView addSubview:iconImage];
     center = CGPointMake(0, 0);
-    if(type == RewardType_czjl)
+    if(type == RewardType_czjl){
         center = CGPointMake(imgWidth * 0.32, imgWidth * 0.78);
+#ifdef QQHB
+        center = CGPointMake(imgWidth * 0.5, imgWidth * 0.78);
+#endif
+    }
     else if(type == RewardType_yqhycz)
         center = CGPointMake(imgWidth * 0.33, imgWidth * 0.7553);
     else if(type == RewardType_ztlsyj)
@@ -154,7 +168,7 @@
     iconImage.center = center;
     [self.aniObjArray addObject:iconImage];
 
-     if(type == RewardType_czjl || type == RewardType_yqhycz){
+     if(va){
          UIImageView *iconImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"activityIcon1"]];
          iconImage.frame = CGRectMake(0, 0, 50, 50);
          iconImage.contentMode = UIViewContentModeScaleAspectFit;

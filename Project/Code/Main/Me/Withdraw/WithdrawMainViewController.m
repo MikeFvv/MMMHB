@@ -40,6 +40,7 @@
     self.wdView = wdView;
     self.wdView.bankIconImageView.image = nil;
     self.wdView.bankLabel.text = @"添加银行卡";
+    self.wdView.textField.placeholder = [NSString stringWithFormat:@"最低提现额度%zd元",[[AppModel shareInstance].commonInfo[@"cashdraw.money.min"] integerValue]];
     CGRect rr = wdView.frame;
     rr.size.width = SCREEN_WIDTH - 40;
     wdView.frame = rr;
@@ -263,7 +264,7 @@
     self.wdView.bankLabel.text = self.selectBankDic[@"title2"];
     [self.wdView.bankIconImageView sd_setImageWithURL:[NSURL URLWithString:self.selectBankDic[@"icon"]]];
     
-    NSString *s = [NSString stringWithFormat:@"%@_selectBankDic",APP_MODEL.user.userId];
+    NSString *s = [NSString stringWithFormat:@"%@_selectBankDic",[AppModel shareInstance].userInfo.userId];
     [FUNCTION_MANAGER archiveWithData:self.selectBankDic andFileName:s];
 }
 
@@ -374,7 +375,7 @@
 //        self.wdView.bankLabel.text = self.selectBankDic[@"title2"];
 //        [self.wdView.bankIconImageView sd_setImageWithURL:[NSURL URLWithString:self.selectBankDic[@"icon"]]];
 //
-//        NSString *s = [NSString stringWithFormat:@"%@_selectBankDic",APP_MODEL.user.userId];
+//        NSString *s = [NSString stringWithFormat:@"%@_selectBankDic",[AppModel shareInstance].user.userId];
 //        [FUNCTION_MANAGER archiveWithData:self.selectBankDic andFileName:s];
 //    }
     [_tableView reloadData];
@@ -383,7 +384,7 @@
 -(void)requestBalance{
     WEAK_OBJ(weakSelf, self);
     [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
-        weakSelf.wdView.tipLabel.text = [NSString stringWithFormat:@"当前零钱余额%@元，",APP_MODEL.user.balance];
+        weakSelf.wdView.tipLabel.text = [NSString stringWithFormat:@"当前零钱余额%@元，",[AppModel shareInstance].userInfo.balance];
     } fail:^(id object) {
         
     }];

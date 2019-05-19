@@ -18,7 +18,8 @@
 @property(nonatomic,strong)UIImageView *bgView;
 @property(nonatomic,strong)UILabel *totalNumLabel;
 @property(nonatomic,strong)UILabel *descLabel;
-
+@property(nonatomic,strong)UILabel *totalNumLabel2;
+@property(nonatomic,strong)UILabel *descLabel2;
 @property(nonatomic,strong)UITextField *accountTextField;
 @property(nonatomic,strong)UITextField *levelTextField;
 @end
@@ -35,7 +36,7 @@
 - (void)initData{
     _model = [[RecommendNet alloc]init];
     if (_uid == nil) {
-        _uid = APP_MODEL.user.userId;
+        _uid = [AppModel shareInstance].userInfo.userId;
     }
 }
 
@@ -43,8 +44,7 @@
 - (void)initSubviews{
     
 //    self.navigationItem.title = @"我的玩家";
-    self.view.backgroundColor = BaseColor;
-    CDWeakSelf(self);
+
     __weak RecommendNet *weakModel = _model;
     
     UIView *headView = [self headView];
@@ -55,22 +55,26 @@
     _tableView.backgroundColor = [UIColor clearColor];
     _tableView.delegate = self;
     _tableView.dataSource = self;
+
+    __weak __typeof(self)weakSelf = self;
+
     _tableView.rowHeight = 130;
 //    _tableView.separatorColor = TBSeparaColor;
 //    _tableView.separatorInset = UIEdgeInsetsMake(0, 70, 0, 0);
     _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
-        CDStrongSelf(self);
-        [self getData:0];
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf getData:0];
     }];
     _tableView.StateView = [StateView StateViewWithHandle:^{
         
     }];
     
     _tableView.mj_footer = [MJRefreshAutoFooter footerWithRefreshingBlock:^{
-        CDStrongSelf(self);
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
         if (!weakModel.isMost) {
-            [self getData:weakModel.page];
+            [strongSelf getData:weakModel.page];
         }
     }];
     [_tableView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -111,6 +115,16 @@
     NSString *s = [NSString stringWithFormat:@"团队成员：代理%zd 玩家%zd",agent,user];
     self.descLabel.text = s;
     self.totalNumLabel.text = INT_TO_STR((agent + user));
+    
+    agent = 0;
+    if(_model.commonInfo[@"pagent"])
+        agent = [_model.commonInfo[@"pagent"] integerValue];
+    user = 0;
+    if(_model.commonInfo[@"puser"])
+        user = [_model.commonInfo[@"puser"] integerValue];
+    s = [NSString stringWithFormat:@"直推成员：代理%zd 玩家%zd",agent,user];
+    self.descLabel2.text = s;
+    self.totalNumLabel2.text = INT_TO_STR((agent + user));
 }
 
 - (void)reload{
@@ -193,7 +207,8 @@
     titleLabel.backgroundColor = [UIColor clearColor];
     [view addSubview:titleLabel];
     [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.top.equalTo(view);
+        make.left.top.equalTo(view);
+        make.right.equalTo(view.mas_centerX);
         make.height.equalTo(@35);
     }];
     titleLabel.text = @"-";
@@ -206,12 +221,43 @@
     descLabel.backgroundColor = [UIColor clearColor];
     [view addSubview:descLabel];
     [descLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.equalTo(view);
+        make.left.equalTo(view);
+        make.right.equalTo(view.mas_centerX);
         make.height.equalTo(@20);
         make.top.equalTo(titleLabel.mas_bottom);
     }];
     descLabel.text = @"-";
     self.descLabel = descLabel;
+    
+    titleLabel = [[UILabel alloc] init];
+    titleLabel.textAlignment = NSTextAlignmentCenter;
+    titleLabel.font = [UIFont boldSystemFontOfSize2:23];
+    titleLabel.textColor = COLOR_X(255, 255, 255);
+    titleLabel.backgroundColor = [UIColor clearColor];
+    [view addSubview:titleLabel];
+    [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.totalNumLabel.mas_right);
+        make.right.top.equalTo(view);
+        make.height.equalTo(@35);
+    }];
+    titleLabel.text = @"-";
+    self.totalNumLabel2 = titleLabel;
+    
+    descLabel = [[UILabel alloc] init];
+    descLabel.textAlignment = NSTextAlignmentCenter;
+    descLabel.font = [UIFont systemFontOfSize2:15];
+    descLabel.textColor = COLOR_X(255, 255, 255);
+    descLabel.backgroundColor = [UIColor clearColor];
+    [view addSubview:descLabel];
+    [descLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(view);
+        make.left.equalTo(self.descLabel.mas_right);
+        make.height.equalTo(@20);
+        make.top.equalTo(titleLabel.mas_bottom);
+    }];
+    descLabel.text = @"-";
+    self.descLabel2 = descLabel;
+    
     
     UIView *accountView = [[UIView alloc] init];
     accountView.backgroundColor = [UIColor clearColor];

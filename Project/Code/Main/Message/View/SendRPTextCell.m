@@ -8,7 +8,7 @@
 
 #import "SendRPTextCell.h"
 #import "SendRPCollectionViewCell.h"
-#import "SendRedPacketController.h"
+#import "SendRedEnvelopeController.h"
 
 
 @interface SendRPTextCell ()

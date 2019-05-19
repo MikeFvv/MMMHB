@@ -40,9 +40,9 @@
     
     CGFloat marginWidth = 30;
     
-    CGFloat w = CDScreenWidth-marginWidth * 2;
-    CGFloat h = (CDScreenWidth-marginWidth)/1.0;
-    CGFloat y = CDScreenHeight /2 - h/2;
+    CGFloat w = SCREEN_WIDTH-marginWidth * 2;
+    CGFloat h = (SCREEN_WIDTH-marginWidth)/1.0;
+    CGFloat y = SCREEN_HEIGHT /2 - h/2;
     
    UIImageView *contentImageView = [[UIImageView alloc] initWithFrame:CGRectMake(marginWidth, y, w, h)];
     contentImageView.backgroundColor = [UIColor clearColor];
@@ -120,8 +120,8 @@
 - (void)updateView:(NSString *)title imageUrl:(NSString *)imageUrl {
     self.titleLabel.text = title;
     
-//    [self.backImageView cd_setImageWithURL:[NSURL URLWithString:imageUrl] placeholderImage:[UIImage imageNamed:@""]];
-     [self.contentImageView cd_setImageWithURL:[NSURL URLWithString:imageUrl] placeholderImage:[UIImage imageNamed:@""]];
+
+     [self.contentImageView cd_setImageWithURL:[NSURL URLWithString:imageUrl] placeholderImage:[UIImage imageNamed:@"common_placeholder"]];
     
 }
 

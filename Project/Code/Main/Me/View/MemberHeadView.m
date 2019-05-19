@@ -162,7 +162,7 @@
 }
 
 - (void)update{
-    UserModel *user = APP_MODEL.user;
+    UserInfo *user = [AppModel shareInstance].userInfo;
     _nickName.text = user.nick;
     _integral.text = (user.balance)?[NSString stringWithFormat:@"余额：%@元",user.balance]:@"余额：0.00元";
     _account.text = [NSString stringWithFormat:@"账号：%@",user.userId];

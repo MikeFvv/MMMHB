@@ -28,6 +28,8 @@
              failure:(void (^)(NSError *))failue{
     WEAK_OBJ(weakSelf, self);
     [NET_REQUEST_MANAGER requestMyPlayerWithPage:page + 1 pageSize:self.pageSize userString:self.userString type:self.type success:^(id object) {
+        if(weakSelf == nil)
+            return;
         NSDictionary *data = [object objectForKey:@"data"];
         NSArray *list = data[@"records"];
         weakSelf.page = [data[@"current"] integerValue];

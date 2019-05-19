@@ -151,7 +151,7 @@
 - (void)action_exitGroup:(NSString *)userId {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@?groupId=%@&userId=%@",APP_MODEL.serverUrl,@"social/skChatGroup/delgroupMember",self.groupId, userId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@?groupId=%@&userId=%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/delgroupMember",self.groupId, userId];
 
     entity.needCache = NO;
 //    NSDictionary *parameters = @{

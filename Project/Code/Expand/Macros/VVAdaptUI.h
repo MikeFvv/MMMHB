@@ -71,9 +71,10 @@
  */
 
 
+//设备宏
+#define SCREEN_WIDTH    UIScreen.mainScreen.bounds.size.width    //屏幕宽
+#define SCREEN_HEIGHT   UIScreen.mainScreen.bounds.size.height   //屏幕高
 
-#define kSCREEN_WIDTH [[UIScreen mainScreen] bounds].size.width
-#define kSCREEN_HEIGHT [[UIScreen mainScreen] bounds].size.height
 
 
 // 判断是否是ipad

@@ -42,9 +42,10 @@
     [_tableView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self);
     }];
-    WEAK_OBJ(weakSelf, self);
+    __weak __typeof(self)weakSelf = self;
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
-        [weakSelf getData];
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf getData];
     }];
     
     self.dataArray = [[NSMutableArray alloc] init];
@@ -192,7 +193,7 @@
     NSString *type = promotDic[@"type"];
     SVP_SHOW;
     WEAK_OBJ(weakSelf, self);
-    [NET_REQUEST_MANAGER getRewardWithActivityType:type userId:APP_MODEL.user.userId success:^(id object) {
+    [NET_REQUEST_MANAGER getRewardWithActivityType:type userId:[AppModel shareInstance].userInfo.userId success:^(id object) {
         SVP_SUCCESS_STATUS(object[@"data"]);
         [weakSelf getData];
     } fail:^(id object) {

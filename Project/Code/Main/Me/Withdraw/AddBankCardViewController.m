@@ -33,7 +33,7 @@
     _tableView.dataSource = self;
     _tableView.delegate = self;
     _tableView.rowHeight = 50;
-    _tableView.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 1)];
+    _tableView.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 1)];
     _tableView.tableFooterView = [self footView];
     _tableView.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
     _tableView.separatorColor = TBSeparaColor;
@@ -132,7 +132,7 @@
 
 -(UIView *)footView{
     UIView *view = [UIView new];
-    view.frame = CGRectMake(0, 0, CDScreenWidth, 64);
+    view.frame = CGRectMake(0, 0, SCREEN_WIDTH, 64);
     view.backgroundColor = [UIColor whiteColor];
     UIButton *btn = [UIButton new];
     [view addSubview:btn];

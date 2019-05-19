@@ -61,7 +61,7 @@
     
     [topView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.mas_equalTo(self.view.mas_left);
-        make.top.mas_equalTo(self.view.mas_top).offset(Height_NavBar);
+        make.top.mas_equalTo(self.view.mas_top);
         make.right.mas_equalTo(self.view.mas_right);
         make.height.mas_equalTo(TopViewHeight);
     }];
@@ -83,6 +83,7 @@
     
     UITextField *searchTextField = [[UITextField alloc] init];
     searchTextField.placeholder = @"搜索";
+    searchTextField.keyboardType = UIKeyboardTypeNumberPad;
     [topView addSubview:searchTextField];
     _searchTextField = searchTextField;
     
@@ -117,7 +118,7 @@
 - (UITableView *)tableView {
     if (!_tableView) {
         
-        _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, Height_NavBar + TopViewHeight + 2, SCREEN_WIDTH, SCREEN_HEIGHT - Height_NavBar -TopViewHeight -1) style:UITableViewStylePlain];
+        _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, TopViewHeight + 2, SCREEN_WIDTH, SCREEN_HEIGHT - Height_NavBar -TopViewHeight -1) style:UITableViewStylePlain];
         _tableView.backgroundColor = [UIColor whiteColor];
         _tableView.dataSource = self;
         _tableView.delegate = self;
@@ -138,7 +139,7 @@
 - (void)addMember {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@",APP_MODEL.serverUrl,@"social/skChatGroup/addgroupMember"];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/addgroupMember"];
 
     NSMutableArray *userIdArray = [NSMutableArray array];
     [userIdArray addObject: self.searchTextField.text];
@@ -180,8 +181,16 @@
 
 #pragma mark -  输入字符判断
 - (void)textFieldDidChangeValue:(NSNotification *)text {
-    
-    [self getUserInfoData];
+    UITextField *textField = (UITextField *)text.object;
+    if (textField.text.length == 0) {
+        return;
+    }
+    NSString *num = @"^[0-9]*$";
+    NSPredicate *pre = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",num];
+    BOOL isNum = [pre evaluateWithObject:textField.text];
+    if (isNum) {
+         [self getUserInfoData];
+    }
 }
 
 
@@ -189,7 +198,7 @@
 - (void)getUserInfoData {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",APP_MODEL.serverUrl,@"social/skChatGroup/select",self.searchTextField.text];
+    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/select",self.searchTextField.text];
     entity.needCache = NO;
     
     SVP_SHOW;

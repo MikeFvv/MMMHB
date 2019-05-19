@@ -24,12 +24,12 @@ BOOL CD_Success(id obj ,int value){
 
 //--------------------适配-----------------------
 CGFloat CD_Scal(CGFloat size ,CGFloat scale){
-    CGFloat s = CDScreenHeight/scale;
+    CGFloat s = SCREEN_HEIGHT/scale;
     return size * s;
 }
 
 CGFloat CD_WidthScal(CGFloat size ,CGFloat scale) {
-    CGFloat s = CDScreenWidth/scale;
+    CGFloat s = SCREEN_WIDTH/scale;
     return size * s;
 }
 

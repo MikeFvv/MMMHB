@@ -824,8 +824,6 @@ static const CGFloat SVProgressHUDLabelSpacing = 8.0f;
 
 - (void)showImage:(UIImage*)image status:(NSString*)status duration:(NSTimeInterval)duration {
     __weak SVProgressHUD *weakSelf = self;
-    if([status isKindOfClass:[NSNull class]])
-        status = @"";
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         __strong SVProgressHUD *strongSelf = weakSelf;
         if(strongSelf){
@@ -1159,9 +1157,7 @@ static const CGFloat SVProgressHUDLabelSpacing = 8.0f;
 #pragma mark - Getters
 
 + (NSTimeInterval)displayDurationForString:(NSString*)string {
-    if([string isKindOfClass:[NSNull class]])
-        string = @"";
-    CGFloat minimum = MAX((CGFloat)string.length * 0.1 + 0.5, [self sharedView].minimumDismissTimeInterval);
+    CGFloat minimum = MAX((CGFloat)string.length * 0.06 + 0.5, [self sharedView].minimumDismissTimeInterval);
     return MIN(minimum, [self sharedView].maximumDismissTimeInterval);
 }
 

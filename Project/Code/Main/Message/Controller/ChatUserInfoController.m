@@ -53,7 +53,7 @@
 - (void)getUserInfoData {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",APP_MODEL.serverUrl,@"admin/user/baseInfo",self.userId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"admin/user/baseInfo",self.userId];
     entity.needCache = NO;
     
      SVP_SHOW;

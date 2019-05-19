@@ -43,7 +43,7 @@
     label.font = [UIFont systemFontOfSize:13];
     label.textAlignment = NSTextAlignmentCenter;
     
-    NSDictionary *ipDic = APP_MODEL.ipArray[2];
+    NSDictionary *ipDic = [AppModel shareInstance].ipArray[2];
     label.text = [NSString stringWithFormat:@"如：%@ 融云key:%@",ipDic[@"url"],ipDic[@"rongYunKey"]];
     [view addSubview:label];
     [label mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -81,7 +81,7 @@
         [mArr removeObjectAtIndex:0];
     NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
     [dic setObject:ip forKey:@"url"];
-    NSDictionary *ipDic = APP_MODEL.ipArray[2];
+    NSDictionary *ipDic = [AppModel shareInstance].ipArray[2];
     [dic setObject:ipDic[@"rongYunKey"] forKey:@"rongYunKey"];
     [dic setObject:@"1" forKey:@"isBeta"];
     [dic setObject:@"Basic YXBwOmFwcA==" forKey:@"baseKey"];

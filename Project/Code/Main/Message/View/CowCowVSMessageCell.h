@@ -6,7 +6,9 @@
 //  Copyright © 2019 CDJay. All rights reserved.
 //
 
-#import <RongIMKit/RongIMKit.h>
+//#import <RongIMKit/RongIMKit.h>
+#import "FYSystemBaseCell.h"
+
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -15,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #define CowBackImageHeight bgWidth * bgRate
 
-@interface CowCowVSMessageCell : RCMessageBaseCell
+@interface CowCowVSMessageCell : FYSystemBaseCell
 
 @property (nonatomic ,strong) UILabel *tipLabel;
 

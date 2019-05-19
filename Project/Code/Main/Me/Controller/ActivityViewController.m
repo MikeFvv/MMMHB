@@ -19,7 +19,7 @@
     [super viewDidLoad];
     self.navigationItem.title = self.vcTitle;
     if(self.userId == nil)
-        self.userId = APP_MODEL.user.userId;
+        self.userId = [AppModel shareInstance].userInfo.userId;
     ActivityView *view = [[ActivityView alloc] init];
     view.userId = self.userId;
     [self.view addSubview:view];

@@ -51,7 +51,6 @@
 - (void)initSubviews{
     self.navigationItem.title = @"提现中心";
     self.view.backgroundColor = BaseColor;
-    WEAK_OBJ(weakSelf, self);
     
     _tableView = [UITableView normalTable];
     [self.view addSubview:_tableView];
@@ -61,13 +60,15 @@
     _tableView.dataSource = self;
     _tableView.delegate = self;
     _tableView.rowHeight = 50;
-    _tableView.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 1)];
+    _tableView.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 1)];
     _tableView.tableFooterView = [self footView];
     _tableView.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
     _tableView.separatorColor = TBSeparaColor;
     _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    __weak __typeof(self)weakSelf = self;
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
-        [weakSelf getData];
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf getData];
     }];
     
     [self getData];
@@ -108,7 +109,7 @@
 }
 
 - (nullable UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
-    UIButton *view = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 48)];
+    UIButton *view = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 48)];
     view.backgroundColor = BaseColor;
     if (section == 1) {
         //[view addTarget:self action:@selector(action_type) forControlEvents:UIControlEventTouchUpInside];
@@ -149,15 +150,15 @@
 }
 
 - (nullable UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
-    UIView *view = [UIView new];//[[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 48)];
+    UIView *view = [UIView new];//[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 48)];
     if (section == 0) {
         view.backgroundColor = [UIColor whiteColor];
-        view.frame = CGRectMake(0, 0, CDScreenWidth, 48);
+        view.frame = CGRectMake(0, 0, SCREEN_WIDTH, 48);
         UILabel *label = [UILabel new];
         [view addSubview:label];
         label.font = [UIFont systemFontOfSize2:12];
         label.textColor = Color_6;
-        label.text = [NSString stringWithFormat:@"余额：%@元",APP_MODEL.user.balance];
+        label.text = [NSString stringWithFormat:@"余额：%@元",[AppModel shareInstance].userInfo.balance];
         
         [label mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.equalTo(view.mas_left).offset(16);
@@ -171,7 +172,7 @@
 
 -(UIView *)footView{
     UIView *view = [UIView new];
-    view.frame = CGRectMake(0, 0, CDScreenWidth, 100);
+    view.frame = CGRectMake(0, 0, SCREEN_WIDTH, 100);
     view.backgroundColor = [UIColor whiteColor];
     UIButton *btn = [UIButton new];
     [view addSubview:btn];
@@ -352,7 +353,7 @@
         SVP_ERROR_STATUS(@"请输入正确的金额");
         return;
     }
-    if([_textField[0].text doubleValue] > [APP_MODEL.user.balance doubleValue]){
+    if([_textField[0].text doubleValue] > [[AppModel shareInstance].userInfo.balance doubleValue]){
         SVP_ERROR_STATUS(@"余额不足");
         return;
     }
@@ -378,7 +379,7 @@
     //    }
     SVP_SHOW;
     WEAK_OBJ(weakSelf, self);
-    NSMutableDictionary *dic = [[NSMutableDictionary alloc]initWithDictionary:@{@"money":_textField[0].text,@"uid":APP_MODEL.user.userId,@"accType":@"3",@"accNo":_textField[1].text,@"accUser":_textField[2].text,@"accTargetName":_textField[3].text,@"accAreaName":_textField[4].text}];
+    NSMutableDictionary *dic = [[NSMutableDictionary alloc]initWithDictionary:@{@"money":_textField[0].text,@"uid":[AppModel shareInstance].userInfo.userId,@"accType":@"3",@"accNo":_textField[1].text,@"accUser":_textField[2].text,@"accTargetName":_textField[3].text,@"accAreaName":_textField[4].text}];
     if (_textField[5].text.length != 0) {
         [dic setObject:_textField[5].text forKey:@"cashRemarks"];
     }

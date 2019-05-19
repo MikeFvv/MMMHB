@@ -251,7 +251,7 @@
 }
 
 -(void)connectToSer{
-    WebViewController *vc = [[WebViewController alloc] initWithUrl:APP_MODEL.commonInfo[@"pop"]];
+    WebViewController *vc = [[WebViewController alloc] initWithUrl:[AppModel shareInstance].commonInfo[@"pop"]];
     vc.title = @"在线客服";
     vc.hidesBottomBarWhenPushed = YES;
     [self.navigationController pushViewController:vc animated:YES];

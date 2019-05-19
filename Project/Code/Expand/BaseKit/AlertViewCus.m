@@ -20,21 +20,33 @@ static AlertViewCus *instance = nil;
 @implementation AlertViewCus
 
 + (AlertViewCus *)createInstanceWithView:(UIView *)superView{
-    if(instance)
-        [instance removeFromSuperview];
+//    [SVProgressHUD dismiss];
+    if(instance) {
+         [instance removeFromSuperview];
+    }
     if(superView == nil){
-        UIWindow * window = [[UIApplication sharedApplication] keyWindow];
+        UIWindow *window = [[UIApplication sharedApplication] keyWindow];
         if (window.windowLevel != UIWindowLevelNormal){
             NSArray *windows = [[UIApplication sharedApplication] windows];
-            for(UIWindow * tmpWin in windows){
+            
+//            for(UIWindow *tmpWin in windows){
+//                if (tmpWin.windowLevel == UIWindowLevelNormal){
+//                    window = tmpWin;
+//                    break;
+//                }
+//            }
+            for (NSInteger index = 0; index < windows.count; index++) {
+                UIWindow *tmpWin = [windows objectAtIndex:index];
                 if (tmpWin.windowLevel == UIWindowLevelNormal){
                     window = tmpWin;
                     break;
                 }
             }
         }
-        if(window == nil)
-            return nil;
+        
+        if(window == nil) {
+             return nil;
+        }
         superView = window;
     }
     instance = [[AlertViewCus alloc] initWithFrame:superView.bounds];

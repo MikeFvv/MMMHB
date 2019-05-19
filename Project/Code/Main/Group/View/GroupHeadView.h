@@ -14,7 +14,8 @@ typedef void (^HeadClick)(NSInteger index);
 @interface GroupHeadView : UIView
 
 @property (nonatomic, copy) HeadClick click;
-
+@property (nonatomic ,assign) BOOL isGroupLord;
+    
 + (GroupHeadView *)headViewWithModel:(GroupNet *)model isGroupLord:(BOOL)isGroupLord;
 
 @end

@@ -1398,7 +1398,7 @@ static sqlite3 * _whc_database;
             }
             sqlite3_finalize(pp_stmt);
         }else {
-            [self log:@"Sorry 查询失败, 建议检查sqlite 函数书写格式是否正确"];
+            [self log:@"Sorry 查询失败, 建议检查sqlite 函数书写格式是否正确！"];
         }
         [self close];
         if (result_array.count > 0) {

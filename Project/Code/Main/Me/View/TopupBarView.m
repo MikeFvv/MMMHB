@@ -28,7 +28,7 @@
 */
 
 + (TopupBarView *)topupBar{
-    return [[TopupBarView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 50)];
+    return [[TopupBarView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 50)];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame{
@@ -54,7 +54,7 @@
     [_moneyField mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(self->_inputView.mas_right).offset(-15);
         make.bottom.top.equalTo(self->_inputView);
-        make.width.equalTo(@(CDScreenWidth*0.65));
+        make.width.equalTo(@(SCREEN_WIDTH*0.65));
     }];
 }
 

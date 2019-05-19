@@ -8,7 +8,7 @@
 
 #import "SendRedPackedTextCell.h"
 #import "SendRPCollectionViewCell.h"
-#import "SendRedPacketController.h"
+#import "SendRedEnvelopeController.h"
 
 #define kTableViewMarginWidth 20
 

@@ -8,9 +8,9 @@
 
 #import "NetResponseManager.h"
 #import "NetRequestManager.h"
-#import "RongCloudManager.h"
 #import "GTMBase64.h"
 #import "NSData+AES.h"
+#import "SAMKeychain.h"
 
 @implementation NetResponseManager
 
@@ -37,19 +37,22 @@
             httpManager.failBlock(error);
     }else if([data isKindOfClass:[NSDictionary class]]){
         NSDictionary *dict = (NSDictionary *)data;
+        //dict = [FUNCTION_MANAGER removeNull:dict];
         ResultCode code = [[dict objectForKey:@"code"] integerValue];
-        if([dict objectForKey:@"code"] == nil)
+        if([dict objectForKey:@"code"] == nil) {
             code = -1;
+        }
+        
         if(httpManager.act == ActRequestToken || httpManager.act == ActRequestTokenBySMS){
             NSString *refreshToken = [dict objectForKey:@"refresh_token"];
-            if(refreshToken.length > 10)
+            if(refreshToken.length > 10) {
                 code = ResultCodeSuccess;
+            }
             [self getTokenBack:dict];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kOnConnectSocketNotification object: nil];
         }else if(httpManager.act == ActRequestIMToken){
             if(code == ResultCodeSuccess){
-                APP_MODEL.rongYunToken = [dict objectForKey:@"data"];
-                [APP_MODEL saveAppModel];
-                NSLog(@"融云token = %@",APP_MODEL.rongYunToken);
+                [[AppModel shareInstance] saveAppModel];
             }
         }else if(httpManager.act == ActRequestUserInfo){
             if(code == ResultCodeSuccess){
@@ -59,6 +62,7 @@
             if(code == ResultCodeSuccess){
                 [self getCommonInfoBack:dict[@"data"]];
             }
+            [[NSNotificationCenter defaultCenter] postNotificationName:kOnConnectSocketNotification object: nil];
         }else if(httpManager.act == ActRequestSystemNotice){
             if(code == ResultCodeSuccess){
                 [self getSystemNoticeBack:dict[@"data"]];
@@ -83,32 +87,37 @@
         [FUNCTION_MANAGER handleFailResponse:responseDic];
         return;
     }
-    APP_MODEL.user.userId = responseDic[@"userId"];
-    APP_MODEL.user.token = responseDic[@"access_token"];
-    APP_MODEL.user.fullToken = [NSString stringWithFormat:@"Bearer %@",APP_MODEL.user.token];
-    [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
-        [APP_MODEL reSetRootAnimation:YES];
-    } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
-    }];
-    [NET_REQUEST_MANAGER requestAppConfigWithSuccess:nil fail:nil];
+    [AppModel shareInstance].userInfo.userId = responseDic[@"userId"];
+    [AppModel shareInstance].userInfo.token = responseDic[@"access_token"];
+    [AppModel shareInstance].userInfo.fullToken = [NSString stringWithFormat:@"Bearer %@",[AppModel shareInstance].userInfo.token];
 }
 
 -(void)updateUserInfo:(NSDictionary *)dict{
-    UserModel *user = [UserModel mj_objectWithKeyValues:dict];
-    user.token = APP_MODEL.user.token;
-    user.fullToken = APP_MODEL.user.fullToken;
+    UserInfo *user = [UserInfo mj_objectWithKeyValues:dict];
+    if([user.userId isKindOfClass:[NSNumber class]]){
+        user.userId = [(NSNumber *)user.userId stringValue];
+    }
+    user.token = [AppModel shareInstance].userInfo.token;
+    user.fullToken = [AppModel shareInstance].userInfo.fullToken;
     user.groupowenFlag = [dict[@"groupowenFlag"] boolValue];
-    APP_MODEL.user = user;
-    APP_MODEL.user.isLogined = YES;
-    [APP_MODEL saveAppModel];
+    [AppModel shareInstance].userInfo = user;
+    [AppModel shareInstance].userInfo.isLogined = YES;
+    [[AppModel shareInstance] saveAppModel];
     [NET_REQUEST_MANAGER requestIMTokenWithSuccess:nil fail:nil];
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     [ud setObject:user.userId forKey:@"userId"];
     [ud setObject:user.mobile forKey:@"mobile"];
     [ud synchronize];
+    
+    [SAMKeychain setPassword:@"1" forService:@"com.fy.ser" account:user.mobile];
 }
 
+
+/**
+ 获取配置
+
+ @param dict dict
+ */
 -(void)getCommonInfoBack:(NSDictionary *)dict{
     if([dict isKindOfClass:[NSString class]]){
         NSString *s = (NSString *)dict;
@@ -118,15 +127,18 @@
         NSString *json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         dict = [json mj_JSONObject];
     }
-    APP_MODEL.commonInfo = dict;
-    NSString *authKey = APP_MODEL.commonInfo[@"app_client_id"];
-    if(authKey)
-        APP_MODEL.authKey = authKey;
+    [AppModel shareInstance].commonInfo = dict;
+    NSString *authKey = [AppModel shareInstance].commonInfo[@"app_client_id"];
+    
+    if(authKey){
+        [AppModel shareInstance].appClientIdInCommonInfo = authKey;
+        [AppModel shareInstance].authKey = [NSString stringWithFormat:@"Basic %@",authKey];
+    }
 }
 
 -(void)getSystemNoticeBack:(NSDictionary *)dict{
-    APP_MODEL.noticeArray = dict[@"records"];
-    [APP_MODEL saveAppModel];
+    [AppModel shareInstance].noticeArray = dict[@"records"];
+    [[AppModel shareInstance] saveAppModel];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"updateScrollBarView" object:nil];
 }
 @end

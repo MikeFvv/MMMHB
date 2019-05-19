@@ -44,6 +44,16 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>Pods-ProjectDFSHB.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-ProjectQQHB.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods-ProjectTTHB.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -60,11 +70,6 @@
 			<false/>
 		</dict>
 		<key>Pods-ProjectXZHB.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>RongCloudIM.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>

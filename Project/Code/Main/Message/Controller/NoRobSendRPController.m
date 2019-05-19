@@ -14,7 +14,6 @@
 #import "NetRequestManager.h"
 #import "BANetManager_OC.h"
 #import "NSString+RegexCategory.h"
-#import "RongCloudManager.h"
 #import "NotificationMessageModel.h"
 #import "SelectMineNumCell.h"
 #import "SendRedPackedTextCell.h"
@@ -145,7 +144,7 @@
     } else if (indexPath.row == 1) {
         return CD_Scal(75, 812);
     } else if (indexPath.row == 2) {
-        return kSCREEN_HEIGHT - CD_Scal(80, 812)*2;
+        return SCREEN_HEIGHT - CD_Scal(80, 812)*2;
     }
     return CD_Scal(10, 812);
 }
@@ -251,13 +250,13 @@
 }
 
 
-#pragma mark action
-- (void)doneSend:(EnvelopeMessage *)message{
-    [self dismissViewControllerAnimated:YES completion:nil];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [ChatViewController sendCustomMessage:message];
-    });
-}
+//#pragma mark action
+//- (void)doneSend:(EnvelopeMessage *)message{
+//    [self dismissViewControllerAnimated:YES completion:nil];
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        [ChatViewController sendCustomMessage:message];
+//    });
+//}
 
 
 #pragma mark - 红包金额验证
@@ -345,44 +344,28 @@
 }
 
 - (void)redpackedRequest:(NSString *)money packetNum:(NSString *)packetNum extDict:(NSDictionary *)extDict {
-    
-    if (![RongCloudManager shareInstance].isConnectRC) {
-        
-        NotificationMessageModel *model = [[NotificationMessageModel alloc] init];
-        model.messagetype = 3;
-        
-        [[RCIM sharedRCIM] sendMessage:ConversationType_GROUP targetId:self.message.groupId content:model pushContent:nil pushData:nil success:^(long messageId) {
-        } error:^(RCErrorCode nErrorCode, long messageId) {
-        }];
-        
-        [self dismissViewControllerAnimated:YES completion:nil];
-        return;
-    }
-    
-    
+
     NSDictionary *parameters = @{
                                  @"ext":extDict,
                                  @"groupId":self.message.groupId,
-                                 @"userId":APP_MODEL.user.userId,
+                                 @"userId":[AppModel shareInstance].userInfo.userId,
                                  @"type":@(_message.type),
                                  @"money":money,
                                  @"count":@(self.redpbNum.integerValue)
                                  };
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@",APP_MODEL.serverUrl,@"social/redpacket/send"];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/redpacket/send"];
     
     entity.needCache = NO;
     entity.parameters = parameters;
     
-    BANetManagerShare.isOpenLog = YES;
-    
     SVP_SHOW;
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
-        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        strongSelf.submit.enabled = YES;
         SVP_DISMISS;
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        
         if ([response objectForKey:@"code"] != nil && [[response objectForKey:@"code"] integerValue] == 0) {
             [strongSelf action_cancle];
         } else if ([response objectForKey:@"code"] != nil){
@@ -394,7 +377,7 @@
                 SVP_ERROR_STATUS(@"网络连接错误");
             }
         }
-        
+        strongSelf.submit.enabled = YES;
     } failureBlock:^(NSError *error) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         strongSelf.submit.enabled = YES;
@@ -411,7 +394,6 @@
 //    NSInteger mObjectInte = [textFieldObj.text integerValue];
   
     self.totalMoney = textFieldObj.text;
-    
 }
 
 - (BOOL)money:(CGFloat)money {

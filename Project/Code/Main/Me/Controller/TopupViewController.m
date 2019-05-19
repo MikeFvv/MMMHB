@@ -228,7 +228,7 @@
     NSInteger row = self.selectIndex;
     NSDictionary *dict = self.dataArray[row];
 
-    NSString *url = [NSString stringWithFormat:@"%@%@&id=%@&amount=%@",APP_MODEL.serverUrl,dict[@"url"],APP_MODEL.user.userId,_topupBar.money];
+    NSString *url = [NSString stringWithFormat:@"%@%@&id=%@&amount=%@",APP_MODEL.serverUrl,dict[@"url"],APP_MODEL.userInfo.userId,_topupBar.money];
 //    if([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:url]]){
 //        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
 //    }

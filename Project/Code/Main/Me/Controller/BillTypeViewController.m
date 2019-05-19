@@ -55,17 +55,17 @@
 */
 
 -(void)initData{
-    [self.dataArray addObject:@{@"icon":@"billType1",@"title":@"全部记录",@"url":@"",@"tag":@"1"}];
-    [self.dataArray addObject:@{@"icon":@"billType2",@"title":@"奖励记录",@"url":@"reward",@"tag":@"2"}];
-    [self.dataArray addObject:@{@"icon":@"billType3",@"title":@"充值记录",@"url":@"recharge",@"tag":@"3"}];
-    [self.dataArray addObject:@{@"icon":@"billType4",@"title":@"提现记录",@"url":@"withdraw",@"tag":@"4"}];
-    [self.dataArray addObject:@{@"icon":@"billType5",@"title":@"发包记录",@"url":@"send_red_packet",@"tag":@"5"}];
-    [self.dataArray addObject:@{@"icon":@"billType6",@"title":@"抢包记录",@"url":@"rob_red_packet",@"tag":@"6"}];
-    [self.dataArray addObject:@{@"icon":@"billType7",@"title":@"盈亏记录",@"url":@"win_loss",@"tag":@"7"}];
-    [self.dataArray addObject:@{@"icon":@"billType8",@"title":@"佣金收入",@"url":@"commission_in",@"tag":@"8"}];
-    [self.dataArray addObject:@{@"icon":@"billType9",@"title":@"水果机记录",@"url":@"fruit",@"tag":@"9"}];
-    if(APP_MODEL.user.innerNumFlag || APP_MODEL.user.groupowenFlag)
-        [self.dataArray addObject:@{@"icon":@"billType10",@"title":@"佣金支出",@"url":@"commission_out",@"tag":@"10"}];
+    [self.dataArray addObject:@{@"icon":@"billType1",@"title":@"全部记录",@"url":@"",@"tag":@"1",@"subTitle":@""}];
+    [self.dataArray addObject:@{@"icon":@"billType2",@"title":@"奖励记录",@"url":@"reward",@"tag":@"2",@"subTitle":@"累计奖励收入"}];
+    [self.dataArray addObject:@{@"icon":@"billType3",@"title":@"充值记录",@"url":@"recharge",@"tag":@"3",@"subTitle":@"累计充值"}];
+    [self.dataArray addObject:@{@"icon":@"billType4",@"title":@"提现记录",@"url":@"withdraw",@"tag":@"4",@"subTitle":@"累计提现"}];
+    [self.dataArray addObject:@{@"icon":@"billType5",@"title":@"发包记录",@"url":@"send_red_packet",@"tag":@"5",@"subTitle":@"累计发包"}];
+    [self.dataArray addObject:@{@"icon":@"billType6",@"title":@"抢包记录",@"url":@"rob_red_packet",@"tag":@"6",@"subTitle":@"累计抢包"}];
+    [self.dataArray addObject:@{@"icon":@"billType7",@"title":@"盈亏记录",@"url":@"win_loss",@"tag":@"7",@"subTitle":@"余额"}];
+    [self.dataArray addObject:@{@"icon":@"billType8",@"title":@"佣金收入",@"url":@"commission_in",@"tag":@"8",@"subTitle":@"累计收入佣金"}];
+    [self.dataArray addObject:@{@"icon":@"billType9",@"title":@"水果机记录",@"url":@"fruit",@"tag":@"9",@"subTitle":@"累计盈亏"}];
+    if([AppModel shareInstance].userInfo.innerNumFlag || [AppModel shareInstance].userInfo.groupowenFlag)
+        [self.dataArray addObject:@{@"icon":@"billType10",@"title":@"佣金支出",@"url":@"commission_out",@"tag":@"10",@"subTitle":@"累计支出佣金"}];
     else
         [self.dataArray addObject:@{@"icon":@"billType11",@"title":@"敬请期待",@"tag":@"10"}];
 }

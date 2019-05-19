@@ -7,12 +7,15 @@
 //
 
 #import "LoginViewController.h"
+#import "UIView+AZGradient.h"
 #import "WXManage.h"
 #import "GTMBase64.h"
 #import "NSData+AES.h"
 #import "NetRequestManager.h"
 #import "LoginBySMSViewController.h"
 #import "AddIpViewController.h"
+#import "SSKeychain.h"
+#import "SAMKeychain.h"
 
 @interface LoginViewController ()<UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate,ActionSheetDelegate>{
     UITableView *_tableView;
@@ -20,6 +23,7 @@
     NSMutableDictionary *_wxRegister;
     UITextField *_reField;
 }
+@property (nonatomic, strong) NSTimer *timer;
 @end
 
 @implementation LoginViewController
@@ -45,10 +49,7 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    if(!APP_MODEL.debugMode)
-        self.navigationItem.title = @"登录";
-    else
-        self.navigationItem.title = APP_MODEL.serverUrl;
+    self.navigationItem.title = @"登录";
     
 //    UIButton *regisBtn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
 //    regisBtn.titleLabel.font = [UIFont systemFontOfSize:15];
@@ -70,7 +71,7 @@
     _tableView.separatorColor = TBSeparaColor;
     _tableView.backgroundColor = BaseColor;
     
-    UIView *fotView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 300)];
+    UIView *fotView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 300)];
     _tableView.tableFooterView = fotView;
     
     UIButton *loginBtn = [UIButton new];
@@ -78,6 +79,8 @@
     loginBtn.layer.cornerRadius = 8;
     loginBtn.layer.masksToBounds = YES;
     loginBtn.backgroundColor = MBTNColor;
+//    [loginBtn setBackgroundImage:[UIImage imageNamed:@"navBarBg"] forState:UIControlStateNormal];
+    [loginBtn az_setGradientBackgroundWithColors:@[HEXCOLOR(0xfe3366),HEXCOLOR(0xff733d)] locations:0 startPoint:CGPointMake(0, 0) endPoint:CGPointMake(1, 0)];
     loginBtn.titleLabel.font = [UIFont boldSystemFontOfSize2:17];
     [loginBtn setTitle:@"登录" forState:UIControlStateNormal];
     [loginBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -100,6 +103,7 @@
     yzmBtn.titleLabel.font = [UIFont boldSystemFontOfSize2:16];
     [yzmBtn setTitle:@"注册" forState:UIControlStateNormal];
     [yzmBtn setTitleColor:COLOR_X(120, 120, 120) forState:UIControlStateNormal];
+    yzmBtn.hidden = YES;
     [yzmBtn addTarget:self action:@selector(action_register) forControlEvents:UIControlEventTouchUpInside];
     [yzmBtn delayEnable];
     [yzmBtn mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -211,8 +215,15 @@
 -(void)viewDidAppear:(BOOL)animated{
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *mobile = [ud objectForKey:@"mobile"];
+    if(mobile == nil){
+        NSArray *arr = [SAMKeychain accountsForService:@"com.fy.ser"];
+        if(arr.count > 0){
+            NSDictionary *dic = arr[0];
+            mobile = dic[@"acct"];
+        }
+    }
     _textField[0].text = mobile;
-    if(APP_MODEL.debugMode)
+    if([AppModel shareInstance].debugMode)
         _textField[1].text = @"123456";
     if(_textField[0].text.length == 0)
         [_textField[0] becomeFirstResponder];
@@ -239,7 +250,7 @@
         _textField[indexPath.row].delegate = self;
         _textField[indexPath.row].clearButtonMode = UITextFieldViewModeWhileEditing;
         if(indexPath.row == 0){
-            _textField[indexPath.row].keyboardType = UIKeyboardTypePhonePad;
+            _textField[indexPath.row].keyboardType = UIKeyboardTypeNumberPad;
             _textField[indexPath.row].returnKeyType = UIReturnKeyNext;
             cell.imageView.image = [UIImage imageNamed:@"icon_phone"];
             
@@ -276,16 +287,68 @@
         return;
     }
     if (_textField[1].text.length < 6) {
-        SVP_ERROR_STATUS(@"请输入密码");
+        SVP_ERROR_STATUS(@"请输入6位以上密码");
         return;
     }
     [self.view endEditing:YES];
-    SVP_SHOW;
-    [NET_REQUEST_MANAGER requestTockenWithAccount:_textField[0].text password:_textField[1].text success:nil fail:^(id object) {
-        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        [strongSelf failData:object];
+    
+    if ([AppModel shareInstance].commonInfo == nil||
+        [AppModel shareInstance].appClientIdInCommonInfo==nil) {
         
+        [NET_REQUEST_MANAGER requestAppConfigWithSuccess:^(id object) {
+            SVP_SHOW;
+            [NET_REQUEST_MANAGER requestTockenWithAccount:_textField[0].text password:_textField[1].text success:^(id object) {
+                SVP_DISMISS;
+                if([object isKindOfClass:[NSDictionary class]]){
+                    if ([object objectForKey:@"code"] && [[object objectForKey:@"code"] integerValue] == 0) {
+                        [SSKeychain setPassword:_textField[1].text forService:@"password" account:_textField[0].text];
+                    }
+                    [self getUserInfo];
+                }
+            }  fail:^(id object) {
+                __strong __typeof(weakSelf)strongSelf = weakSelf;
+                [strongSelf failData:object];
+            }];
+        } fail:^(id object) { SVP_ERROR_STATUS(@"网络请求初始化接口失败，稍后重试...");
+        }];
+        
+    }else{
+        
+        SVP_SHOW;
+        [NET_REQUEST_MANAGER requestTockenWithAccount:_textField[0].text password:_textField[1].text success:^(id object) {
+            SVP_DISMISS;
+            if([object isKindOfClass:[NSDictionary class]]){
+                if ([object objectForKey:@"code"] && [[object objectForKey:@"code"] integerValue] == 0) {
+                    [SSKeychain setPassword:_textField[1].text forService:@"password" account:_textField[0].text];
+                }
+                [self getUserInfo];
+            }
+        }  fail:^(id object) {
+            __strong __typeof(weakSelf)strongSelf = weakSelf;
+            [strongSelf failData:object];
+        }];
+    
+    }
+    
+//    [NET_REQUEST_MANAGER requestTockenWithAccount:_textField[0].text password:_textField[1].text success:nil fail:^(id object) {
+//        __strong __typeof(weakSelf)strongSelf = weakSelf;
+//        [strongSelf failData:object];
+//        
+//    }];
+}
+
+
+/**
+ 获取用户信息
+ */
+- (void)getUserInfo {
+    [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
+//        [[AppModel shareInstance] reSetRootAnimation:YES];
+        [[AppModel shareInstance] reSetTabBarAsRootAnimation];
+    } fail:^(id object) {
+        [FUNCTION_MANAGER handleFailResponse:object];
     }];
+    [NET_REQUEST_MANAGER requestAppConfigWithSuccess:nil fail:nil];
 }
 
 
@@ -293,7 +356,7 @@
     __weak __typeof(self)weakSelf = self;
     [self.view endEditing:YES];
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"请选择服务器地址" preferredStyle:UIAlertControllerStyleActionSheet];
-    NSArray *arr = [APP_MODEL ipArray];
+    NSArray *arr = [[AppModel shareInstance] ipArray];
     
     NSMutableArray *newArr = [NSMutableArray array];
     for (NSDictionary *dic in arr) {
@@ -308,7 +371,7 @@
 }
 
 -(void)actionSheetDelegateWithActionSheet:(ActionSheetCus *)actionSheet index:(NSInteger)index{
-    NSArray *arr = [APP_MODEL ipArray];
+    NSArray *arr = [[AppModel shareInstance] ipArray];
     if(index > arr.count)
     return;
     if(index == arr.count){

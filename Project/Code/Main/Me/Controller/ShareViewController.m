@@ -27,7 +27,7 @@
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
     layout.minimumLineSpacing = 8;
     layout.minimumInteritemSpacing = 8;
-    NSInteger width = (CDScreenWidth - 24)/2;
+    NSInteger width = (SCREEN_WIDTH - 24)/2;
     layout.itemSize = CGSizeMake(width, width * 1.6);
     self.collectionView = [[UICollectionView alloc]initWithFrame:self.view.bounds collectionViewLayout:layout];
     [self.view addSubview:_collectionView];
@@ -121,7 +121,7 @@
     ShareDetailViewController *vc = [[ShareDetailViewController alloc] init];
     vc.title = self.tempDic[@"title"];
     vc.shareInfo = self.tempDic;
-    vc.shareUrl = [NSString stringWithFormat:@"%@%@",self.shareUrl,[AppModel shareInstance].user.invitecode];
+    vc.shareUrl = [NSString stringWithFormat:@"%@%@",self.shareUrl,[AppModel shareInstance].userInfo.invitecode];
     [self.navigationController pushViewController:vc animated:YES];
 }
 @end

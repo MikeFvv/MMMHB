@@ -455,7 +455,7 @@
             bankId = self.bankId;
             bankName = self.bankNameField.text;
         }
-        [NET_REQUEST_MANAGER submitRechargeInfoWithBankId:bankId bankName:bankName bankNo:self.accountTextField.text tId:self.infoDic[@"id"] money:self.moneyTextField.text name:self.nameTextField.text orderId:nil type:self.selectType + 1 typeCode:[self.infoDic[@"typeCode"] integerValue] userId:APP_MODEL.user.userId success:^(id object) {
+        [NET_REQUEST_MANAGER submitRechargeInfoWithBankId:bankId bankName:bankName bankNo:self.accountTextField.text tId:self.infoDic[@"id"] money:self.moneyTextField.text name:self.nameTextField.text orderId:nil type:self.selectType + 1 typeCode:[self.infoDic[@"typeCode"] integerValue] userId:[AppModel shareInstance].userInfo.userId success:^(id object) {
             SVP_DISMISS;
             [weakSelf goToCheck:object[@"data"]];
         } fail:^(id object) {
@@ -465,7 +465,7 @@
 }
 
 -(void)openByWeb{
-    NSString *url = [NSString stringWithFormat:@"%@%@?userId=%@&amount=%@&id=%@&typeCode=%zd",APP_MODEL.serverUrl,self.infoDic[@"url"],APP_MODEL.user.userId,self.moneyTextField.text,self.infoDic[@"id"],[self.infoDic[@"typeCode"] integerValue]];
+    NSString *url = [NSString stringWithFormat:@"%@%@?userId=%@&amount=%@&id=%@&typeCode=%zd",[AppModel shareInstance].serverUrl,self.infoDic[@"url"],[AppModel shareInstance].userInfo.userId,self.moneyTextField.text,self.infoDic[@"id"],[self.infoDic[@"typeCode"] integerValue]];
     WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
     vc.navigationItem.title = @"充值";
     [self.navigationController pushViewController:vc animated:YES];
@@ -499,7 +499,7 @@
 
 -(void)goToCheck:(NSDictionary *)dict{
     DepositOrderController *vc = [[DepositOrderController alloc] init];
-    vc.imageUrl = self.infoDic[@"img"];
+    //vc.imageUrl = self.infoDic[@"img"];
     vc.titleStr = self.infoDic[@"title"];
     vc.infoDic = dict;
     vc.type = self.type;

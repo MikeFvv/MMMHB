@@ -182,8 +182,8 @@
     [submitBtn delayEnable];
     
     
-    CGFloat submitWidth = CDScreenWidth/3;
-    CGFloat bottomHeight = CDScreenHeight/2/2;
+    CGFloat submitWidth = SCREEN_WIDTH/3;
+    CGFloat bottomHeight = SCREEN_HEIGHT/2/2;
     [submitBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.size.mas_equalTo(submitWidth);
         make.centerY.mas_equalTo(backImageView.mas_centerY).multipliedBy(1.3);

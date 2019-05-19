@@ -15,10 +15,13 @@ NS_ASSUME_NONNULL_BEGIN
 @interface PushMessageModel : NSObject<NSCoding,WHC_SqliteInfo>
 
 @property (nonatomic ,copy) NSString *userId; // 用户ID
-@property (nonatomic ,copy) NSString *groupId; // 群ID,
+/**
+ *  会话ID
+ */
+@property (nonatomic, copy)         NSString *sessionId;
 //本地
 @property (nonatomic ,copy) NSString *lastMessage; ///<最后一条消息
-@property (nonatomic ,assign) int number;      // 消息条数
+@property (nonatomic ,assign) NSInteger number;      // 消息条数
 
 - (void)encodeWithCoder:(nonnull NSCoder *)aCoder;
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)aDecoder;

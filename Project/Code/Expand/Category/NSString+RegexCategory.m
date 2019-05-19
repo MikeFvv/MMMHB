@@ -352,7 +352,7 @@
  *  匹配单数字字符
  */
 - (BOOL)isSingleNumber {
-    NSString *num = @"[0-9]";
+    NSString *num = @"[0-9]"; 
     return [self isValidateByRegex:num];
 }
 @end

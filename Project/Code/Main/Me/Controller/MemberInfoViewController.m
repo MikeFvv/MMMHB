@@ -7,7 +7,7 @@
 //
 
 #import "MemberInfoViewController.h"
-#import "RongCloudManager.h"
+#import "QRCodeViewController.h"
 
 @interface MemberInfoViewController ()<UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate,ActionSheetDelegate>{
     UIImageView *_headIcon;
@@ -36,8 +36,8 @@
 
 #pragma mark ----- Data
 - (void)initData{
-    _sexType = APP_MODEL.user.gender;
-    _headUrl = APP_MODEL.user.avatar;
+    _sexType = [AppModel shareInstance].userInfo.gender;
+    _headUrl = [AppModel shareInstance].userInfo.avatar;
 }
 
 - (void)addObserver{
@@ -53,7 +53,7 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    self.navigationItem.title = @"编辑资料";
+    self.navigationItem.title = @"个人信息";
 //    UIButton *btn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
 //    btn.titleLabel.font = [UIFont systemFontOfSize:15];
 //    [btn setTitle:@"保存" forState:UIControlStateNormal];
@@ -134,7 +134,7 @@
             _nickName = [UILabel new];
             [cell.contentView addSubview:_nickName];
             _nickName.font = [UIFont systemFontOfSize2:16];
-            _nickName.text = APP_MODEL.user.nick;
+            _nickName.text = [AppModel shareInstance].userInfo.nick;
             _nickName.textColor = Color_6;
             
             [_nickName mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -147,9 +147,8 @@
             _sexLabel = [UILabel new];
             [cell.contentView addSubview:_sexLabel];
             _sexLabel.font = [UIFont systemFontOfSize2:16];
-            _sexLabel.text = (APP_MODEL.user.gender == 1)?@"女":@"男";
+            _sexLabel.text = ([AppModel shareInstance].userInfo.gender == 1)?@"女":@"男";
             _sexLabel.textColor = Color_6;
-
             [_sexLabel mas_makeConstraints:^(MASConstraintMaker *make) {
                 make.right.equalTo(cell.contentView.mas_right).offset(-12);
                 make.centerY.equalTo(cell.contentView);
@@ -160,7 +159,7 @@
             [cell.contentView addSubview:label];
             label.font = [UIFont systemFontOfSize2:16];
             label.textColor = Color_6;
-            label.text = APP_MODEL.user.mobile;
+            label.text = [AppModel shareInstance].userInfo.mobile;
             
             [label mas_makeConstraints:^(MASConstraintMaker *make) {
                 make.right.equalTo(cell.contentView.mas_right).offset(-12);
@@ -212,6 +211,10 @@
 //        UIActionSheet *sheet = [[UIActionSheet alloc]initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"男",@"女", nil];
 //        sheet.tag = 2;
 //        [sheet showInView:self.view];
+    }else if(indexPath.row == 4){
+        QRCodeViewController *vc = [[QRCodeViewController alloc] init];
+        vc.qrCodeUrl = [NSString stringWithFormat:@"%@%@",self.shareUrl,[AppModel shareInstance].userInfo.invitecode];
+        [self.navigationController pushViewController:vc animated:YES];
     }
 }
 
@@ -238,37 +241,47 @@
         return;
     }
     SVP_SHOW;
-    CDWeakSelf(self);
+    __weak __typeof(self)weakSelf = self;
     [NET_REQUEST_MANAGER editUserInfoWithUserAvatar:_headUrl userNick:_nickName.text gender:_sexType success:^(id object) {
-        CDStrongSelf(self);
-        [self updateInfo];
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf updateInfo];
         SVP_SUCCESS_STATUS(@"保存成功");
-        [self.navigationController popViewControllerAnimated:YES];
+        [strongSelf.navigationController popViewControllerAnimated:YES];
     } fail:^(id object) {
         [FUNCTION_MANAGER handleFailResponse:object];
     }];
 }
 
 - (void)updateInfo{
-    APP_MODEL.user.avatar = _headUrl;
-    APP_MODEL.user.nick = _nickName.text;
-    APP_MODEL.user.gender = _sexType;
-    [APP_MODEL saveAppModel];
-    
-    [[RongCloudManager shareInstance] refreshUserInfo];
+    [AppModel shareInstance].userInfo.avatar = _headUrl;
+    [AppModel shareInstance].userInfo.nick = _nickName.text;
+    [AppModel shareInstance].userInfo.gender = _sexType;
+    [[AppModel shareInstance] saveAppModel];
 }
 
 - (void)upload:(UIImage *)image{
     SVP_SHOW;
-    CDWeakSelf(self);
+    __weak __typeof(self)weakSelf = self;
     UIImage *img = CD_TailorImg(image, CGSizeMake(100, 100));
     [NET_REQUEST_MANAGER upLoadImageObj:img success:^(id object) {
         SVP_SUCCESS_STATUS(@"上传成功");
-        CDStrongSelf(self);
+         __strong __typeof(weakSelf)strongSelf = weakSelf;
         self-> _headUrl = [object objectForKey:@"data"];
         self-> _headIcon.image = img;
     } fail:^(id object) {
         [FUNCTION_MANAGER handleFailResponse:object];
+        NSError *error = object;
+        if ([error.userInfo isKindOfClass:[NSDictionary class]]) {
+            NSLog(@"%@", error.userInfo[@"NSErrorFailingURLKey"]);
+            NSLog(@"%@", error.userInfo[@"NSLocalizedDescription"]);
+            
+            
+            if ([error.userInfo[@"com.alamofire.serialization.response.error.response"] isKindOfClass:[NSHTTPURLResponse class]]) {
+                NSHTTPURLResponse *http = (NSHTTPURLResponse *)error.userInfo[@"com.alamofire.serialization.response.error.response"];
+                NSInteger code = http.statusCode;
+                NSLog(@"%zd", code);
+            }
+        }
     }];
 }
 

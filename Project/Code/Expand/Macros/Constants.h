@@ -46,4 +46,11 @@ static NSString * const kRCNotificationMessage = @"RC:NotiMessage";
 
 
 
+// ***************** 通知 *****************
+// 刷新token
+static NSString * const kOnConnectSocketNotification = @"kOnConnectSocketNotification";
+
+static NSString * const kReloadMyMessageGroupList = @"kReloadMyMessageGroupList";
+
+
 #endif /* Constants_h */

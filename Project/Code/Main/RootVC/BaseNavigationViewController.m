@@ -70,4 +70,10 @@
     }
 }
 
++(UINavigationController *)rootNavigationController {
+    UITabBarController *tabC = (UITabBarController *)[[[UIApplication sharedApplication] keyWindow] rootViewController];
+    UINavigationController *navigationController = (UINavigationController *)tabC.selectedViewController;
+    return navigationController;
+}
+
 @end

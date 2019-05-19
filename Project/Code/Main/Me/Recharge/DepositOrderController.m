@@ -363,7 +363,10 @@
         if(tag == 1){
             [weakSelf.navigationController popToRootViewControllerAnimated:YES];
         }else{
-            if(arr.count >= 3)
+            if(arr.count == 3){
+                [weakSelf.navigationController popToViewController:arr[arr.count - 2] animated:YES];
+            }
+            else if(arr.count > 3)
                 [weakSelf.navigationController popToViewController:arr[arr.count - 3] animated:YES];
             else
                 [weakSelf.navigationController popToRootViewControllerAnimated:YES];
@@ -391,9 +394,13 @@
         self.titLabel.text = @"订单已失效";
         return;
     }
-    NSInteger minu = self.leftTime/60;
+    NSInteger minu = (self.leftTime%3600)/60;
     NSInteger second = self.leftTime%60;
-    self.titLabel.text = [NSString stringWithFormat:@"订单失效时间还剩 %02zd:%02zd",minu,second];
+    NSInteger hour = self.leftTime/3600;
+    if(hour <= 0)
+        self.titLabel.text = [NSString stringWithFormat:@"订单失效时间还剩 %02zd:%02zd",minu,second];
+    else
+        self.titLabel.text = [NSString stringWithFormat:@"订单失效时间还剩 %02zd:%02zd:%02zd",hour,minu,second];
     self.leftTime -= 1;
     [self performSelector:@selector(update) withObject:nil afterDelay:1.0];
 }

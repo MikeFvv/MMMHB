@@ -51,14 +51,14 @@
     _tableView = [UITableView normalTable];
     [self.view addSubview:_tableView];
     
-    UIView *headView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 50)];
+    UIView *headView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 50)];
     _tableView.tableHeaderView = headView;
     _tableView.backgroundColor = BaseColor;
     headView.backgroundColor = [UIColor whiteColor];
     _textField = [UITextField new];
     [headView addSubview:_textField];
     _textField.placeholder = @"5字以内（只能输入中文、数字、字母）";
-    _textField.text = APP_MODEL.user.nick;
+    _textField.text = [AppModel shareInstance].userInfo.nick;
     _textField.font = [UIFont systemFontOfSize2:16];
 //    _textField.delegate = self;
     _textField.returnKeyType = UIReturnKeyDone;

@@ -20,6 +20,9 @@ typedef enum{
 
 typedef enum{
     ActNil,
+    ActRequestMsgBanner,
+    ActRequestClickBanner,
+    
     ActRequestUserInfo,//用户信息
     ActRequestUserInfoById,//用户信息
     ActModifyUserInfo,//修改个人信息
@@ -69,7 +72,6 @@ typedef enum{
     ActRequestFaBaoReward,//获取发包奖励金额
     ActRequestQiaoBaoList,//获取抢包活动阶段
     ActRequestFaBaoList,//获取发包活动阶段
-    ActRequestActivityDetail,//获取活动详情
     ActAll,//通用
 }Act;
 
@@ -78,6 +80,7 @@ typedef enum{
 @property(nonatomic,copy)NSString *url;
 @property(nonatomic,assign)Act act;
 @property(nonatomic,assign)long long startTime;
+-(id)initWithType:(RequestType)type;
 @end
 
 @interface NetRequestManager : NSObject{
@@ -91,6 +94,11 @@ typedef enum{
 //- (id)getDataFromJson:(NSString *)jsonStr;
 
 #pragma mark ---------------------------接口
+-(void)requestClickBannerWithAdvSpaceId:(NSString*)advSpaceId Id:(NSString*)adId success:(CallbackBlock)successBlock
+                                   fail:(CallbackBlock)failBlock;
+-(void)requestMsgBannerWithId:(NSInteger)adId WithPictureSpe:(NSInteger)pictureSpe success:(CallbackBlock)successBlock
+                         fail:(CallbackBlock)failBlock;
+
 #pragma mark 手机注册
 -(void)registeWithAccount:(NSString *)account
                  password:(NSString *)password
@@ -305,6 +313,15 @@ typedef enum{
                             success:(CallbackBlock)successBlock
                                fail:(CallbackBlock)failBlock;
 
+-(void)submitRechargeInfoWithId:(NSString *)tId
+                          money:(NSString *)money
+                           name:(NSString *)name
+                           type:(NSInteger)type
+                       typeCode:(NSInteger)typeCode
+                         userId:(NSString *)userId
+                        success:(CallbackBlock)successBlock
+                           fail:(CallbackBlock)failBlock;
+
 #pragma mark 重新下订单
 -(void)reOrderRechargeInfoWithId:(NSString *)orderId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
 
@@ -339,4 +356,8 @@ typedef enum{
 #pragma mark 查询所有推广教程
 -(void)requestCopyListWithSuccess:(CallbackBlock)successBlock
                              fail:(CallbackBlock)failBlock;
+
+#pragma mark 查询所有支付通道
+-(void)requestAllRechargeChannelWithSuccess:(CallbackBlock)successBlock
+                                       fail:(CallbackBlock)failBlock;
 @end

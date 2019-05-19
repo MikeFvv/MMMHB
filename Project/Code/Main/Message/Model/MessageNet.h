@@ -60,6 +60,7 @@
  @param failureBlock 失败block
  */
 - (void)joinGroup:(NSString *)groupId
+         password:(NSString *)password
           successBlock:(void (^)(NSDictionary *))successBlock
           failureBlock:(void (^)(NSError *))failureBlock;
 

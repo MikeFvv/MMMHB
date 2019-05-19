@@ -1,4 +1,4 @@
-//
+
 //  FunctionManager.m
 //  I_am_here
 //
@@ -22,10 +22,10 @@
 #import <ifaddrs.h>
 #import <arpa/inet.h>
 #import <net/if.h>
-#include <mach/mach_host.h>
-#include <mach/machine.h>
-#include <mach/host_info.h>
-#include <mach/mach_time.h>
+//#include <mach/mach_host.h>
+//#include <mach/machine.h>
+//#include <mach/host_info.h>
+//#include <mach/mach_time.h>
 
 @interface FunctionManager()
 
@@ -48,7 +48,114 @@
     return self;
 }
 
++ (BOOL)isIphoneX {
+    static BOOL isIphoneX = NO;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSSet *platformSet = [NSSet setWithObjects:@"iPhone10,3", @"iPhone10,6", @"iPhone11,8", @"iPhone11,2", @"iPhone11,4", @"iPhone11,6", nil];
+        struct utsname systemInfo;
+        uname(&systemInfo);
+        NSString *platform = [NSString stringWithCString:systemInfo.machine encoding:NSUTF8StringEncoding];
+        if ([platform isEqualToString:@"x86_64"] || [platform isEqualToString:@"i386"]) {
+            platform = NSProcessInfo.processInfo.environment[@"SIMULATOR_MODEL_IDENTIFIER"];
+        }
+        isIphoneX = [platformSet containsObject:platform];
+    });
+    return isIphoneX;
+}
+
++ (CGFloat)iphoneBottomHeight {
+    return FunctionManager.isIphoneX ? 34.0 : 0.0;
+}
+
++ (CGFloat)tabBarHeight {
+    return [self iphoneBottomHeight] + 49.0;
+}
+
++ (CGFloat)statusBarHeight {
+    return FunctionManager.isIphoneX ? 44.0 : 20.0;
+}
+
++ (CGFloat)navigationBarHeight {
+    return 44.0;
+}
+
+-(id)getCacheDataByKey:(NSString*)key{
+    NSString *filePath = [PATH_OF_DOCUMENT stringByAppendingPathComponent:key];
+    id data = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
+    return data;
+}
+
+-(void)setCacheDataWithKey:(NSString*)key data:(id)data{
+    if (data) {
+        NSString *filePath = [PATH_OF_DOCUMENT stringByAppendingPathComponent:key];
+        [NSKeyedArchiver archiveRootObject:data toFile:filePath];
+    }
+}
++(BOOL)isEmpty:(NSString *)text
+{
+    if ([[FunctionManager isValueNSStringWith:text] isEqualToString:@""] ||
+        [FunctionManager isValueNSStringWith:text] == nil)
+    {
+        return true;
+    }
+    return false;
+}
+
++(id)isValueNSStringWith:(NSString *)str{
+    NSString *resultStr = nil;
+    str =[str stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if ([str isEqual:[NSNull null]]
+        ||[NSString stringWithFormat:@"%@",str]==nil
+        ||[NSString stringWithFormat:@"%@",str].length==0
+        ||[[NSString stringWithFormat:@"%@",str] isEqual:@"(null)"]
+        ||[[NSString stringWithFormat:@"%@",str] isEqual:@"<null>"]
+        ||[[NSString stringWithFormat:@"%@",str] isEqual:@"null"]
+        ||[str stringByReplacingOccurrencesOfString:@" " withString:@""].length == 0
+        ) {
+        resultStr = @"";
+    }else{
+        resultStr = [NSString stringWithFormat:@"%@",str];
+    }
+    return resultStr;
+}
 #pragma mark
++(BOOL)getDataSuccessed:(NSDictionary *)dic
+{
+    if (dic!=nil) {
+        int successed = [[dic objectForKey:@"code"]intValue];
+        if (successed == 0) {
+            return YES;
+        } else {
+            return NO;
+        }
+    } else {
+        //        (@"后台返回数据有错误：%s",dic.description.UTF8String);
+        return NO;
+    }
+}
+
++ (CGFloat)getContentHeightWithParagraphStyleLineSpacing:(CGFloat)lineSpacing fontWithString:(NSString*)fontWithString fontOfSize:(CGFloat)fontOfSize boundingRectWithWidth:(CGFloat)width {
+    float height = 0;
+    CGSize lableSize = CGSizeZero;
+    //    if(IS_IOS7)
+    if([fontWithString respondsToSelector:@selector(boundingRectWithSize:options:attributes:context:)]){
+        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc]init];
+        paragraphStyle.lineSpacing = lineSpacing;
+        CGSize sizeTemp = [fontWithString boundingRectWithSize: CGSizeMake(width, MAXFLOAT)
+                                                       options: NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
+                                                    attributes: @{NSFontAttributeName:
+                                                                      [UIFont systemFontOfSize:fontOfSize],
+                                                                  NSParagraphStyleAttributeName:
+                                                                      paragraphStyle}
+                                                       context: nil].size;
+        lableSize = CGSizeMake(ceilf(sizeTemp.width), ceilf(sizeTemp.height));
+    }
+    
+    
+    height = lableSize.height;
+    return height;
+}
 -(NSString *)getDeviceModel{
     struct utsname systemInfo;
     uname(&systemInfo);
@@ -171,7 +278,7 @@
 
 #pragma mark
 -(UIImage*)imageWithColor:(UIColor*)color{
-    return [self imageWithColor:color andSize:CGSizeMake(5, 3)];
+    return [self imageWithColor:color andSize:CGSizeMake(5, 2)];
 }
 
 -(UIImage*)imageWithColor:(UIColor*)color andSize:(CGSize)size{
@@ -418,7 +525,7 @@
 }
 
 -(void)checkVersion:(BOOL)showAlert{
-    if(APP_MODEL.user.isLogined == NO)
+    if([AppModel shareInstance].userInfo.isLogined == NO)
         return;
     WEAK_OBJ(weakObj, self);
     [NET_REQUEST_MANAGER requestAppConfigWithSuccess:^(id object) {
@@ -431,7 +538,7 @@
 
 -(void)checkVersion2:(BOOL)showAlert{
     WEAK_OBJ(weakObj, self);
-    NSDictionary *dict = APP_MODEL.commonInfo;
+    NSDictionary *dict = [AppModel shareInstance].commonInfo;
     NSString *appVersion = [self getApplicationVersion];
     NSString *newestVersion = dict[@"ios.version"];
     if([appVersion compare:newestVersion] == NSOrderedAscending){
@@ -444,7 +551,7 @@
             [view showWithText:desc button1:@"取消" button2:@"更新" callBack:^(id object) {
                 NSInteger tag = [object integerValue];
                 if(tag == 1){
-                    NSURL *url = [NSURL URLWithString:APP_MODEL.commonInfo[@"ios.download.path"]];
+                    NSURL *url = [NSURL URLWithString:[AppModel shareInstance].commonInfo[@"ios.download.path"]];
                     if([[UIApplication sharedApplication] canOpenURL:url])
                         [[UIApplication sharedApplication] openURL:url];
                     [weakObj performSelector:@selector(exitApp) withObject:nil afterDelay:0.5];
@@ -452,7 +559,7 @@
             }];
         }else{
             [view showWithText:desc button:@"更新" callBack:^(id object) {
-                NSURL *url = [NSURL URLWithString:APP_MODEL.commonInfo[@"ios.download.path"]];
+                NSURL *url = [NSURL URLWithString:[AppModel shareInstance].commonInfo[@"ios.download.path"]];
                 if([[UIApplication sharedApplication] canOpenURL:url])
                     [[UIApplication sharedApplication] openURL:url];
                 [weakObj performSelector:@selector(exitApp) withObject:nil afterDelay:0.5];
@@ -462,7 +569,7 @@
 //        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"版本更新" message:desc preferredStyle:UIAlertControllerStyleAlert];
 //        [alertController modifyColor];
 //        UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"更新" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-//            NSURL *url = [NSURL URLWithString:APP_MODEL.commonInfo[@"ios.download.path"]];
+//            NSURL *url = [NSURL URLWithString:[AppModel shareInstance].commonInfo[@"ios.download.path"]];
 //            if([[UIApplication sharedApplication] canOpenURL:url])
 //                [[UIApplication sharedApplication] openURL:url];
 //            [weakObj performSelector:@selector(exitApp) withObject:nil afterDelay:0.5];
@@ -558,5 +665,24 @@
     UIImage *grayImage = [UIImage imageWithCGImage:CGBitmapContextCreateImage(context)];
     CGContextRelease(context);
     return grayImage;
+}
+
+-(NSMutableDictionary *)removeNull:(NSDictionary *)dict{
+    NSMutableDictionary *dic = [[NSMutableDictionary alloc] initWithDictionary:dict];
+    NSArray *keyArr = [dic allKeys];
+    for (NSString *key in keyArr) {
+        id obj = [dic objectForKey:key];
+        if([obj isKindOfClass:[NSArray class]]){
+            NSMutableArray *arr = (NSMutableArray *)obj;
+            for (id obj in arr) {
+                if([obj isKindOfClass:[NSDictionary class]])
+                    [self removeNull:obj];
+            }
+        }else if([obj isKindOfClass:[NSNull class]]){
+            [dic removeObjectForKey:key];
+            NSLog(@"delete Null for Key:%@",key);
+        }
+    }
+    return dic;
 }
 @end

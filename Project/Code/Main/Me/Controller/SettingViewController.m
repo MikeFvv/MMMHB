@@ -52,7 +52,7 @@
     _tableView.backgroundView = view;
     _tableView.rowHeight = 50;
     _tableView.separatorColor = TBSeparaColor;
-    _tableView.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 1)];
+    _tableView.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 1)];
 }
 
 #pragma mark UITableViewDataSource
@@ -78,7 +78,7 @@
                 [cell.contentView addSubview:label];
                 label.font = [UIFont systemFontOfSize2:15];
                 label.textColor = Color_6;
-                label.text = (indexPath.row == 0)?APP_MODEL.user.userId:APP_MODEL.user.mobile;
+                label.text = (indexPath.row == 0)?[AppModel shareInstance].userInfo.userId:[AppModel shareInstance].userInfo.mobile;
                 
                 [label mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.top.bottom.equalTo(cell.contentView);
@@ -88,7 +88,7 @@
             if (indexPath.row == 2) {
                 _sw = [UISwitch new];
                 [cell.contentView addSubview:_sw];
-                _sw.on = (APP_MODEL.turnOnSound == NO)?YES:NO;//APP_MODEL.turnOnSound;
+                _sw.on = ([AppModel shareInstance].turnOnSound == NO)?YES:NO;//[AppModel shareInstance].turnOnSound;
                 [_sw addTarget:self action:@selector(action_setSound) forControlEvents:UIControlEventValueChanged];
                 [_sw mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.right.equalTo(cell.contentView.mas_right).offset(-12);
@@ -113,8 +113,8 @@
 
 #pragma mark action
 - (void)action_setSound{
-    APP_MODEL.turnOnSound = (_sw.on== NO)?YES:NO;;
-    [APP_MODEL saveAppModel];
+    [AppModel shareInstance].turnOnSound = (_sw.on== NO)?YES:NO;;
+    [[AppModel shareInstance] saveAppModel];
 }
 
 - (void)didReceiveMemoryWarning {

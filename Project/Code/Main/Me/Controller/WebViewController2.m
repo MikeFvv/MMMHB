@@ -50,8 +50,8 @@
     NSURL *u = [NSURL URLWithString:url];
     NSURLRequest *request = [NSURLRequest requestWithURL:u];
 //    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:u];
-//    if(APP_MODEL.user.fullToken)
-//        [request setValue:APP_MODEL.user.fullToken forHTTPHeaderField:@"Authorization"];
+//    if([AppModel shareInstance].user.fullToken)
+//        [request setValue:[AppModel shareInstance].user.fullToken forHTTPHeaderField:@"Authorization"];
     [_webView scalesPageToFit];
     [_webView loadRequest:request];
     

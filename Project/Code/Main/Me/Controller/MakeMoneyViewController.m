@@ -64,7 +64,7 @@
     [_guideView addSubview:lheadIcon];
     lheadIcon.layer.cornerRadius = CD_Scal(40, 667)/2;
     lheadIcon.layer.masksToBounds = YES;
-    [lheadIcon cd_setImageWithURL:[NSURL URLWithString:[NSString cdImageLink:APP_MODEL.user.avatar]] placeholderImage:[UIImage imageNamed:@"user-default"]];
+    [lheadIcon cd_setImageWithURL:[NSURL URLWithString:[NSString cdImageLink:APP_MODEL.userInfo.avatar]] placeholderImage:[UIImage imageNamed:@"user-default"]];
 //    lheadIcon.backgroundColor = [UIColor randColor];
     
     [lheadIcon mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -134,7 +134,7 @@
     [qrView addSubview:lb4];
     lb4.font = [UIFont boldSystemFontOfSize:16];
     lb4.textColor = [UIColor lightGrayColor];
-    lb4.text = [NSString stringWithFormat:@"邀请码：%@",APP_MODEL.user.invitecode];// ;
+    lb4.text = [NSString stringWithFormat:@"邀请码：%@",APP_MODEL.userInfo.invitecode];// ;
     lb4.textColor = MBTNColor;
     
     [lb4 mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -177,7 +177,7 @@
     UIImageView *qrImage = [UIImageView new];
     qrImage.contentMode = UIViewContentModeScaleAspectFit;
     [qrView addSubview:qrImage];
-    NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.user.invitecode];
+    NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.userInfo.invitecode];
     qrImage.image = CD_QrImg(shareUrl, 360);//CD_QrImg(@"www.baidu.com", CD_Scal(200, 667));
     
     NSInteger wid = 15;
@@ -296,7 +296,7 @@
     WXShareModel *model = [[WXShareModel alloc]init];
     model.title = WXShareTitle;
     model.imageIcon = [UIImage imageNamed:[FUNCTION_MANAGER getAppIconName]];;
-    NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.user.invitecode];
+    NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.userInfo.invitecode];
     model.link = shareUrl;
     model.content = WXShareDescription;
     model.WXShareType = WXSceneTimeline;
@@ -311,7 +311,7 @@
     WXShareModel *model = [[WXShareModel alloc]init];
     model.title = WXShareTitle;
     model.imageIcon = [UIImage imageNamed:[FUNCTION_MANAGER getAppIconName]];;
-    NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.user.invitecode];
+    NSString *shareUrl = [NSString stringWithFormat:@"%@%@",APP_MODEL.commonInfo[@"share.url"],APP_MODEL.userInfo.invitecode];
     model.link = shareUrl;
     model.content = WXShareDescription;
     model.WXShareType = WXSceneSession;

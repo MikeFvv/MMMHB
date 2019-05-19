@@ -25,12 +25,12 @@
 */
 
 + (BillHeadView *)headView:(BOOL)isAll{
-    CGFloat w = (CDScreenWidth-1)/2;
+    CGFloat w = (SCREEN_WIDTH-1)/2;
     CGFloat h = w / BSCAL;
     NSInteger n = 2;
     if(isAll)
         n = 1;
-    BillHeadView *headView = [[BillHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, h*n+2) isAll:isAll];
+    BillHeadView *headView = [[BillHeadView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, h*n+2) isAll:isAll];
     return headView;
 }
 
@@ -57,11 +57,11 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    UserModel *user = APP_MODEL.user;
-    CGFloat w = (CDScreenWidth-1)/2;
+    UserInfo *user = [AppModel shareInstance].userInfo;
+    CGFloat w = (SCREEN_WIDTH-1)/2;
     CGFloat h = w / BSCAL;
     NSArray *list = @[@"my-icon1",@"my-icon6",@"my-icon3",@"my-icon4"];
-    NSArray *titles = @[[NSString stringWithFormat:@"余额：%@元",user.balance],@"全部",@"",@""];
+    NSArray *titles = @[[NSString stringWithFormat:@"金额总计：%@元",user.balance],@"全部",@"",@""];
     NSArray *tags = @[@0,@1,@2,@3];
     NSInteger a = 0;
     if(self.isAll)

@@ -44,7 +44,7 @@
     
     self.view.backgroundColor = BaseColor;
     self.navigationItem.title = @"通知中心";
-    __weak typeof(self) weakSelf = self;
+
     __weak NotifMessageNet *weakModel = _model;
     _tableView = [UITableView normalTable];
     [self.view addSubview:_tableView];
@@ -55,9 +55,11 @@
     _tableView.separatorColor = TBSeparaColor;
     _tableView.separatorInset = UIEdgeInsetsMake(0, 0, 0, 0);
     
+    __weak __typeof(self)weakSelf = self;
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
         weakModel.page = 1;
-        [weakSelf getData];
+        [strongSelf getData];
     }];
     
     _tableView.mj_footer = [MJRefreshAutoFooter footerWithRefreshingBlock:^{

@@ -10,7 +10,7 @@
 #import "UIImageView+WebCache.h"
 
 @interface ImageDetailViewController ()<UIGestureRecognizerDelegate>
-@property(nonatomic,assign)BOOL needShowBar;
+@property(nonatomic,assign)NSInteger showBar;//这边用int 是防止右滑返回的一个bug
 @end
 
 @implementation ImageDetailViewController
@@ -107,10 +107,10 @@
 
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    if(self.navigationController.navigationBarHidden)
-        self.needShowBar = NO;
+    if(self.navigationController.navigationBarHidden && self.showBar == 0)
+        self.showBar = 1;
     else
-        self.needShowBar = YES;
+        self.showBar = 2;
     if(self.hiddenNavBar){
         if(self.navigationController.navigationBarHidden == NO)
             [self.navigationController setNavigationBarHidden:YES animated:YES];
@@ -121,7 +121,7 @@
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
-    if(self.needShowBar){
+    if(self.showBar == 2){
         if(self.navigationController.navigationBarHidden == YES)
             [self.navigationController setNavigationBarHidden:NO animated:YES];
     }

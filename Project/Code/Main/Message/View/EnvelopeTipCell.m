@@ -9,8 +9,8 @@
 #import "EnvelopeTipCell.h"
 
 @implementation EnvelopeTipCell
-
-+ (CGSize)sizeForMessageModel:(RCMessageModel *)model
+//+ (CGSize)sizeForMessageModel:(RCMessageModel *)model
++ (CGSize)sizeForMessageModel:(id *)model
       withCollectionViewWidth:(CGFloat)collectionViewWidth
          referenceExtraHeight:(CGFloat)extraHeight
 {
@@ -31,27 +31,28 @@
 
 #pragma mark - Data
 - (void)initData{
-    self.allowsSelection = NO;
+//    self.allowsSelection = NO;
 }
 
 
 #pragma mark - Layout
 - (void)initLayout{
-    self.tipLabel.frame = self.baseContentView.bounds;
+//    self.tipLabel.frame = self.baseContentView.bounds;
 }
 
 #pragma mark - subView
 - (void)initSubviews{
     self.tipLabel = [UILabel new];
-    [self.baseContentView addSubview:self.tipLabel];
+//    [self.baseContentView addSubview:self.tipLabel];
     
     self.tipLabel.textAlignment = NSTextAlignmentCenter;
     self.tipLabel.text = @"xsdas领取了你的红包";
     self.tipLabel.font = [UIFont systemFontOfSize2:14];
 }
 
-- (void)setDataModel:(RCMessageModel *)model{
-    [super setDataModel:model];
+//- (void)setDataModel:(RCMessageModel *)model{
+    - (void)setDataModel:(id *)model{
+//    [super setDataModel:model];
     
     
     [self initLayout];

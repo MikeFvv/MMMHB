@@ -3,10 +3,15 @@ set -e
 set -u
 set -o pipefail
 
+function on_error {
+  echo "$(realpath -mq "${0}"):$1: error: Unexpected failure"
+}
+trap 'on_error $LINENO' ERR
+
 if [ -z ${UNLOCALIZED_RESOURCES_FOLDER_PATH+x} ]; then
-    # If UNLOCALIZED_RESOURCES_FOLDER_PATH is not set, then there's nowhere for us to copy
-    # resources to, so exit 0 (signalling the script phase was successful).
-    exit 0
+  # If UNLOCALIZED_RESOURCES_FOLDER_PATH is not set, then there's nowhere for us to copy
+  # resources to, so exit 0 (signalling the script phase was successful).
+  exit 0
 fi
 
 mkdir -p "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
@@ -96,18 +101,7 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_resource "${PODS_ROOT}/IQKeyboardManager/IQKeyboardManager/Resources/IQKeyboardManager.bundle"
   install_resource "${PODS_ROOT}/JSPatch/JSPatch/JSPatch.js"
   install_resource "${PODS_ROOT}/MJRefresh/MJRefresh/MJRefresh.bundle"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/RongCloud.bundle"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/en.lproj"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/zh-Hans.lproj"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/Emoji.plist"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/RCColor.plist"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/RCConfig.plist"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/JrmfIMLib/JResource.bundle"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/JrmfIMLib/en.lproj"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/JrmfIMLib/zh-Hans.lproj"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/JrmfIMLib/jrmf.cer"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/AlipaySDK/AlipaySDK.bundle"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/JrmfIMLib/WalletResource.bundle"
+  install_resource "${PODS_ROOT}/SSKeychain/Support/SSKeychain.bundle"
   install_resource "${PODS_ROOT}/SVProgressHUD/SVProgressHUD/SVProgressHUD.bundle"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
@@ -115,18 +109,7 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_resource "${PODS_ROOT}/IQKeyboardManager/IQKeyboardManager/Resources/IQKeyboardManager.bundle"
   install_resource "${PODS_ROOT}/JSPatch/JSPatch/JSPatch.js"
   install_resource "${PODS_ROOT}/MJRefresh/MJRefresh/MJRefresh.bundle"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/RongCloud.bundle"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/en.lproj"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/zh-Hans.lproj"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/Emoji.plist"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/RCColor.plist"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/RCConfig.plist"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/JrmfIMLib/JResource.bundle"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/JrmfIMLib/en.lproj"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/JrmfIMLib/zh-Hans.lproj"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/JrmfIMLib/jrmf.cer"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/AlipaySDK/AlipaySDK.bundle"
-  install_resource "${PODS_ROOT}/RongCloudIM/RongCloudIM/JrmfIMLib/WalletResource.bundle"
+  install_resource "${PODS_ROOT}/SSKeychain/Support/SSKeychain.bundle"
   install_resource "${PODS_ROOT}/SVProgressHUD/SVProgressHUD/SVProgressHUD.bundle"
 fi
 

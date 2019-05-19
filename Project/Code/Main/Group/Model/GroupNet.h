@@ -18,6 +18,7 @@
 @property (nonatomic ,assign) BOOL isEmpty; // <空
 @property (nonatomic ,assign) BOOL isMost; // <没有更多
 
+@property(nonatomic,assign)NSInteger groupNum;//群用户基数
 
 
 /**

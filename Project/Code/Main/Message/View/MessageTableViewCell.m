@@ -10,6 +10,7 @@
 #import "MessageItem.h"
 #import "SqliteManage.h"
 #import "PushMessageModel.h"
+#import "MessageSingle.h"
 
 @interface MessageTableViewCell()
 @property (nonatomic,strong) UIImageView *headIcon;
@@ -119,11 +120,11 @@
 }
 
 - (void)setObj:(id)obj{
-    MessageItem *item = nil;//
+    MessageItem *item = nil; //
     if ([obj isKindOfClass:[MessageItem class]]) {
         item = (MessageItem *)obj;
         _titleLabel.text = item.chatgName;
-    } else{
+    } else {
         item = [MessageItem mj_objectWithKeyValues:obj];
         _titleLabel.text = item.chatgName;
     }
@@ -134,36 +135,25 @@
     }
 
     if (item.isMyJoined == YES) {
-        PushMessageModel *pmModel = [SqliteManage queryById:item.groupId];
-        if (pmModel.number >0) {
+        NSString *queryId = [NSString stringWithFormat:@"%@-%@",item.groupId,[AppModel shareInstance].userInfo.userId];
+         PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].myJoinGroupMessage[queryId];
+        
+        if (pmModel.number > 0) {
             
-            if ([pmModel.lastMessage isEqualToString:RedPacketString] || [pmModel.lastMessage isEqualToString:CowCowMessageString]) {
-                _descLabel.text = (pmModel.number>99) ? @"【99+未读】"  : [NSString stringWithFormat:@"【%d条未读】【红包】",pmModel.number];
-            } else {
-                _descLabel.text = (pmModel.number>99) ? @"【99+未读】" : [NSString stringWithFormat:@"【%d条未读】%@",pmModel.number,pmModel.lastMessage];
-            }
+            _descLabel.text = (pmModel.number>99) ? @"【99+未读】" : [NSString stringWithFormat:@"【%d条未读】%@",pmModel.number,pmModel.lastMessage];
             
             _dotView.hidden = NO;
         } else {
             if (pmModel.lastMessage.length >0) {
                 
-                if ([pmModel.lastMessage isEqualToString:RedPacketString] || [pmModel.lastMessage isEqualToString:CowCowMessageString]) {
-                    _descLabel.text = @"【红包】";
-                } else {
-                    _descLabel.text = pmModel.lastMessage;
-                }
+                _descLabel.text = pmModel.lastMessage;
             } else {
                 _descLabel.text = @"暂无未读消息";
             }
             _dotView.hidden = YES;
         }
     } else {
-        if ([item.notice isEqualToString:RedPacketString] || [item.notice isEqualToString:CowCowMessageString]) {
-             _descLabel.text = @"【红包】";
-        } else {
-            _descLabel.text = item.notice;
-        }
-        
+        _descLabel.text = item.notice;
         _dotView.hidden = YES;
     }
     

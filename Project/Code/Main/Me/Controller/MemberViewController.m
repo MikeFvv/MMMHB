@@ -32,7 +32,7 @@
 #import "HelpCenterWebController.h"
 #import "AgentCenterViewController.h"
 #import "BillTypeViewController.h"
-
+#import "Recharge2ViewController.h"
 @implementation CellData
 
 -(instancetype)initWithTitle:(NSString *)title subTitle:(NSString *)subTitle icon:(NSString *)icon showArrow:(BOOL)showArrow tag:(NSInteger)tag{
@@ -85,7 +85,7 @@
     self.dataArray = [[NSMutableArray alloc] init];
     NSMutableArray *sectionArray = [[NSMutableArray alloc] init];
     
-    CellData *cellData1 = [[CellData alloc] initWithTitle:@"邀请码" subTitle:APP_MODEL.user.invitecode icon:@"my-code" showArrow:NO tag:1];
+    CellData *cellData1 = [[CellData alloc] initWithTitle:@"邀请码" subTitle:[AppModel shareInstance].userInfo.invitecode icon:@"my-code" showArrow:NO tag:1];
     [sectionArray addObject:cellData1];
     [self.dataArray addObject:sectionArray];
 
@@ -129,14 +129,13 @@
 #pragma mark ----- subView
 - (void)initSubviews{
     self.navigationItem.title = @"我的";
-    CDWeakSelf(self);
     
     _headHeight = 200;
     if(SCREEN_HEIGHT >= 812)
         _headHeight += 4;
-    self.imageBgView.frame = CGRectMake(0, 0, CDScreenWidth, _headHeight);
+    self.imageBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, _headHeight);
     
-    _headView = [[MemberHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, _headHeight)];
+    _headView = [[MemberHeadView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, _headHeight)];
     [_headView addTarget:self action:@selector(action_info) forControlEvents:UIControlEventTouchUpInside];
     [_headView.zuanQianBtn addTarget:self action:@selector(zuanQian) forControlEvents:UIControlEventTouchUpInside];
     [_headView.zhangDanBtn addTarget:self action:@selector(becomeAgent) forControlEvents:UIControlEventTouchUpInside];
@@ -153,9 +152,10 @@
     _tableView.separatorInset = UIEdgeInsetsMake(0, 50, 0, 0);
     _tableView.tableHeaderView = _headView;
     _tableView.rowHeight = 50.f;
+    __weak __typeof(self)weakSelf = self;
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
-        CDStrongSelf(self);
-        [self getUserInfo];
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf getUserInfo];
     }];
     
     self.imageBgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"navBarBg"]];//me_Background
@@ -173,9 +173,10 @@
 
 #pragma mark net
 - (void)getUserInfo{
-    CDWeakSelf(self);
+    __weak __typeof(self)weakSelf = self;
     [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
-        [weakself update];
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf update];
     } fail:^(id object) {
         [FUNCTION_MANAGER handleFailResponse:object];
     }];
@@ -280,10 +281,10 @@
     CellData *data = self.dataArray[indexPath.section][indexPath.row];
     if (data.tag == 1){
         UIPasteboard * pastboard = [UIPasteboard generalPasteboard];
-        pastboard.string = APP_MODEL.user.invitecode;
+        pastboard.string = [AppModel shareInstance].userInfo.invitecode;
         SVP_SUCCESS_STATUS(@"复制成功");
     } else if(data.tag == 2){
-        PUSH_C(self, RechargeViewController, YES);
+        PUSH_C(self, Recharge2ViewController, YES);
     } else if (data.tag == 3){
         PUSH_C(self, WithdrawMainViewController, YES);
     } else if(data.tag == 4){
@@ -305,7 +306,7 @@
 //        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"是否退出？" preferredStyle:UIAlertControllerStyleAlert];
 //        [alertController modifyColor];
 //        UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"退出" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-//            [APP_MODEL logout];
+//            [[AppModel shareInstance] logout];
 //        }];
 //        [okAction setValue:Color_0 forKey:@"_titleTextColor"];
 //        [alertController addAction:okAction];
@@ -317,12 +318,12 @@
     } else if(data.tag == 8){
         ReportFormsViewController *vc = [[ReportFormsViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
-        vc.userId = APP_MODEL.user.userId;
+        vc.userId = [AppModel shareInstance].userInfo.userId;
         [self.navigationController pushViewController:vc animated:YES];
     } else if(data.tag == 9){
         ActivityViewController *vc = [[ActivityViewController alloc] init];
         vc.vcTitle = @"活动中心";
-        vc.userId = APP_MODEL.user.userId;
+        vc.userId = [AppModel shareInstance].userInfo.userId;
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
     } else if(data.tag == 10){
@@ -335,7 +336,7 @@
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
     } else if(data.tag == 13){
-        NSString *url = [NSString stringWithFormat:@"%@?code=%@",APP_MODEL.commonInfo[@"website.address"],APP_MODEL.user.invitecode];
+        NSString *url = [NSString stringWithFormat:@"%@?code=%@",[AppModel shareInstance].commonInfo[@"website.address"],[AppModel shareInstance].userInfo.invitecode];
         if([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:url]])
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
 //        WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
@@ -347,16 +348,8 @@
 }
 
 -(void)logout{
-    SVP_SHOW;
-    [NET_REQUEST_MANAGER removeTokenWithSuccess:^(id object) {
-        SVP_DISMISS;
-        [APP_MODEL logout];
-    } fail:^(id object) {
-#ifdef DEBUG
-        [APP_MODEL logout];
-#endif
-        [FUNCTION_MANAGER handleFailResponse:object];
-    }];
+    [NET_REQUEST_MANAGER removeTokenWithSuccess:nil fail:nil];
+    [[AppModel shareInstance] logout];
 }
 #pragma mark action
 - (void)action_info{

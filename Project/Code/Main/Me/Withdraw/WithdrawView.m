@@ -13,7 +13,7 @@
 -(void)initView{
     self.submitBtn.layer.masksToBounds = YES;
     self.submitBtn.layer.cornerRadius = 8;
-    self.tipLabel.text = [NSString stringWithFormat:@"当前零钱余额%@元，",APP_MODEL.user.balance];
+    self.tipLabel.text = [NSString stringWithFormat:@"当前零钱余额%@元，",[AppModel shareInstance].userInfo.balance];
     self.textField.delegate = self;
     
     self.bankIconImageView.layer.masksToBounds = YES;
@@ -25,7 +25,7 @@
 }
 
 -(IBAction)allMoneyAction:(id)sender{
-    self.textField.text = [NSString stringWithFormat:@"%.02f",[APP_MODEL.user.balance doubleValue]];
+    self.textField.text = [NSString stringWithFormat:@"%zd",[[AppModel shareInstance].userInfo.balance integerValue]];
     self.textField.font = [UIFont systemFontOfSize:38];
 }
 

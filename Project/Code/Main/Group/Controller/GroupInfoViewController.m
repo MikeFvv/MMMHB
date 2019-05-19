@@ -15,6 +15,8 @@
 #import "RCDBaseSettingTableViewCell.h"
 #import "AddMemberController.h"
 #import "NSString+Size.h"
+#import "SqliteManage.h"
+#import "ImageDetailViewController.h"
 
 static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 
@@ -24,7 +26,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 @property (nonatomic, strong) GroupNet *model;
 @property (nonatomic, strong) GroupHeadView *headView;
 @property (nonatomic, assign) BOOL enableNotification;
-@property (nonatomic, strong)  RCConversation *currentConversation;
+//@property (nonatomic, strong)  RCConversation *currentConversation;
 @property (nonatomic, strong) MessageItem *groupInfo;
 
 @end
@@ -50,7 +52,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 #pragma mark ----- Data
 - (void)initData {
     _model = [GroupNet new];
-    
+    _model.groupNum = self.groupInfo.groupNum;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -59,28 +61,28 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     [self getGroupUsersData];
 }
 
-- (void)update {
-    CDWeakSelf(self);
+- (void)updateGroupUser {
+    __weak __typeof(self)weakSelf = self;
     
-    if ([self.groupInfo.userId isEqualToString:AppModel.shareInstance.user.userId] ) {
+    if ([self.groupInfo.userId isEqualToString:[AppModel shareInstance].userInfo.userId] ) {
         _headView = [GroupHeadView headViewWithModel:_model isGroupLord:YES];
     } else {
         _headView = [GroupHeadView headViewWithModel:_model isGroupLord:NO];
     }
     _headView.click = ^(NSInteger index) {
-        CDStrongSelf(self);
+         __strong __typeof(weakSelf)strongSelf = weakSelf;
         
-        if (index - (self.model.dataList.count -1) == 1) {
+        if (index - (strongSelf.model.dataList.count -1) == 1) {
             // 添加群员
-            [self addGroupMember];
+            [strongSelf addGroupMember];
             return;
-        } else if (index - (self.model.dataList.count-1) == 2) {
+        } else if (index - (strongSelf.model.dataList.count-1) == 2) {
             // 删减群员
-            [self deleteGroupMember];
+            [strongSelf deleteGroupMember];
             return;
         }
         
-        [self gotoAllGroupUsers];
+        [strongSelf gotoAllGroupUsers];
     };
     _tableView.tableHeaderView = _headView;
     
@@ -91,9 +93,9 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     vc.title = @"添加群成员";
     vc.groupId = self.groupInfo.groupId;
     [self.navigationController pushViewController:vc animated:YES];
-    
-    
 }
+    
+    
 - (void)deleteGroupMember {
     AllUserViewController *vc = [AllUserViewController allUser:_model];
     vc.title = @"删除成员";
@@ -101,7 +103,6 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     vc.isDelete = YES;
     [self.navigationController pushViewController:vc animated:YES];
 }
-
 
 /**
  退出群组确认
@@ -114,10 +115,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
         if(tag == 1)
             [weakSelf action_exitGroup];
     }];
-
 }
-
-
 
 /**
  退出群组请求  退群
@@ -126,7 +124,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 
     SVP_SHOW;
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",APP_MODEL.serverUrl,@"social/skChatGroup/quit", _groupInfo.groupId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/quit", _groupInfo.groupId];
     
     entity.needCache = NO;
     
@@ -134,7 +132,8 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
          __strong __typeof(weakSelf)strongSelf = weakSelf;
         if ([response objectForKey:@"code"] && [[response objectForKey:@"code"] integerValue] == 0) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"ReloadMyMessageGroupList" object:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kReloadMyMessageGroupList object:nil];
+            [SqliteManage removeGroupSql:strongSelf.groupInfo.groupId];
             SVP_ERROR_STATUS([response objectForKey:@"msg"]);
             
             [strongSelf.navigationController popToViewController:[strongSelf.navigationController.viewControllers objectAtIndex:0] animated:YES];
@@ -143,6 +142,17 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
             SVP_ERROR_STATUS([response objectForKey:@"msg"]);
         }
     } failureBlock:^(NSError *error) {
+        if ([error.userInfo isKindOfClass:[NSDictionary class]]) {
+            NSLog(@"%@", error.userInfo[@"NSErrorFailingURLKey"]);
+            NSLog(@"%@", error.userInfo[@"NSLocalizedDescription"]);
+        
+            
+            if ([error.userInfo[@"com.alamofire.serialization.response.error.response"] isKindOfClass:[NSHTTPURLResponse class]]) {
+                NSHTTPURLResponse *http = (NSHTTPURLResponse *)error.userInfo[@"com.alamofire.serialization.response.error.response"];
+                NSInteger code = http.statusCode;
+                NSLog(@"%zd", code);
+            }
+        }
         [FUNCTION_MANAGER handleFailResponse:error];
     } progressBlock:nil];
 }
@@ -212,7 +222,11 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     __weak __typeof(self)weakSelf = self;
     [_model queryGroupUserGroupId:_groupInfo.groupId successBlock:^(NSDictionary *info) {
          __strong __typeof(weakSelf)strongSelf = weakSelf;
-        [strongSelf update];
+        if ([info objectForKey:@"code"] && [[info objectForKey:@"code"] integerValue] == 0) {
+            [strongSelf updateGroupUser];
+        } else {
+            SVP_ERROR_STATUS([info objectForKey:@"msg"]);
+        }
     } failureBlock:^(NSError *error) {
         SVP_ERROR(error);
     }];
@@ -235,7 +249,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return (section == 0)?3:1;
+    return (section == 0)?5:1;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -302,7 +316,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 right.textColor = Color_6;
                 right.textAlignment = NSTextAlignmentRight;
                 right.numberOfLines = 0;
-                CGFloat height =  [_groupInfo.notice heightWithFont:[UIFont systemFontOfSize2:14] constrainedToWidth:SCREEN_WIDTH-(85+15)];
+                CGFloat height =  [_groupInfo.notice heightWithFont:[UIFont systemFontOfSize2:15] constrainedToWidth:SCREEN_WIDTH-(85+15)];
                 if (height > 20) {
                     right.textAlignment = NSTextAlignmentLeft;
                 } else {
@@ -347,30 +361,45 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 }];
             }
             
-//            else if (indexPath.row == 3){
-//                UILabel *label = [UILabel new];
-//                [cell.contentView addSubview:label];
-//                label.font = [UIFont systemFontOfSize2:16];
-//                label.text = @"规则";
-//                label.textColor = Color_0;
-//
-//                [label mas_makeConstraints:^(MASConstraintMaker *make) {
-//                    make.left.equalTo(cell.contentView).offset(15);
-//                    make.centerY.equalTo(cell.contentView);
-//                }];
-//
-//                UILabel *bot = [UILabel new];
-//                [cell.contentView addSubview:bot];
-//                bot.font = [UIFont systemFontOfSize2:13];
-//                bot.text = _groupInfo.rule;
-//                bot.textColor = Color_6;
-//                bot.numberOfLines = 0;
-//
-//                [bot mas_makeConstraints:^(MASConstraintMaker *make) {
-//                    make.right.equalTo(cell.contentView.mas_right).offset(-15);
-//                    make.centerY.equalTo(label.mas_centerY);
-//                }];
-//            }
+            else if (indexPath.row == 3 || indexPath.row == 4){
+                UILabel *label = [UILabel new];
+                [cell.contentView addSubview:label];
+                label.font = [UIFont systemFontOfSize2:16];
+                if(indexPath.row == 3)
+                    label.text = @"群规";
+                else
+                    label.text = @"玩法";
+                label.textColor = Color_0;
+
+                [label mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.left.equalTo(cell.contentView).offset(15);
+                    make.centerY.equalTo(cell.contentView);
+                }];
+                
+                UIImageView *imgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fangdajing"]];
+                [cell.contentView addSubview:imgView];
+                [imgView mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.width.height.equalTo(@18);
+                    make.right.equalTo(cell.contentView.mas_right).offset(-17);
+                    make.centerY.equalTo(cell.contentView.mas_centerY);
+                }];
+                
+                UILabel *right = [UILabel new];
+                [cell.contentView addSubview:right];
+                right.font = [UIFont systemFontOfSize2:15];
+                if(indexPath.row == 3)
+                    right.text = self.groupInfo.rule;
+                else if(indexPath.row == 4)
+                    right.text = self.groupInfo.howplay;
+                right.textColor = Color_6;
+                right.textAlignment = NSTextAlignmentRight;
+                
+                [right mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.right.equalTo(cell.contentView.mas_right).offset(-40);
+                    make.left.equalTo(cell.contentView.mas_left).offset(85);
+                    make.centerY.equalTo(label.mas_centerY);
+                }];
+            }
         } else if (indexPath.section == 1) {
 
             switch (indexPath.row) {
@@ -380,7 +409,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                     cellee.leftLabel.font = [UIFont systemFontOfSize2:15];
                     cellee.switchButton.hidden = NO;
  
-                    NSString *switchKeyStr = [NSString stringWithFormat:@"%@-%@", APP_MODEL.user.userId,_groupInfo.groupId];
+                    NSString *switchKeyStr = [NSString stringWithFormat:@"%@-%@", [AppModel shareInstance].userInfo.userId,_groupInfo.groupId];
                     // 读取
                     BOOL isSwitch = [[NSUserDefaults standardUserDefaults] boolForKey:switchKeyStr];
                     
@@ -401,6 +430,20 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
     return cell;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if(indexPath.section == 0 && (indexPath.row == 3 || indexPath.row == 4)){
+        NSString *url = nil;
+        if(indexPath.row == 3)
+            url = self.groupInfo.ruleImg;
+        else if(indexPath.row == 4)
+            url = self.groupInfo.howplayImg;
+        ImageDetailViewController *vc = [[ImageDetailViewController alloc] init];
+        vc.imageUrl = url;
+        vc.hiddenNavBar = YES;
+        [self.navigationController pushViewController:vc animated:YES];
+    }
+}
+
 #pragma mark - gotoAllGroupUsers
 - (void)gotoAllGroupUsers {
     AllUserViewController *vc = [AllUserViewController allUser:_model];
@@ -416,17 +459,9 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 
 - (void)clickNotificationBtn:(id)sender {
     UISwitch *swch = sender;
-    NSString *switchKeyStr = [NSString stringWithFormat:@"%@-%@", APP_MODEL.user.userId,_groupInfo.groupId];
+    NSString *switchKeyStr = [NSString stringWithFormat:@"%@-%@", [AppModel shareInstance].userInfo.userId,_groupInfo.groupId];
     //保存
     [[NSUserDefaults standardUserDefaults] setBool:swch.on forKey:switchKeyStr];
-    
-    [[RCIMClient sharedRCIMClient] setConversationNotificationStatus:ConversationType_GROUP
-                                                            targetId:APP_MODEL.user.userId
-                                                           isBlocked:swch.on
-                                                             success:^(RCConversationNotificationStatus nStatus) {
-                                                             }
-                                                               error:^(RCErrorCode status){
-                                                               }];
 }
 
 @end

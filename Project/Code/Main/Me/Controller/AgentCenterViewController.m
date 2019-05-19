@@ -81,6 +81,7 @@
 @interface AgentCenterViewController ()
 @property(nonatomic,strong)UIScrollView *scrollView;
 @property(nonatomic,strong)NSMutableArray *menuArray;
+@property(nonatomic,strong)CellItemView *item1;
 @end
 
 @implementation AgentCenterViewController
@@ -91,7 +92,7 @@
     self.title = @"代理中心";
     self.menuArray = [NSMutableArray array];
     NSDictionary *dic = nil;
-    if(APP_MODEL.user.agentFlag)
+    if([AppModel shareInstance].userInfo.agentFlag)
         dic = @{@"icon":@"agent_sqdl",@"title":@"您已是代理",@"tag":@"1"};
     else
         dic = @{@"icon":@"agent_sqdl",@"title":@"申请代理",@"tag":@"1"};
@@ -139,9 +140,11 @@
         item.icon = dic[@"icon"];
         item.infoDic = self.menuArray[i];
         [item.btn addTarget:self action:@selector(btnAction:) forControlEvents:UIControlEventTouchUpInside];
+        if(i == 0)
+            self.item1 = item;
     }
     
-    if(APP_MODEL.user.agentFlag == NO){
+    if([AppModel shareInstance].userInfo.agentFlag == NO){
         [self performSelector:@selector(becomeAgent) withObject:nil afterDelay:0.5];
     }
 }
@@ -162,8 +165,10 @@
     NSDictionary *dic = item.infoDic;
     NSInteger tag = [[dic objectForKey:@"tag"] integerValue];
     if(tag == 1){
-        if(APP_MODEL.user.agentFlag){
-            SVP_SUCCESS_STATUS(@"您已经是代理");
+        if([AppModel shareInstance].userInfo.agentFlag){
+//            SVP_SUCCESS_STATUS(@"您已经是代理");
+            AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+            [view showWithText:@"您已经是代理" button:@"好的" callBack:nil];
             return;
         }
         AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
@@ -178,19 +183,19 @@
         BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
         vc.hiddenNavBar = YES;
-        vc.imageUrl = APP_MODEL.commonInfo[@"agent_rule"];
+        vc.imageUrl = [AppModel shareInstance].commonInfo[@"agent_rule"];
         [self.navigationController pushViewController:vc animated:YES];
     }else if(tag == 4){
         PUSH_C(self, RecommendedViewController, YES);
     }else if(tag == 5){
         ReportFormsViewController *vc = [[ReportFormsViewController alloc] init];
         vc.hidesBottomBarWhenPushed = YES;
-        vc.userId = APP_MODEL.user.userId;
+        vc.userId = [AppModel shareInstance].userInfo.userId;
         [self.navigationController pushViewController:vc animated:YES];
     }else if(tag == 6){
         PUSH_C(self, ShareViewController, YES);
     }else if(tag == 7 || tag == 8 || tag == 9){
-        NSString *url = [NSString stringWithFormat:@"%@?code=%@",APP_MODEL.commonInfo[@"website.address"],APP_MODEL.user.invitecode];
+        NSString *url = [NSString stringWithFormat:@"%@?code=%@",[AppModel shareInstance].commonInfo[@"website.address"],[AppModel shareInstance].userInfo.invitecode];
         if([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:url]])
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
     }else if(tag == 3){
@@ -201,16 +206,28 @@
 }
 
 -(void)toBeAgent{
-    SVP_SHOW;
-//    WEAK_OBJ(weakSelf, self);
-    [NET_REQUEST_MANAGER askForToBeAgentWithSuccess:^(id object) {
-        SVP_SUCCESS_STATUS(object[@"data"]);
-        //[weakSelf performSelector:@selector(back) withObject:nil afterDelay:1.0];
+    __weak __typeof(self)weakSelf = self;
+    [[NetRequestManager sharedInstance] askForToBeAgentWithSuccess:^(id object) {
+        AlertTipPopUpView* popupView = [[AlertTipPopUpView alloc]init];
+        [popupView showInApplicationKeyWindow];
+        [popupView richElementsInViewWithModel:[object objectForKey:@"data"] actionBlock:^(id data) {
+            
+        }];
+        [weakSelf requestUserinfo];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
+-(void)requestUserinfo{
+    WEAK_OBJ(weakSelf, self);
+    [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
+        if([AppModel shareInstance].userInfo.agentFlag)
+            weakSelf.item1.title = @"您已是代理";
+    } fail:^(id object) {
+        
+    }];
+}
 -(UIView *)headView{
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 150)];
     view.backgroundColor = BaseColor;

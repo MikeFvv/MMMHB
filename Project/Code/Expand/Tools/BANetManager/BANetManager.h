@@ -77,7 +77,12 @@ typedef NSURLSessionTask BAURLSessionTask;
 
 @class BADataEntity;
 
+
+#import "AFNetworking.h"
+
 @interface BANetManager : NSObject
+
+@property(nonatomic, strong) AFHTTPSessionManager *sessionManager;
 
 /**
  创建的请求的超时间隔（以秒为单位），此设置为全局统一设置一次即可，默认超时时间间隔为30秒。

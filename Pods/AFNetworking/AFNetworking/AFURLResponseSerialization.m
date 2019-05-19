@@ -234,16 +234,10 @@ static id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJSONReadingO
                            data:(NSData *)data
                           error:(NSError *__autoreleasing *)error
 {
-    id responseObject = nil;
-    NSError *serializationError = nil;
-    if(data)
-        responseObject = [NSJSONSerialization JSONObjectWithData:data options:self.readingOptions error:&serializationError];
-    if(responseObject == nil){
     if (![self validateResponse:(NSHTTPURLResponse *)response data:data error:error]) {
         if (!error || AFErrorOrUnderlyingErrorHasCodeInDomain(*error, NSURLErrorCannotDecodeContentData, AFURLResponseSerializationErrorDomain)) {
             return nil;
         }
-    }
     }
 
     // Workaround for behavior of Rails to return a single space for `head :ok` (a workaround for a bug in Safari), which is not interpreted as valid input by NSJSONSerialization.
@@ -253,6 +247,10 @@ static id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJSONReadingO
     if (data.length == 0 || isSpace) {
         return nil;
     }
+    
+    NSError *serializationError = nil;
+    
+    id responseObject = [NSJSONSerialization JSONObjectWithData:data options:self.readingOptions error:&serializationError];
 
     if (!responseObject)
     {
@@ -461,20 +459,19 @@ static id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJSONReadingO
                            data:(NSData *)data
                           error:(NSError *__autoreleasing *)error
 {
-    id responseObject = nil;
-    NSError *serializationError = nil;
-    if(data)
-        responseObject = [NSPropertyListSerialization propertyListWithData:data options:self.readOptions format:NULL error:&serializationError];
-    if(responseObject == nil){
     if (![self validateResponse:(NSHTTPURLResponse *)response data:data error:error]) {
         if (!error || AFErrorOrUnderlyingErrorHasCodeInDomain(*error, NSURLErrorCannotDecodeContentData, AFURLResponseSerializationErrorDomain)) {
             return nil;
         }
     }
-    }
+
     if (!data) {
         return nil;
     }
+    
+    NSError *serializationError = nil;
+    
+    id responseObject = [NSPropertyListSerialization propertyListWithData:data options:self.readOptions format:NULL error:&serializationError];
     
     if (!responseObject)
     {

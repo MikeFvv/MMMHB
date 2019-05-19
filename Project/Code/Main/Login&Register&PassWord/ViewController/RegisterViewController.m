@@ -56,11 +56,11 @@
     _tableView.dataSource = self;
     _tableView.rowHeight = 52;
     _tableView.sectionFooterHeight = 8.0f;
-    _tableView.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 1)];
+    _tableView.tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 1)];
     _tableView.backgroundColor = BaseColor;
     _tableView.separatorColor = TBSeparaColor;
     
-    UIView *fotView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 200)];
+    UIView *fotView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 200)];
     _tableView.tableFooterView = fotView;
     
     
@@ -291,7 +291,7 @@
 }
 
 -(void)feedback{
-    WebViewController *vc = [[WebViewController alloc] initWithUrl:APP_MODEL.commonInfo[@"pop"]];
+    WebViewController *vc = [[WebViewController alloc] initWithUrl:[AppModel shareInstance].commonInfo[@"pop"]];
     vc.title = @"联系客服";
     [self.navigationController pushViewController:vc animated:YES];
 }

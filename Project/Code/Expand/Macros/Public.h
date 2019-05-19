@@ -8,9 +8,6 @@
 
 #define DEGREES_TO_RADIANS(angle) ((angle) / 180.0 * M_PI)
 
-#define SCREEN_HEIGHT [[UIScreen mainScreen] bounds].size.height//屏幕高
-#define SCREEN_WIDTH [[UIScreen mainScreen] bounds].size.width//屏幕宽
-
 #define INT_TO_STR(x) [NSString stringWithFormat:@"%ld",(long)x]
 
 #define NUMBER_TO_STR(a) [a isKindOfClass:[NSString class]]?a:[a stringValue]
@@ -34,22 +31,23 @@ typedef NS_ENUM(NSUInteger, ResultCode) {
 };
 
 typedef NS_ENUM(NSInteger, RewardType){
-    //6000豹子顺子奖励 5000直推流水佣金 1110邀请好友充值 1100充值奖励 3000发包奖励 4000抢包奖励
     RewardType_nil,
-    RewardType_bzsz = 6000,
-    RewardType_ztlsyj = 5000,
-    RewardType_yqhycz = 1110,
-    RewardType_czjl = 1100,
-    RewardType_fbjl = 3000,
-    RewardType_qbjl = 4000,
+    RewardType_bzsz = 6000,//豹子顺子奖励
+    RewardType_ztlsyj = 5000,//直推流水佣金
+    RewardType_yqhycz = 1110,//邀请好友充值
+    RewardType_czjl = 1100,//充值奖励
+    RewardType_fbjl = 3000,//发包奖励
+    RewardType_qbjl = 4000,//抢包奖励
+    RewardType_zcdljl = 2100,//注册登录奖励
 };
 
 
-#define WXShareDescription [NSString stringWithFormat:@"我的邀请码是%@",APP_MODEL.user.invitecode]
+
+#define WXShareDescription [NSString stringWithFormat:@"我的邀请码是%@",[AppModel shareInstance].userInfo.invitecode]
 
 #define PUSH_C(viewController,targetViewController,animation) targetViewController *vc = [[targetViewController alloc] init]; vc.hidesBottomBarWhenPushed = YES; [viewController.navigationController pushViewController:vc animated:animation];
 
-
+#define HEXCOLOR(hexValue)  [UIColor colorWithRed:((float)((hexValue & 0xFF0000) >> 16))/255.0 green:((float)((hexValue & 0xFF00) >> 8))/255.0 blue:((float)(hexValue & 0xFF))/255.0 alpha:1]
 ///<页面背景色
 #define BaseColor HexColor(@"#F6F6F6")
 ///<导航栏背景色
@@ -72,10 +70,27 @@ typedef NS_ENUM(NSInteger, RewardType){
 // 白色
 #define Color_F HexColor(@"#FFFFFF")
 
+#define kGETVALUE_HEIGHT(width,height,limit_width) ((limit_width)*(height)/(width))
+
 // wx背景灰色
 #define kBackgroundGrayColor [UIColor colorWithRed:250/255.0 green:250/255.0 blue:250/255.0 alpha:1.0]
 
 #define COLOR_X(R,G,B) [UIColor colorWithRed:R/255.0 green:G/255.0 blue:B/255.0 alpha:1]
+
+#pragma mark - UserDefault
+#define SetUserDefaultKeyWithObject(key,object) [[NSUserDefaults standardUserDefaults] setObject:object forKey:key]
+#define SetUserBoolKeyWithObject(key,object) [[NSUserDefaults standardUserDefaults] setBool:object forKey:key]
+
+#define GetUserDefaultWithKey(key) [[NSUserDefaults standardUserDefaults] objectForKey:key]
+#define GetUserDefaultBoolWithKey(key) [[NSUserDefaults standardUserDefaults] boolForKey:key]
+
+#define DeleUserDefaultWithKey(key) [[NSUserDefaults standardUserDefaults] removeObjectForKey:key]
+#define UserDefaultSynchronize  [[NSUserDefaults standardUserDefaults] synchronize]
+
+#pragma mark - 沙盒路径
+#define PATH_OF_APP_HOME    NSHomeDirectory()
+#define PATH_OF_TEMP        NSTemporaryDirectory()
+#define PATH_OF_DOCUMENT    [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0]
 
 static NSString * const kJSPatchURL = @"https://www.520qun.com";
 
@@ -87,6 +102,8 @@ static NSString * const kJSPatchURL = @"https://www.520qun.com";
 #else
 #define NSLog(FORMAT, ...) nil
 #endif
+
+
 
 #import "NSObject+CDCategory.h"
 #import "NSObject+CDExtension.h"
@@ -110,9 +127,17 @@ static NSString * const kJSPatchURL = @"https://www.520qun.com";
 #import "SuperViewController.h"
 
 #import "AppModel.h"
-#import "UserModel.h"
+//#import "UserModel.h"
+#import "UserInfo.h"
+
 
 #import "SVProgressHUD+CDHUD.h"
 #import "UIAlertController+Cus.h"
-
+#import "UIView+AZGradient.h"
 #import "AlertViewCus.h"
+#import "FYSDK.h"
+#import "AABlock.h"
+#import "YBNotificationManager.h"
+#import "BannerModel.h"
+#import "SDCycleScrollView.h"
+#import "AlertTipPopUpView.h"

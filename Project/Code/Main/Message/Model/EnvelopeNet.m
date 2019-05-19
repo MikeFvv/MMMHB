@@ -67,7 +67,7 @@ static dispatch_once_t predicate;
     }
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",APP_MODEL.serverUrl,urlPath, (NSString *)packetId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,urlPath, (NSString *)packetId];
     
     entity.needCache = NO;
     
@@ -96,7 +96,7 @@ static dispatch_once_t predicate;
            failureBlock:(void (^)(NSError *))failureBlock {
     self.isGrabId = NO;
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",APP_MODEL.serverUrl,@"social/redpacket", (NSString *)packetId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"social/redpacket", (NSString *)packetId];
     
     entity.needCache = NO;
     
@@ -128,7 +128,7 @@ static dispatch_once_t predicate;
     self.isGrabId = YES;
     // 抢包ID
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",APP_MODEL.serverUrl,@"social/redpacket/getDetailByGrabId", (NSString *)packetId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"social/redpacket/getDetailByGrabId", (NSString *)packetId];
     
     entity.needCache = NO;
     
@@ -180,7 +180,7 @@ static dispatch_once_t predicate;
                             [self.redPackedInfoDetail setObject:@(YES)forKey:@"isBanker"];
                         }
                         
-                        if ([userId isEqualToString:[AppModel shareInstance].user.userId]) {
+                        if ([userId isEqualToString:[AppModel shareInstance].userInfo.userId]) {
                             [self.redPackedInfoDetail setObject:[objDict objectForKey:@"score"] forKey:@"itselfPointsNum"];
                         }
                     }
@@ -229,7 +229,7 @@ static dispatch_once_t predicate;
                 
                 BOOL isItself = NO;
                 NSString *userId = [NSString stringWithFormat:@"%@",[objDict objectForKey:@"userId"]];
-                if ([userId isEqualToString:[AppModel shareInstance].user.userId]) {
+                if ([userId isEqualToString:[AppModel shareInstance].userInfo.userId]) {
                     [self.redPackedInfoDetail setObject:[objDict objectForKey:@"money"] forKey:@"itselfMoney"];
                     [self.redPackedInfoDetail setObject:@(YES) forKey:@"isItself"];
                     isItself = YES;

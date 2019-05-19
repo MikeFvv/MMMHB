@@ -17,7 +17,7 @@
     - (instancetype)initWithUrl:(NSString *)url{
         self = [super init];
         if (self) {
-            NSString *url = [NSString stringWithFormat:@"%@/dist/#/index/helpCenter?accesstoken=%@", [AppModel shareInstance].commonInfo[@"website.address"], [AppModel shareInstance].user.token];
+            NSString *url = [NSString stringWithFormat:@"%@/dist/#/index/helpCenter?accesstoken=%@", [AppModel shareInstance].commonInfo[@"website.address"], [AppModel shareInstance].userInfo.token];
             _url = url;
         }
         return self;

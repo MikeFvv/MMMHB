@@ -26,11 +26,17 @@
     _dataArray = [[NSMutableArray alloc] init];
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+//    [self.navigationController.navigationBar setBackgroundImage:[FUNCTION_MANAGER imageWithColor:[UIColor whiteColor]] forBarMetrics:UIBarMetricsDefault];
+//    [self.navigationController.navigationBar setShadowImage:[FUNCTION_MANAGER imageWithColor:COLOR_X(200, 200, 200) andSize:CGSizeMake(10, 0.5)]];
+//    [[UIBarButtonItem appearance] setBackButtonBackgroundImage:[UIImage imageNamed:@"nav_back2"] forState:UIControlStateNormal barMetrics:UIBarMetricsCompact];
+//    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName:COLOR_X(60, 60, 60)}];
+    
     self.navigationItem.title = @"发现";
     self.navigationItem.backBarButtonItem = nil;
     self.navigationItem.hidesBackButton = YES;
     self.navigationItem.leftBarButtonItem = nil;
-    _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, CDScreenHeight - 50)  style:UITableViewStylePlain];
+    _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, SCREEN_HEIGHT - 50)  style:UITableViewStylePlain];
     UIView *view = [[UIView alloc] init];
     view.backgroundColor = BaseColor;
     _tableView.backgroundView = view;
@@ -158,9 +164,9 @@
     NSDictionary *dic = _dataArray[indexPath.section][indexPath.row];
     NSInteger tag = [dic[@"tag"] integerValue];
     if(tag == 2){
-        NSString *urlHead = APP_MODEL.commonInfo[@"big.wheel.lottery.url"];
+        NSString *urlHead = [AppModel shareInstance].commonInfo[@"big.wheel.lottery.url"];
         if(urlHead.length > 0){
-            NSString *url = [NSString stringWithFormat:@"%@?token=%@",urlHead,APP_MODEL.user.token];
+            NSString *url = [NSString stringWithFormat:@"%@?token=%@",urlHead,[AppModel shareInstance].userInfo.token];
             WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
             vc.navigationItem.title = dic[@"title"];
             vc.hidesBottomBarWhenPushed = YES;
@@ -172,9 +178,9 @@
 //        vc.hidesBottomBarWhenPushed = YES;
 //        [self.navigationController pushViewController:vc animated:YES];
     }else if(tag == 1){
-        NSString *urlHead = APP_MODEL.commonInfo[@"fruit.slot.url"];
+        NSString *urlHead = [AppModel shareInstance].commonInfo[@"fruit.slot.url"];
         if(urlHead.length > 0){
-            NSString *url = [NSString stringWithFormat:@"%@?token=%@",urlHead,APP_MODEL.user.token];
+            NSString *url = [NSString stringWithFormat:@"%@?token=%@",urlHead,[AppModel shareInstance].userInfo.token];
             WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
             vc.navigationItem.title = dic[@"title"];
             vc.hidesBottomBarWhenPushed = YES;

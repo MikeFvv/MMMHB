@@ -28,7 +28,7 @@
 
 + (CDBaseNet *)normalNet{
     CDBaseNet *net = [[CDBaseNet alloc]init];
-    [net updateHTTPHeaderField: APP_MODEL.authKey];
+    [net updateHTTPHeaderField: [AppModel shareInstance].authKey];
     return net;
 }
 
@@ -39,7 +39,7 @@
         _manager = [AFHTTPSessionManager manager];
 //        _manager.responseSerializer = [AFJSONResponseSerializer serializer];
 //        _manager.requestSerializer  = [AFHTTPRequestSerializer serializer];
-        [_manager.requestSerializer setValue:APP_MODEL.authKey forHTTPHeaderField:@"Authorization"];
+        [_manager.requestSerializer setValue:[AppModel shareInstance].authKey forHTTPHeaderField:@"Authorization"];
         _manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",@"text/html",@"image/jpeg", @"image/png",@"text/plain",@"application/octet-stream", nil];
         _manager.requestSerializer.timeoutInterval = 30;
 //        _prefix = @"";
@@ -55,8 +55,8 @@
 - (void)doGetSuccess:(void (^)(NSDictionary *))success
              failure:(void (^)(NSError *))failue{
     
-    CDLog(@"GETUrl:----%@",self.path);
-    CDLog(@"json:--%@",[self.param mj_JSONString]);
+    NSLog(@"GETUrl:----%@",self.path);
+    NSLog(@"json:--%@",[self.param mj_JSONString]);
     
     
     [_manager GET:self.path parameters:self.param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
@@ -70,8 +70,8 @@
 
 - (void)doPostSuccess:(void (^)(NSDictionary *))success
               failure:(void (^)(NSError *))failue{
-    CDLog(@"GETUrl:----%@",self.path);
-    CDLog(@"json:--%@",[self.param mj_JSONString]);
+    NSLog(@"GETUrl:----%@",self.path);
+    NSLog(@"json:--%@",[self.param mj_JSONString]);
     [_manager POST:self.path parameters:self.param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         success(responseObject);
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
@@ -81,7 +81,7 @@
 
 - (void)upLoadSuccess:(void (^)(NSDictionary *))success
               failure:(void (^)(NSError *))failue{
-    CDLog(@"GETUrl:----%@",self.path);
+    NSLog(@"GETUrl:----%@",self.path);
     [_manager POST:self.path parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         [formData appendPartWithFileData:self.param name:@"file" fileName:@"icon.png" mimeType:@"image/png"];
     } progress:^(NSProgress * _Nonnull uploadProgress) {

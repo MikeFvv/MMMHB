@@ -31,7 +31,7 @@
 //    loginBtn.layer.cornerRadius = 8;
 //    loginBtn.layer.masksToBounds = YES;
 //    loginBtn.titleLabel.font = [UIFont boldSystemFontOfSize2:17];
-//    if(APP_MODEL.user.agentFlag){
+//    if([AppModel shareInstance].user.agentFlag){
 //        [loginBtn setTitle:@"已经是代理" forState:UIControlStateNormal];
 //        loginBtn.backgroundColor = COLOR_X(160, 160, 160);
 //    }
@@ -56,7 +56,6 @@
 
 -(void)toBeAgent{
     SVP_SHOW;
-    WEAK_OBJ(weakSelf, self);
     [NET_REQUEST_MANAGER askForToBeAgentWithSuccess:^(id object) {
         SVP_SUCCESS_STATUS(object[@"data"]);
         //[weakSelf performSelector:@selector(back) withObject:nil afterDelay:1.0];
@@ -69,10 +68,6 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
-//-(NSString *)imageUrl{
-//    NSString *url = [AppModel shareInstance].commonInfo[@""];
-//    return url;
-//}
 /*
 #pragma mark - Navigation
 

@@ -9,6 +9,7 @@
 #import "SqliteManage.h"
 #import "WHC_ModelSqlite.h"
 #import "PushMessageModel.h"
+#import "FYMessage.h"
 
 @implementation SqliteManage
 + (SqliteManage *)shareInstance {
@@ -21,7 +22,7 @@
 }
 
 + (void)updateGroup:(NSString *)group number:(int)number lastMessage:(NSString *)last {
-    NSString *query = [NSString stringWithFormat:@"groupId='%@' AND userId='%@'",group,APP_MODEL.user.userId];
+    NSString *query = [NSString stringWithFormat:@"sessionId='%@' AND userId='%@'",group,[AppModel shareInstance].userInfo.userId];
     PushMessageModel *oldModel = [[WHC_ModelSqlite query:[PushMessageModel class] where:query] firstObject];
     
     if (oldModel) {
@@ -40,7 +41,9 @@
         if (last.length >0) {
             oldModel.lastMessage = last;
         }
-        [WHC_ModelSqlite update:oldModel where:query];
+         dispatch_async(dispatch_get_global_queue(0, 0), ^{
+             [WHC_ModelSqlite update:oldModel where:query];
+         });
     } else {
         if (number == 0) {
             return;
@@ -50,28 +53,35 @@
         PushMessageModel *new = [PushMessageModel new];
         new.number = 1;
         new.lastMessage = last;
-        new.groupId = group;
-        new.userId = [AppModel shareInstance].user.userId;
-        [WHC_ModelSqlite insert:new];
+        new.sessionId = group;
+        new.userId = [AppModel shareInstance].userInfo.userId;
+        
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+           [WHC_ModelSqlite insert:new];
+        });
+        
     }
 //    [[AppModel shareInstance] save];
     
     if (oldModel.number <= 99) {
-       [[NSNotificationCenter defaultCenter]postNotificationName:@"CDReadNumberChange" object:nil];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            [[NSNotificationCenter defaultCenter]postNotificationName:@"CDReadNumberChange" object:nil];
+        });
     }
     
 }
 
-+ (void)removeGroup:(NSString *)group{
-    NSString *path = [NSString stringWithFormat:@"%@",APP_MODEL.user.userId];
-    NSString *query = [NSString stringWithFormat:@"groupId='%@'AND userId='%@'",group,path];
-    [WHC_ModelSqlite delete:[PushMessageModel class] where:query];
++ (void)removeGroupSql:(NSString *)groupId {
+    NSString *query = [NSString stringWithFormat:@"sessionId='%@'",groupId];
+    [WHC_ModelSqlite delete:[FYMessage class] where:query];
+    
+    NSString *queryWhere = [NSString stringWithFormat:@"sessionId='%@' AND userId='%@'",groupId,[AppModel shareInstance].userInfo.userId];
+    [WHC_ModelSqlite delete:[PushMessageModel class] where:queryWhere];
 }
 
 + (PushMessageModel *)queryById:(NSString *)groupId{
-    NSString *path = [NSString stringWithFormat:@"%@",APP_MODEL.user.userId];
-    NSString *query = [NSString stringWithFormat:@"groupId='%@' AND userId='%@'",groupId,path];
-    return [[WHC_ModelSqlite query:[PushMessageModel class] where:query] firstObject];
+    NSString *queryWhere = [NSString stringWithFormat:@"sessionId='%@' AND userId='%@'",groupId,[AppModel shareInstance].userInfo.userId];
+    return [[WHC_ModelSqlite query:[PushMessageModel class] where:queryWhere] firstObject];
 }
 
 + (void)clean{

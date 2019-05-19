@@ -20,41 +20,16 @@
 // 通杀  通赔
 @property (nonatomic,strong) UIImageView *passKillPayIcon;
 //
-@property (nonatomic, strong) RCMessageModel *messageModel;
+@property (nonatomic, strong) FYMessage *message;
 
 
 @end
 
 @implementation CowCowVSMessageCell
 
-+ (CGSize)sizeForMessageModel:(RCMessageModel *)model
-      withCollectionViewWidth:(CGFloat)collectionViewWidth
-         referenceExtraHeight:(CGFloat)extraHeight
-{
-    CGFloat __messagecontentview_height = CowBackImageHeight+ 40 + 10;
-    __messagecontentview_height += extraHeight;
-    return CGSizeMake(collectionViewWidth, __messagecontentview_height);
-}
-
-
-- (instancetype)initWithFrame:(CGRect)frame{
-    self = [super initWithFrame:frame];
-    if (self) {
-        [self initData];
-        [self initSubviews];
-    }
-    return self;
-}
-
-#pragma mark - Data
-- (void)initData {
-    self.allowsSelection = NO;
-}
-
-
-#pragma mark - Layout
-- (void)initLayout{
-    //    self.tipLabel.frame = self.baseContentView.bounds;
+-(void)initChatCellUI {
+    [super initChatCellUI];
+    [self initSubviews];
 }
 
 #pragma mark - subView
@@ -63,19 +38,16 @@
     UIView *backView = [[UIView alloc] init];
     UITapGestureRecognizer *tapGesturRecognizer=[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(action_seeDetails)];
     [backView addGestureRecognizer:tapGesturRecognizer];
-    
     backView.layer.cornerRadius = 8;
     backView.layer.masksToBounds = YES;
-//    backView.layer.borderColor = [UIColor colorWithRed:1 green:0 blue:0 alpha:0.1].CGColor;
-//    backView.layer.borderWidth = 0.5;
-    [self.baseContentView addSubview:backView];
+    [self addSubview:backView];
     
     NSInteger xx = CD_WidthScal(60, 320);
     [backView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.mas_equalTo(self.baseContentView.mas_left).offset(xx);
-        make.right.mas_equalTo(self.baseContentView.mas_right).offset(-xx);
-        make.top.mas_equalTo(self.baseContentView.mas_top).offset(10);
-        make.bottom.mas_equalTo(self.baseContentView.mas_bottom);
+        make.left.mas_equalTo(self.mas_left).offset(xx);
+        make.right.mas_equalTo(self.mas_right).offset(-xx);
+        make.top.mas_equalTo(self.mas_top).offset(10);
+        make.bottom.mas_equalTo(self.mas_bottom);
     }];
     
     UIImageView *backImageView = [[UIImageView alloc] init];
@@ -256,17 +228,13 @@
     
 }
 
-- (void)setDataModel:(RCMessageModel *)model {
-    [super setDataModel:model];
-    CowCowVSMessageModel *cow = (CowCowVSMessageModel *)model.content;
-    NSDictionary *dict = (NSDictionary *)cow.content.mj_JSONObject;
-    self.messageModel = model;
-    
-    
-    if ([[dict objectForKey:@"bankWin"] integerValue] > 0 && [[dict objectForKey:@"playerWin"] integerValue] == 0) {
+-(void)setModel:(FYMessagelLayoutModel *)model {
+    [super setModel:model];
+    self.message = model.message;
+    if ([[model.message.cowcowRewardInfoDict objectForKey:@"bankWin"] integerValue] > 0 && [[model.message.cowcowRewardInfoDict objectForKey:@"playerWin"] integerValue] == 0) {
         self.passKillPayIcon.image = [UIImage imageNamed:@"cow_will"];
         self.passKillPayIcon.hidden = NO;
-    } else if ([[dict objectForKey:@"bankWin"] integerValue] == 0 && [[dict objectForKey:@"playerWin"] integerValue] > 0) {
+    } else if ([[model.message.cowcowRewardInfoDict objectForKey:@"bankWin"] integerValue] == 0 && [[model.message.cowcowRewardInfoDict objectForKey:@"playerWin"] integerValue] > 0) {
         self.passKillPayIcon.image = [UIImage imageNamed:@"cow_pay"];
         self.passKillPayIcon.hidden = NO;
     } else {
@@ -274,11 +242,11 @@
     }
     
     
-    self.bankerLabel.text = [[dict objectForKey:@"bankWin"] stringValue];
-    self.playerWinLabel.text = [[dict objectForKey:@"playerWin"] stringValue];
-    [self.bankerHeadImageView cd_setImageWithURL:[NSURL URLWithString:[dict objectForKey:@"userAvatar"]] placeholderImage:[UIImage imageNamed:@"msg3"]];
-    self.nameLabel.text = [dict objectForKey:@"userName"];
-    self.pointNumImageView.image = [UIImage imageNamed: [NSString stringWithFormat:@"cow_%ld",[[dict objectForKey:@"bankScore"] integerValue]]];
+    self.bankerLabel.text = [[model.message.cowcowRewardInfoDict objectForKey:@"bankWin"] stringValue];
+    self.playerWinLabel.text = [[model.message.cowcowRewardInfoDict objectForKey:@"playerWin"] stringValue];
+    [self.bankerHeadImageView cd_setImageWithURL:[NSURL URLWithString:[model.message.cowcowRewardInfoDict objectForKey:@"userAvatar"]] placeholderImage:[UIImage imageNamed:@"msg3"]];
+    self.nameLabel.text = [model.message.cowcowRewardInfoDict objectForKey:@"userName"];
+    self.pointNumImageView.image = [UIImage imageNamed: [NSString stringWithFormat:@"cow_%ld",[[model.message.cowcowRewardInfoDict objectForKey:@"bankScore"] integerValue]]];
     
     //    [self initLayout];
 }
@@ -290,10 +258,10 @@
  */
 - (void)action_seeDetails {
     NSMutableDictionary *dictPar = [[NSMutableDictionary alloc] init];
-    if (self.messageModel == nil) {
+    if (self.message == nil) {
         dictPar = nil;
     } else {
-      [dictPar setObject:self.messageModel == nil ? @"" : self.messageModel forKey:@"VS_messageModel"];
+      [dictPar setObject:self.message == nil ? @"" : self.message forKey:@"VS_FYMessage"];
     }
     [[NSNotificationCenter defaultCenter]
      postNotificationName:@"VSViewSeeDetailsNoticafication" object:dictPar];

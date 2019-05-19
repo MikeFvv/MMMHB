@@ -12,9 +12,21 @@
     WebProgressView *_progress;
     NSString *_htmlString;
 }
+@property (nonatomic, copy) ActionBlock block;
 @end
 
 @implementation WebViewController
+- (void)actionBlock:(ActionBlock)block{
+    self.block = block;
+    
+}
+-(void)removeAndBack{
+    [self.navigationController popViewControllerAnimated:YES];
+    if (self.block) {
+        self.block(@1);
+    }
+}
+
 - (instancetype)initWithUrl:(NSString *)url{
     self = [super init];
     if (self) {
@@ -84,7 +96,7 @@
         make.edges.equalTo(self.view);
     }];
     if (_url.length) {
-         [self loadUrl];
+        [self loadUrl];
     }
     if (_htmlString) {
         [self loadHtml];
@@ -114,7 +126,7 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqualToString:@"estimatedProgress"]) {
-//        NSLog(@"%.2f",_webView.estimatedProgress);
+        //        NSLog(@"%.2f",_webView.estimatedProgress);
         [_progress setProgress:_webView.estimatedProgress animated:YES];
     }
 }
@@ -132,7 +144,7 @@
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
     [_progress setProgress:0 animated:NO];
     //self.navigationItem.title = webView.title;
-//    NSLog(@"%@",webView.title);
+    //    NSLog(@"%@",webView.title);
 }
 
 // 页面加载失败时调用
@@ -145,16 +157,6 @@
     [_progress removeFromSuperview];
     [_webView removeObserver:self forKeyPath:@"estimatedProgress"];
 }
-
-/*
- #pragma mark - Navigation
- 
- // In a storyboard-based application, you will often want to do a little preparation before navigation
- - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
- // Get the new view controller using [segue destinationViewController].
- // Pass the selected object to the new view controller.
- }
- */
 
 -(void)openBySafari{
     if([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:_url]]){

@@ -12,7 +12,7 @@
 #import "CDAlertViewController.h"
 #import "BillTableViewCell.h"
 #import "EnvelopeNet.h"
-#import "RedPackedDetListController.h"
+#import "RedEnvelopeDetListController.h"
 
 @interface BillViewController ()<UITableViewDelegate,UITableViewDataSource>{
     UITableView *_tableView;
@@ -55,7 +55,8 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    WEAK_OBJ(weakSelf, self);
+    __weak __typeof(self)weakSelf = self;
+
     __weak BillNet *weakModel = _model;
     
     _tableView = [UITableView groupTable];
@@ -72,6 +73,7 @@
     if(type.length == 0)
         isAll = YES;
     _headView = [BillHeadView headView:isAll];
+    _headView.balanceLabel.text = [NSString stringWithFormat:@"%@：0.00元",self.infoDic[@"subTitle"]];
     _headView.billTypeList = self.billTypeList;
     _headView.beginTime = _model.beginTime;
     _headView.endTime = _model.endTime;
@@ -89,14 +91,16 @@
     
     _tableView.tableHeaderView = _headView;
     
+    
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
-        [weakSelf getData];
-        [weakSelf requestBlance];
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf getData];
     }];
     
     _tableView.mj_footer = [MJRefreshAutoFooter footerWithRefreshingBlock:^{
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
         if (!weakModel.isMost) {
-            [weakSelf getDataByPage:weakModel.page];
+            [strongSelf getDataByPage:weakModel.page];
         }
     }];
 }
@@ -128,10 +132,15 @@
         _headView.endTime = date;
         _model.endTime = date;
     }
+    if([_model.endTime compare:_model.beginTime] == NSOrderedAscending){
+        SVP_ERROR_STATUS(@"结束时间不能早于开始时间");
+        return;
+    }
     [self getData];
 }
 
 - (void)getData{
+    SVP_SHOW;
     [self getDataByPage:0];
 }
 
@@ -142,6 +151,9 @@
             SVP_SUCCESS_STATUS(@"无相关数据");
         else
             SVP_DISMISS;
+        NSDictionary *extra = info[@"data"][@"extras"];
+        NSString *s = extra[@"money_sum"];
+        weakSelf.headView.balanceLabel.text = [NSString stringWithFormat:@"%@：%@元",self.infoDic[@"subTitle"],s];
         [weakSelf reload];
     } failure:^(NSError *error) {
         [weakSelf reload];
@@ -161,7 +173,7 @@
 #pragma mark UITableViewDataSource
 - (nullable UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
     if (section == 0) {
-        UIView *view = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, 36)];
+        UIView *view = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 36)];
         UILabel *label = [UILabel new];
         [view addSubview:label];
         label.font = [UIFont systemFontOfSize2:13];
@@ -279,7 +291,7 @@
     [self.view endEditing:YES];
     //    CDPush(self.navigationController, CDPVC(@"RedPackedDetListController", obj), YES);
     
-    RedPackedDetListController *vc = [[RedPackedDetListController alloc] init];
+    RedEnvelopeDetListController *vc = [[RedEnvelopeDetListController alloc] init];
     vc.objPar = @(-1);
     vc.bankerId = self.sendPId;
     [self.navigationController pushViewController:vc animated:YES];
@@ -299,17 +311,18 @@
     // Dispose of any resources that can be recreated.
 }
 
--(void)viewDidAppear:(BOOL)animated{
-    [self requestBlance];
-}
+//-(void)viewDidAppear:(BOOL)animated{
+//    [self requestBlance];
+//}
+//
+//-(void)requestBlance{
+//    WEAK_OBJ(weakSelf, self);
+//    [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
+//        if(weakSelf.headView.balanceLabel)
+//            weakSelf.headView.balanceLabel.text = [NSString stringWithFormat:@"金额总计：%@元",[AppModel shareInstance].user.balance];
+//    } fail:^(id object) {
+//
+//    }];
+//}
 
--(void)requestBlance{
-    WEAK_OBJ(weakSelf, self);
-    [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
-        if(weakSelf.headView.balanceLabel)
-            weakSelf.headView.balanceLabel.text = [NSString stringWithFormat:@"余额：%@元",APP_MODEL.user.balance];
-    } fail:^(id object) {
-        
-    }];
-}
 @end

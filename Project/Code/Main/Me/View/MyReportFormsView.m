@@ -29,7 +29,7 @@
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
     layout.minimumLineSpacing = 0;
     layout.minimumInteritemSpacing = 0;
-    NSInteger width = CDScreenWidth/2;
+    NSInteger width = SCREEN_WIDTH/2;
     layout.itemSize = CGSizeMake(width, width * 0.55);
     self.collectionView = [[UICollectionView alloc]initWithFrame:self.bounds collectionViewLayout:layout];
     [self addSubview:_collectionView];
@@ -153,7 +153,7 @@
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section{
 //    if(section == 0)
-//        return CGSizeMake(self.frame.size.width, 38 + CDScreenWidth/2 * 0.55);
+//        return CGSizeMake(self.frame.size.width, 38 + SCREEN_WIDTH/2 * 0.55);
 //    else
         return CGSizeMake(self.frame.size.width, 38);
 }

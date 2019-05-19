@@ -7,7 +7,7 @@
 
 /*! 系统相册 */
 #import <Photos/Photos.h>
-#import "AFNetworking.h"
+
 #import "AFNetworkActivityIndicatorManager.h"
 #import "UIImage+CompressImage.h"
 #import "BANetManagerCache.h"
@@ -27,7 +27,7 @@ static NSMutableArray *tasks;
 
 @interface BANetManager ()
 
-@property(nonatomic, strong) AFHTTPSessionManager *sessionManager;
+
 
 @end
 
@@ -80,7 +80,7 @@ static NSMutableArray *tasks;
     AFJSONRequestSerializer *request = [AFJSONRequestSerializer serializer];
     BANetManagerShare.sessionManager.requestSerializer = request;
     /*! 设置apikey ------类似于自己应用中的tokken---此处仅仅作为测试使用*/
-    NSString *token = [AppModel shareInstance].user.fullToken; // 后台Token
+    NSString *token = [AppModel shareInstance].userInfo.fullToken; // 后台Token
     [BANetManagerShare.sessionManager.requestSerializer setValue:token forHTTPHeaderField:@"Authorization"];
     
     /*! 复杂的参数类型 需要使用json传值-设置请求内容的类型*/

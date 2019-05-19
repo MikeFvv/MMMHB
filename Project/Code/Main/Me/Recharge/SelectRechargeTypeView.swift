@@ -48,8 +48,8 @@ class SelectRechargeTypeView: UIView,UITableViewDelegate,UITableViewDataSource {
         if height > NSInteger(self.frame.size.height - 300){
             height = NSInteger(self.frame.size.height - 300)
         }
-        if height < 90{
-            height = 90
+        if height < 200{
+            height = 200
         }
         
         let width:NSInteger = NSInteger(self.frame.size.width)

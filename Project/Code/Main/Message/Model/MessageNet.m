@@ -74,7 +74,7 @@
              failureBlock:(void (^)(NSError *))failureBlock {
 
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",APP_MODEL.serverUrl,@"social/skChatGroup", groupId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup", groupId];
     
     entity.needCache = NO;
     __weak __typeof(self)weakSelf = self;
@@ -101,7 +101,7 @@
                           failureBlock:(void (^)(NSError *))failureBlock {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@?page=1&limit=100&orderByField=id&isAsc=false",APP_MODEL.serverUrl,@"social/skChatGroup/joinGroupPage"];;
+    entity.urlString = [NSString stringWithFormat:@"%@%@?page=1&limit=100&orderByField=id&isAsc=false",[AppModel shareInstance].serverUrl,@"social/skChatGroup/joinGroupPage"];
     
     entity.needCache = NO;
     
@@ -133,7 +133,7 @@
                        failureBlock:(void (^)(NSError *))failureBlock {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@?page=1&limit=100&orderByField=id&isAsc=false",APP_MODEL.serverUrl,@"social/skChatGroup/page"];;
+    entity.urlString = [NSString stringWithFormat:@"%@%@?page=1&limit=100&orderByField=id&isAsc=false",[AppModel shareInstance].serverUrl,@"social/skChatGroup/page"];;
     
     entity.needCache = NO;
     
@@ -165,15 +165,17 @@
         NSArray *list = [data objectForKey:@"records"];
         if (isMyJoined) {
             
-            NSInteger oldMessageNum = 0;
-            if ([AppModel shareInstance].unReadCount > 0) {
-                oldMessageNum = [AppModel shareInstance].unReadCount;
-            }
+//            NSInteger oldMessageNum = 0;
+//            if ([AppModel shareInstance].unReadCount > 0) {
+//                oldMessageNum = [AppModel shareInstance].unReadCount;
+//            }
+//
+//            [AppModel shareInstance].unReadCount = 0;
             
-            [AppModel shareInstance].unReadCount = 0;
+            NSMutableArray *marray = [NSMutableArray array];
             for (id item in list) {
-                PushMessageModel *pmModel = [SqliteManage queryById:[[item objectForKey:@"id"] stringValue]];
-                [AppModel shareInstance].unReadCount += pmModel.number;
+//                PushMessageModel *pmModel = [SqliteManage queryById:[[item objectForKey:@"id"] stringValue]];
+//                [AppModel shareInstance].unReadCount += pmModel.number;
                 
                 CDTableModel *model = [CDTableModel new];
                 NSMutableDictionary *group = [[NSMutableDictionary alloc]initWithDictionary:item];
@@ -181,11 +183,14 @@
                 model.obj = group;
                 model.className = @"MessageTableViewCell";
                 [self.myJoinDataList addObject:model];
+                // 保存群ID
+                [marray addObject:[[item objectForKey:@"id"] stringValue]];
             }
+            [AppModel shareInstance].myGroupArray = marray;
             
-            if (oldMessageNum > 0 && oldMessageNum != [AppModel shareInstance].unReadCount) {
-                [[NSNotificationCenter defaultCenter]postNotificationName:@"CDReadNumberChange" object:nil];
-            }
+//            if (oldMessageNum > 0 && oldMessageNum != [AppModel shareInstance].unReadCount) {
+//                [[NSNotificationCenter defaultCenter]postNotificationName:@"CDReadNumberChange" object:nil];
+//            }
             
             self.isEmptyMyJoin = (self.myJoinDataList.count == 0)?YES:NO;
             self.isMostMyJoin = ((self.myJoinDataList.count % self.pageSize == 0)&(list.count>0))?NO:YES;
@@ -198,6 +203,12 @@
             }
             self.isEmpty = (self.dataList.count == 0)?YES:NO;
             self.isMost = ((self.dataList.count % self.pageSize == 0)&(list.count>0))?NO:YES;
+        }
+        
+    } else {
+        if ([AppModel shareInstance].unReadCount > 0) {
+            [AppModel shareInstance].unReadCount = 0;
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"CDReadNumberChange" object:nil];
         }
         
     }
@@ -257,19 +268,25 @@
  @param failureBlock 失败block
  */
 - (void)joinGroup:(NSString *)groupId
+         password:(NSString *)password
           successBlock:(void (^)(NSDictionary *))successBlock
           failureBlock:(void (^)(NSError *))failureBlock {
     
-    BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",APP_MODEL.serverUrl,@"social/skChatGroup/join", groupId];
+    NSDictionary *parameters = @{
+                                 @"id":groupId,
+                                 @"pwd":password == nil ? @"" :password
+                                 };
     
+    BADataEntity *entity = [BADataEntity new];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/join"];
+    entity.parameters = parameters;
     entity.needCache = NO;
     
     __weak __typeof(self)weakSelf = self;
-    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         
-        if ([[response objectForKey:@"code"] integerValue] == 0 || [[response objectForKey:@"code"] integerValue] == 1) {
+        if ([[response objectForKey:@"code"] integerValue] == 0) {
             [strongSelf queryMyJoinGroup];
         }
         successBlock(response);

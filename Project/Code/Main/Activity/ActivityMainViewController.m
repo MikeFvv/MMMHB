@@ -56,9 +56,10 @@
         make.top.bottom.equalTo(self.view);
         make.right.equalTo(self.view).offset(-20);
     }];
-    WEAK_OBJ(weakSelf, self);
+    __weak __typeof(self)weakSelf = self;
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
-        [weakSelf requestData];
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf requestData];
     }];
 
     [self requestData];
@@ -161,7 +162,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     NSDictionary *dic = _dataArray[indexPath.row];
     NSInteger type = [dic[@"type"] integerValue];
-    if(type == RewardType_bzsz || type == RewardType_ztlsyj || type == RewardType_yqhycz || type == RewardType_czjl){//6000豹子顺子奖励 5000直推流水佣金 1110邀请好友充值 1100充值奖励
+    if(type == RewardType_bzsz || type == RewardType_ztlsyj || type == RewardType_yqhycz || type == RewardType_czjl || type == RewardType_zcdljl){//6000豹子顺子奖励 5000直推流水佣金 1110邀请好友充值 1100充值奖励 2100注册登录奖励
         ActivityDetail1ViewController *vc = [[ActivityDetail1ViewController alloc] init];
         vc.infoDic = dic;
         vc.imageUrl = dic[@"bodyImg"];

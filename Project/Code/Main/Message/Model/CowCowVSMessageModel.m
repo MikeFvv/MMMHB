@@ -10,6 +10,14 @@
 
 @implementation CowCowVSMessageModel
 
++ (NSDictionary *)mj_replacedKeyFromPropertyName {
+    return @{ @"messageId": @"id"
+              };
+}
+
+
+
+
 - (instancetype)initWithObj:(id)obj{
     self = [super init];
     if (self) {

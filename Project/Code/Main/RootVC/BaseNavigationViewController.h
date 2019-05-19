@@ -10,5 +10,5 @@
 
 @interface BaseNavigationViewController
     : UINavigationController <UIGestureRecognizerDelegate, UINavigationControllerDelegate>
-
++(UINavigationController *)rootNavigationController;
 @end

@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <RongIMKit/RongIMKit.h>
+//#import <RongIMKit/RongIMKit.h>
 
 @interface GroupInfoViewController : UIViewController
 

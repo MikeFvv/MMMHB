@@ -12,20 +12,7 @@
 #import "SVProgressHUD.h"
 #import "StateView.h"
 
-//设备宏
-#define CDScreenWidth    UIScreen.mainScreen.bounds.size.width
-#define CDScreenHeight   UIScreen.mainScreen.bounds.size.height
 
-
-
-#define CDWeakSelf(type)  __weak typeof(type) weak##type = type;
-#define CDStrongSelf(type)  __strong typeof(type) type = weak##type;
-
-#ifdef DEBUG
-#define CDLog(...) NSLog(@"%s 第%d行 \n %@\n\n",__func__,__LINE__,[NSString stringWithFormat:__VA_ARGS__])
-#else
-#define CDLog(...)
-#endif
 
 @interface UIColor (CDCategory)
 #define CDCOLORA(r, g, b, a) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:a]

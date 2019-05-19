@@ -14,10 +14,9 @@
 @interface GroupHeadView()<UICollectionViewDelegate,UICollectionViewDataSource>{
     UICollectionView *_collectionView;
     UIButton *_allBtn;
-    
 }
 @property (nonatomic ,strong) NSArray *dataList;
-@property (nonatomic ,assign) BOOL isGroupLord;
+
 @end
 
 @implementation GroupHeadView
@@ -34,7 +33,7 @@
     
     CGFloat height = lorow*CD_Scal(82, 667)+50;
 //    lorow = (lorow>5)?5:lorow;
-    GroupHeadView *view = [[GroupHeadView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, height)];
+    GroupHeadView *view = [[GroupHeadView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, height)];
     view.dataList = model.dataList;
     view.isGroupLord = isGroupLord;
     [view updateList:model];
@@ -61,11 +60,13 @@
     [_collectionView reloadData];
     
     NSString *count = [NSString stringWithFormat:@"全部群成员(%ld)>",model.total];
-    if(APP_MODEL.user.innerNumFlag || APP_MODEL.user.groupowenFlag){
-    }else{
-        count = [NSString stringWithFormat:@"全部群成员(%ld)",model.total];
-        _allBtn.userInteractionEnabled = NO;
-    }
+
+//    if([AppModel shareInstance].userInfo.innerNumFlag || [AppModel shareInstance].userInfo.groupowenFlag){
+//    }else
+//    {
+//        count = [NSString stringWithFormat:@"全部群成员(%ld)",model.total];
+//        _allBtn.userInteractionEnabled = NO;
+//    }
     NSMutableAttributedString *AttributedStr = [[NSMutableAttributedString alloc]initWithString:count];
     NSRange rang = NSMakeRange(0, count.length);
     [AttributedStr addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize2:14] range:rang];
@@ -96,7 +97,7 @@
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
     layout.minimumLineSpacing = 0;
     layout.minimumInteritemSpacing = 0;
-    layout.itemSize = CGSizeMake(CDScreenWidth/5, CD_Scal(82, 667));
+    layout.itemSize = CGSizeMake(SCREEN_WIDTH/5, CD_Scal(82, 667));
     
     _collectionView = [[UICollectionView alloc]initWithFrame:self.bounds collectionViewLayout:layout];
     [self addSubview:_collectionView];
@@ -135,7 +136,10 @@
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
-    if(APP_MODEL.user.innerNumFlag || APP_MODEL.user.groupowenFlag){
+
+//    if([AppModel shareInstance].userInfo.innerNumFlag || [AppModel shareInstance].userInfo.groupowenFlag){
+    {
+
         if (self.click) {
             self.click(indexPath.row);
         }

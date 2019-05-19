@@ -19,6 +19,7 @@
 @property (nonatomic ,assign) BOOL shutup;  // 是否禁言
 @property (nonatomic ,copy) NSString *avatar;  //
 @property (nonatomic ,copy) NSString *rule;  // 群规则
+@property (nonatomic ,copy) NSString *ruleImg;  // 群规则图片
 @property (nonatomic ,copy) NSString *orderNum; // 排序号
 @property (nonatomic ,copy) NSString *notice; // 群公告
 @property (nonatomic ,copy) NSString *nick;   // 群主昵称
@@ -34,11 +35,15 @@
 @property (nonatomic ,copy) NSString *chatgId; // 群类型ID
 @property (nonatomic ,copy) NSString *chatgName; // 群组名称
 @property (nonatomic ,copy) NSString *img; // 群图片
-@property (nonatomic ,copy) NSString *ruleImg; // 群规
 
 @property (nonatomic ,assign) NSInteger talkTime; // 说话时间
 @property (nonatomic ,assign) NSInteger chatWord; // 信息的长度
+@property (nonatomic ,copy) NSString *password; // 加群密码
 
+@property (nonatomic ,copy)NSString *howplay;//玩法
+@property (nonatomic ,copy)NSString *howplayImg;//玩法图片
+
+@property (nonatomic,assign)NSInteger groupNum;//成员数量基数
 
 
 // 是否正常

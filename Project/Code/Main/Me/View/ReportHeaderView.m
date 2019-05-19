@@ -24,7 +24,7 @@
 */
 
 + (ReportHeaderView *)headView{
-    ReportHeaderView *headView = [[ReportHeaderView alloc]initWithFrame:CGRectMake(0, 0, CDScreenWidth, (CDScreenWidth/2) * 0.55)];
+    ReportHeaderView *headView = [[ReportHeaderView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, (SCREEN_WIDTH/2) * 0.55)];
     return headView;
 }
 
@@ -50,7 +50,7 @@
 
 #pragma mark ----- subView
 - (void)initSubviews{
-    CGFloat w = (CDScreenWidth-1)/2;
+    CGFloat w = (SCREEN_WIDTH-1)/2;
     CGFloat h = w / BSCAL;
     NSArray *list = @[@"my-icon3",@"my-icon4"];
     NSArray *titles = @[@"",@""];

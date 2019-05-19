@@ -14,11 +14,11 @@
 MJCodingImplementation
 
 ///消息是否存储，是否计入未读数
-+ (RCMessagePersistent)persistentFlag {
-
-
-    return MessagePersistent_ISCOUNTED;
-}
+//+ (RCMessagePersistent)persistentFlag {
+//
+//
+//    return MessagePersistent_ISCOUNTED;
+//}
 
 ///消息的类型名
 + (NSString *)getObjectName {
@@ -35,7 +35,7 @@ MJCodingImplementation
         [extra CDSetNOTNULLObject:[obj objectForKey:@"num"] forKey:@"num"];
         [extra CDSetNOTNULLObject:[obj objectForKey:@"type"] forKey:@"type"];
         [extra CDSetNOTNULLObject:[obj objectForKey:@"username"] forKey:@"username"];
-        [extra CDSetNOTNULLObject:APP_MODEL.user.userId forKey:@"userId"];
+        [extra CDSetNOTNULLObject:[AppModel shareInstance].userInfo.userId forKey:@"userId"];
         
         [extra CDSetNOTNULLObject:[obj objectForKey:@"nograbContent"] forKey:@"nograbContent"]; // 禁抢红包属性
         [extra CDSetNOTNULLObject:[NSString cdImageLink:obj[@"headImg"]] forKey:@"headImg"];
@@ -50,22 +50,22 @@ MJCodingImplementation
 ///将消息内容编码成json
 - (NSData *)encode {
     NSMutableDictionary *dataDict = [NSMutableDictionary dictionary];
-    if (self.content) {
-        [dataDict setObject:self.content forKey:@"content"];
-    }
-    if (self.senderUserInfo) {
-        NSMutableDictionary *userInfoDic = [[NSMutableDictionary alloc] init];
-        if (self.senderUserInfo.name) {
-            [userInfoDic setObject:self.senderUserInfo.name forKeyedSubscript:@"name"];
-        }
-        if (self.senderUserInfo.portraitUri) {
-            [userInfoDic setObject:self.senderUserInfo.portraitUri forKeyedSubscript:@"portrait"];
-        }
-        if (self.senderUserInfo.userId) {
-            [userInfoDic setObject:self.senderUserInfo.userId forKeyedSubscript:@"id"];
-        }
-        [dataDict setObject:userInfoDic forKey:@"user"];
-    }
+//    if (self.content) {
+//        [dataDict setObject:self.content forKey:@"content"];
+//    }
+//    if (self.senderUserInfo) {
+//        NSMutableDictionary *userInfoDic = [[NSMutableDictionary alloc] init];
+//        if (self.senderUserInfo.name) {
+//            [userInfoDic setObject:self.senderUserInfo.name forKeyedSubscript:@"name"];
+//        }
+//        if (self.senderUserInfo.portraitUri) {
+//            [userInfoDic setObject:self.senderUserInfo.portraitUri forKeyedSubscript:@"portrait"];
+//        }
+//        if (self.senderUserInfo.userId) {
+//            [userInfoDic setObject:self.senderUserInfo.userId forKeyedSubscript:@"id"];
+//        }
+//        [dataDict setObject:userInfoDic forKey:@"user"];
+//    }
     NSData *data = [NSJSONSerialization dataWithJSONObject:dataDict options:kNilOptions error:nil];
     return data;
 }
@@ -78,7 +78,7 @@ MJCodingImplementation
         if (dictionary) {
             self.content = dictionary[@"content"];
             NSDictionary *userinfoDic = dictionary[@"user"];
-            [self decodeUserInfo:userinfoDic];
+//            [self decodeUserInfo:userinfoDic];
         }
     }
 }

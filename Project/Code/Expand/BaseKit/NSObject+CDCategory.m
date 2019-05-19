@@ -34,37 +34,37 @@
 @implementation UIFont (CDCategory)
 
 + (UIFont *)systemFontOfSize2:(CGFloat)scale{
-    if(CDScreenHeight == 667)
+    if(SCREEN_HEIGHT == 667)
         return [UIFont systemFontOfSize:scale];
-    else if(CDScreenHeight > 667)
+    else if(SCREEN_HEIGHT > 667)
         return [UIFont systemFontOfSize:scale + 1];
     return [UIFont systemFontOfSize:scale];
 }
 
 + (UIFont *)boldSystemFontOfSize2:(CGFloat)scale{
-    if(CDScreenHeight == 667)
+    if(SCREEN_HEIGHT == 667)
         return [UIFont boldSystemFontOfSize:scale];
-    else if(CDScreenHeight > 667)
+    else if(SCREEN_HEIGHT > 667)
         return [UIFont boldSystemFontOfSize:scale + 1];
     return [UIFont boldSystemFontOfSize:scale];
 }
 
 
 + (UIFont *)vvFontOfSize:(CGFloat)scale {
-    if(CDScreenWidth == 375)
+    if(SCREEN_WIDTH == 375)
         return [UIFont systemFontOfSize:scale];
-    else if(CDScreenWidth >= 414)
+    else if(SCREEN_WIDTH >= 414)
         return [UIFont systemFontOfSize:scale + 1];
-    else if(CDScreenWidth <= 320)
+    else if(SCREEN_WIDTH <= 320)
         return [UIFont systemFontOfSize:scale - 1];
     return [UIFont systemFontOfSize:scale];
 }
 + (UIFont *)vvBoldFontOfSize:(CGFloat)scale {
-    if(CDScreenWidth == 375)
+    if(SCREEN_WIDTH == 375)
         return [UIFont boldSystemFontOfSize:scale];
-    else if(CDScreenWidth >= 414)
+    else if(SCREEN_WIDTH >= 414)
         return [UIFont boldSystemFontOfSize:scale + 1];
-    else if(CDScreenWidth <= 320)
+    else if(SCREEN_WIDTH <= 320)
         return [UIFont boldSystemFontOfSize:scale - 1];
     return [UIFont boldSystemFontOfSize:scale];
 }

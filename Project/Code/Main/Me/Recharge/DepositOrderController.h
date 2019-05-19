@@ -18,7 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface DepositOrderController : SuperViewController
 @property(nonatomic,strong)NSDictionary *infoDic;
-@property(nonatomic,strong)NSString *imageUrl;
 @property(nonatomic,strong)NSString *titleStr;
 @property(nonatomic,assign)NSInteger type;
 @end

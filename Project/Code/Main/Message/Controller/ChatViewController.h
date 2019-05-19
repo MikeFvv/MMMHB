@@ -6,16 +6,21 @@
 //  Copyright © 2018年 CDJay. All rights reserved.
 //
 
-#import <RongIMKit/RongIMKit.h>
+//#import <RongIMKit/RongIMKit.h>
+#import "FYIMSessionViewController.h"
 @class MessageItem;
 
-@interface ChatViewController : RCConversationViewController
+@interface ChatViewController : FYIMSessionViewController
 
 
 + (ChatViewController *)groupChatWithObj:(MessageItem *)obj;
-
+//
 + (ChatViewController *)currentChat;
 
-+ (void)sendCustomMessage:(id)message;
+// 是否新成员
+@property (nonatomic,assign) BOOL isNewMember;
+
+
+//+ (void)sendCustomMessage:(id)message;
 
 @end

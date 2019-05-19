@@ -104,7 +104,7 @@ typedef void (^PikerHandle)(NSString *date);
     cancle.titleLabel.font = [UIFont systemFontOfSize2:15];
     [cancle addTarget:self action:@selector(action_disMiss) forControlEvents:UIControlEventTouchUpInside];
     
-    UIButton *maker = [[UIButton alloc]initWithFrame:CGRectMake(CDScreenWidth-55, 0, 50, 50)];
+    UIButton *maker = [[UIButton alloc]initWithFrame:CGRectMake(SCREEN_WIDTH-55, 0, 50, 50)];
     [self.contentView addSubview:maker];
     [maker setTitle:@"确定" forState:UIControlStateNormal];
     [maker setTitleColor:MBTNColor forState:UIControlStateNormal];

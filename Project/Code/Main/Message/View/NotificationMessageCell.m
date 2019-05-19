@@ -8,61 +8,58 @@
 
 #import "NotificationMessageCell.h"
 #import "NotificationMessageModel.h"
+#import "NSString+Size.h"
+
+@interface NotificationMessageCell()
+//
+@property (nonatomic,strong) UIView *textBackView;
+
+@end
 
 @implementation NotificationMessageCell
 
-+ (CGSize)sizeForMessageModel:(RCMessageModel *)model
-      withCollectionViewWidth:(CGFloat)collectionViewWidth
-         referenceExtraHeight:(CGFloat)extraHeight
-{
-    CGFloat __messagecontentview_height = 15.0f;
-    __messagecontentview_height += extraHeight;
-    return CGSizeMake(collectionViewWidth, __messagecontentview_height);
-}
 
-
-- (instancetype)initWithFrame:(CGRect)frame{
-    self = [super initWithFrame:frame];
-    if (self) {
-        [self initData];
-        [self initSubviews];
-    }
-    return self;
-}
-
-#pragma mark - Data
-- (void)initData{
-    self.allowsSelection = NO;
-}
-
-
-#pragma mark - Layout
-- (void)initLayout {
-    self.tipLabel.frame = self.baseContentView.bounds;
+-(void)initChatCellUI {
+    [super initChatCellUI];
+    [self initSubviews];
 }
 
 #pragma mark - subView
-- (void)initSubviews{
-    self.tipLabel = [UILabel new];
-    [self.baseContentView addSubview:self.tipLabel];
-    
-    self.tipLabel.textAlignment = NSTextAlignmentCenter;
-    self.tipLabel.textColor = [UIColor whiteColor];
-    self.tipLabel.font = [UIFont systemFontOfSize2:14];
-    self.tipLabel.backgroundColor = [UIColor colorWithRed:0.788 green:0.788 blue:0.788 alpha:1.000];
-    self.tipLabel.layer.cornerRadius = 3;
-    self.tipLabel.layer.masksToBounds = YES;
+- (void)initSubviews {
+
+
+    _tipLabel = [UILabel new];
+    [self addSubview:_tipLabel];
+    _tipLabel.textAlignment = NSTextAlignmentCenter;
+    _tipLabel.textColor = [UIColor whiteColor];
+    _tipLabel.backgroundColor = [UIColor colorWithRed:0.788 green:0.788 blue:0.788 alpha:1.000];
+    _tipLabel.font = [UIFont systemFontOfSize:12];
+    _tipLabel.clipsToBounds = YES;
+    _tipLabel.layer.cornerRadius = 3;
     
     [self.tipLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.mas_equalTo(self.baseContentView.mas_centerX);
-        make.centerY.mas_equalTo(self.baseContentView.mas_centerY);
-        make.height.mas_equalTo(22);
+        make.centerX.mas_equalTo(self.mas_centerX);
+        make.centerY.mas_equalTo(self.mas_centerY);
+        make.size.mas_equalTo(CGSizeMake(100, 20));
     }];
 }
 
-- (void)setDataModel:(RCMessageModel *)model{
-    [super setDataModel:model];
-    NotificationMessageModel *messageModel = (NotificationMessageModel *)model.content;
+-(void)setModel:(FYMessagelLayoutModel *)model {
+    [super setModel:model];
+    
+    if (model.message.messageType == FYSystemMessage) {
+        self.tipLabel.text = model.message.text;
+        
+      CGFloat width = [model.message.text widthWithFont:[UIFont systemFontOfSize:12] constrainedToHeight:17] +10*2;
+        
+        [self.tipLabel mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(CGSizeMake(width, 20));
+        }];
+        
+        return;
+    }
+    
+    NotificationMessageModel *messageModel = [[NotificationMessageModel alloc] init];
     
     if (messageModel.messagetype == 1) {
         self.tipLabel.text = @"发送的消息超过规定长度";
@@ -77,6 +74,9 @@
     } else {
         self.tipLabel.text = @"系统历史消息";
     }
+    
+    
+   
 }
 
 

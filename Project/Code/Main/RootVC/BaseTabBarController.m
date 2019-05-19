@@ -7,7 +7,6 @@
 //
 
 #import "BaseTabBarController.h"
-#import "RongCloudManager.h"
 #import "TabbarButton.h"
 #import "ActivityViewController.h"
 #import "ActivityMainViewController.h"
@@ -47,7 +46,7 @@
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    [[RongCloudManager shareInstance] doConnect];
+    self.selectedIndex = _selectIndex;
 }
 
 
@@ -59,7 +58,7 @@
 }
 
 - (void)initSubViewControllers{
-    _selectIndex = 0;
+    _selectIndex = 1;
     self.delegate = self;
     
     NSArray *vcs = @[@"MessageViewController",@"GroupViewController",@"ActivityMainViewController",@"DiscoveryViewController",@"MemberViewController"];
@@ -67,14 +66,14 @@
     NSArray *nors = @[@"footer-icon-tip",@"footer-icon-group",@"tabbar2",@"tabar_find",@"footer-icon-my"];//@"footer-icon-jl"
     NSArray *ses = @[@"footer-icon-tip-on",@"footer-icon-group-on",@"tabbar1",@"tabar_find_on",@"footer-icon-my-on"];//@"footer-icon-jl-on"
     NSMutableArray *vs = [[NSMutableArray alloc]init];
-    CGFloat w = (CDScreenWidth - CDScreenWidth * 0.1)/vcs.count;
+    CGFloat w = (SCREEN_WIDTH - SCREEN_WIDTH * 0.1)/vcs.count;
     NSInteger m = 0;
     for (int i = 0; i<vcs.count; i++) {
         UIViewController *vc = [[NSClassFromString(vcs[i])alloc]init];
         if([vc isKindOfClass:[ActivityViewController class]]){
             ActivityViewController *avc = (ActivityViewController *)vc;
             avc.vcTitle = titles[i];
-            avc.userId = APP_MODEL.user.userId;
+            avc.userId = [AppModel shareInstance].userInfo.userId;
         }
         UINavigationController *nav = [[UINavigationController alloc]initWithRootViewController:vc];
         [vs addObject:nav];
@@ -82,9 +81,9 @@
         
         [self.tabBar addSubview:_tabbar[i]];
         if(i == 2){
-            _tabbar[i].frame = CGRectMake(m, 0, w + CDScreenWidth * 0.1, 49);
+            _tabbar[i].frame = CGRectMake(m, 0, w + SCREEN_WIDTH * 0.1, 49);
             float rateY = 49/75.0;
-            float rateX = (w + CDScreenWidth * 0.1)/158.0;
+            float rateX = (w + SCREEN_WIDTH * 0.1)/158.0;
             _tabbar[i].scaleX = rateX;
             _tabbar[i].scaleY = rateY;
 
@@ -97,7 +96,7 @@
             [_tabbar[i].iconImg mas_remakeConstraints:^(MASConstraintMaker *make) {
                 make.centerX.equalTo(self->_tabbar[i]);
                 make.centerY.equalTo(self->_tabbar[i]).offset(-3);
-                make.width.equalTo(@(w + CDScreenWidth * 0.1 - 10));
+                make.width.equalTo(@(w + SCREEN_WIDTH * 0.1 - 10));
             }];
         }
         
@@ -119,6 +118,7 @@
         }
         m += _tabbar[i].frame.size.width;
     }
+    
     self.viewControllers = vs;
 }
 
