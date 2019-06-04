@@ -37,7 +37,7 @@
             httpManager.failBlock(error);
     }else if([data isKindOfClass:[NSDictionary class]]){
         NSDictionary *dict = (NSDictionary *)data;
-        //dict = [FUNCTION_MANAGER removeNull:dict];
+        //dict = [[FunctionManager sharedInstance] removeNull:dict];
         ResultCode code = [[dict objectForKey:@"code"] integerValue];
         if([dict objectForKey:@"code"] == nil) {
             code = -1;
@@ -84,7 +84,7 @@
         return;
     }
     if(responseDic[@"code"] && [responseDic[@"code"] integerValue] != ResultCodeSuccess){
-        [FUNCTION_MANAGER handleFailResponse:responseDic];
+        [[FunctionManager sharedInstance] handleFailResponse:responseDic];
         return;
     }
     [AppModel shareInstance].userInfo.userId = responseDic[@"userId"];

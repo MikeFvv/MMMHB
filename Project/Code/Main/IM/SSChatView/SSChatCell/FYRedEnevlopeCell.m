@@ -30,8 +30,8 @@
     
     [_redIcon mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.bubbleBackView.mas_left).offset(13);
-        make.top.equalTo(self.bubbleBackView.mas_top).offset(15);
-        make.size.mas_equalTo(CGSizeMake(29, 34));
+        make.top.equalTo(self.bubbleBackView.mas_top).offset(22);
+//        make.size.mas_equalTo(CGSizeMake(29, 34));87 102
     }];
     
     _contentLabel = [UILabel new];
@@ -64,7 +64,7 @@
     
     [_redTypeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.bubbleBackView.mas_left).offset(10);
-        make.bottom.equalTo(self.bubbleBackView.mas_bottom).offset(-3);
+        make.bottom.equalTo(self.bubbleBackView.mas_bottom).offset(-5);
     }];
 }
 
@@ -125,45 +125,60 @@
     
     // ****** 更新视图位置 ******
     if (redEnveType == FYRedEnvelopeType_Fu) {
+        CGFloat topM = 19*FYRedEnvelopeBackHeight/85;
         [self.contentLabel mas_updateConstraints:^(MASConstraintMaker *make) {
-            make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(14);
+            make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(topM);
         }];
         
         if (model.message.messageFrom == FYMessageDirection_SEND) {
+            CGFloat sLeftM = 54*FYRedEnvelopeBackWidth/200;
             [_descLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
                 make.top.mas_equalTo(self.contentLabel.mas_bottom).offset(8);
-                make.left.mas_equalTo(self.bubbleBackView.mas_left).offset(56);
+                make.left.mas_equalTo(self.bubbleBackView.mas_left).offset(sLeftM);
             }];
             
         } else {
+            CGFloat rLeftM = -54*FYRedEnvelopeBackWidth/200;
             [self.descLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
                 make.top.mas_equalTo(self.contentLabel.mas_bottom).offset(8);
-                make.right.mas_equalTo(self.bubbleBackView.mas_right).offset(-52);
+                make.right.mas_equalTo(self.bubbleBackView.mas_right).offset(rLeftM);
             }];
         }
         
     } else if (redEnveType == FYRedEnvelopeType_Cow) {
-        [self.contentLabel mas_updateConstraints:^(MASConstraintMaker *make) {
-            make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(25);
-        }];
+        CGFloat topM = 27*FYRedEnvelopeBackHeight/85;
+        CGFloat sLeftM = 13*FYRedEnvelopeBackWidth/200;//sender left no arrow
+        CGFloat rLeftM = 17*FYRedEnvelopeBackWidth/200;
+//        [self.contentLabel mas_updateConstraints:^(MASConstraintMaker *make) {
+//            make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(topM);
+//        }];
         
         if (model.message.messageFrom == FYMessageDirection_SEND) {
+            [_contentLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
+                make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(topM);
+                make.left.equalTo(self.redIcon.mas_right).offset(sLeftM);
+               
+            }];
             [self.descLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
                 make.top.mas_equalTo(self.contentLabel.mas_bottom).offset(2);
                 make.left.mas_equalTo(self.contentLabel.mas_left);
             }];
         } else {
+            
             [self.contentLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
-                make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(25);
-                make.left.mas_equalTo(self.redIcon.mas_right).offset(12);
+                make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(topM);
+                make.left.mas_equalTo(self.redIcon.mas_right).offset(rLeftM);
             }];
             [self.descLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
                 make.top.mas_equalTo(self.contentLabel.mas_bottom).offset(2);
-                make.left.mas_equalTo(self.redIcon.mas_right).offset(14);
+                make.left.mas_equalTo(self.redIcon.mas_right).offset(rLeftM);
             }];
         }
     } else {
-        
+        CGFloat redIconTopM = 15*FYRedEnvelopeBackHeight/85;
+        [self.contentLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
+           make.left.mas_equalTo(self.redIcon.mas_right).offset(10); make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(redIconTopM);
+        }];
         [self.descLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
             make.top.mas_equalTo(self.contentLabel.mas_bottom).offset(3);
             make.left.mas_equalTo(self.redIcon.mas_right).offset(10);
@@ -171,18 +186,19 @@
     }
     
     
-    
+    CGFloat redIconTopM = 18*FYRedEnvelopeBackHeight/85;
     if (model.message.messageFrom == FYMessageDirection_SEND) {
         
         self.descLabel.textAlignment = NSTextAlignmentLeft;
         [self.redTypeLabel mas_updateConstraints:^(MASConstraintMaker *make) {
             make.left.mas_equalTo(self.bubbleBackView.mas_left).offset(10);
-            make.bottom.mas_equalTo(self.bubbleBackView.mas_bottom).offset(-3);
+            make.bottom.mas_equalTo(self.bubbleBackView.mas_bottom).offset(-5);
         }];
         
         if (redEnveType == FYRedEnvelopeType_Mine || redEnveType == FYRedEnvelopeType_NoRob) {
             [self.redIcon mas_updateConstraints:^(MASConstraintMaker *make) {
                 make.left.mas_equalTo(self.bubbleBackView.mas_left).offset(12);
+                make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(redIconTopM);
             }];
         }
         
@@ -191,14 +207,14 @@
         if (redEnveType == FYRedEnvelopeType_Mine || redEnveType == FYRedEnvelopeType_NoRob) {
             [self.redIcon mas_updateConstraints:^(MASConstraintMaker *make) {
                 make.left.mas_equalTo(self.bubbleBackView.mas_left).offset(21);
-                make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(15);
+                make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(redIconTopM);
             }];
         }
         
         self.descLabel.textAlignment = NSTextAlignmentRight;
         [self.redTypeLabel mas_updateConstraints:^(MASConstraintMaker *make) {
             make.left.mas_equalTo(self.bubbleBackView.mas_left).offset(18);
-            make.bottom.mas_equalTo(self.bubbleBackView.mas_bottom).offset(-3);
+            make.bottom.mas_equalTo(self.bubbleBackView.mas_bottom).offset(-5);
         }];
         
     }

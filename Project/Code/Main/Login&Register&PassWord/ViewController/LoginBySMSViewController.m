@@ -145,7 +145,7 @@
         SVP_SUCCESS_STATUS(@"发送成功，请注意查收短信");
         [weakSelf.codeBtn beginTime:60];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -165,7 +165,7 @@
     [NET_REQUEST_MANAGER requestTockenWithPhone:_textField[0].text smsCode:sms success:^(id object) {
         SVP_DISMISS;
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

@@ -339,7 +339,7 @@
         SVP_SUCCESS_STATUS(object[@"data"]);
         [weakSelf.navigationController popViewControllerAnimated:YES];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 #pragma mark - 提交信息
@@ -350,7 +350,7 @@
         SVP_DISMISS;
         [weakSelf submitActionBack];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

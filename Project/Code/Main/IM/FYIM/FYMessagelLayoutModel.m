@@ -74,8 +74,6 @@
         _nickNameRect = CGRectMake(FYChatIconLeftOrRight*2 + SSChatIconWH,SSChatCellTopOrBottom, FYChatNameWidth, FYChatNameSpacingHeight-4);
     }else{
         _headerImgRect = CGRectMake(SSChatIcon_RX, SSChatCellTopOrBottom, SSChatIconWH, SSChatIconWH);
-        
-        //        _nickNameRect = CGRectMake(SSChatIcon_RX - FYChatNameWidth - FYChatIconLeftOrRight,SSChatCellTopOrBottom, FYChatNameWidth, FYChatNameSpacingHeight-4);
         _nickNameRect = CGRectMake(0,0, 0, 0);
     }
     

@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface BaseTabBarController : UITabBarController
-
-
+@property(nonatomic,assign)NSInteger selectIndex;
+- (void)hadSelectedIndex:(NSUInteger)index;
 @end
 

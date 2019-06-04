@@ -93,7 +93,7 @@
         [weakObj reload];
     } failure:^(NSError *error) {
         [weakObj reload];
-        [FUNCTION_MANAGER handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
     
     WEAK_OBJ(weakSelf, self);
@@ -101,7 +101,7 @@
         [weakSelf updateHeadInfo];
     } failure:^(NSError *error) {
         [weakObj reload];
-        [FUNCTION_MANAGER handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
 }
 
@@ -181,7 +181,7 @@
 }
 
 -(void)detailAction:(UIButton *)btn{
-    UITableViewCell *cell = [FUNCTION_MANAGER cellForChildView:btn];
+    UITableViewCell *cell = [[FunctionManager sharedInstance] cellForChildView:btn];
     NSIndexPath *path = [_tableView indexPathForCell:cell];
     CDTableModel *model = _model.dataList[path.row];
     NSDictionary *dic = model.obj;

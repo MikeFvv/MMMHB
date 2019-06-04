@@ -141,3 +141,5 @@ static NSString * const kJSPatchURL = @"https://www.520qun.com";
 #import "BannerModel.h"
 #import "SDCycleScrollView.h"
 #import "AlertTipPopUpView.h"
+#import "BaseVC.h"
+#import "UITableView+YBGeneral.h"

@@ -203,7 +203,7 @@ static AlertViewCus *instance = nil;
 }
 
 -(void)refreshLayout{
-    CGSize size = [FUNCTION_MANAGER getFitSizeWithLabel:self.textLabel withFixType:FixTypes_width];
+    CGSize size = [[FunctionManager sharedInstance] getFitSizeWithLabel:self.textLabel withFixType:FixTypes_width];
     CGRect rect = self.textLabel.frame;
     rect.size.height = size.height + 30;
     NSInteger height = rect.size.height + 48;

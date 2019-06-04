@@ -27,8 +27,8 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-//    [self.navigationController.navigationBar setBackgroundImage:[FUNCTION_MANAGER imageWithColor:[UIColor whiteColor]] forBarMetrics:UIBarMetricsDefault];
-//    [self.navigationController.navigationBar setShadowImage:[FUNCTION_MANAGER imageWithColor:COLOR_X(200, 200, 200) andSize:CGSizeMake(10, 0.5)]];
+//    [self.navigationController.navigationBar setBackgroundImage:[[FunctionManager sharedInstance] imageWithColor:[UIColor whiteColor]] forBarMetrics:UIBarMetricsDefault];
+//    [self.navigationController.navigationBar setShadowImage:[[FunctionManager sharedInstance] imageWithColor:COLOR_X(200, 200, 200) andSize:CGSizeMake(10, 0.5)]];
 //    [[UIBarButtonItem appearance] setBackButtonBackgroundImage:[UIImage imageNamed:@"nav_back2"] forState:UIControlStateNormal barMetrics:UIBarMetricsCompact];
 //    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName:COLOR_X(60, 60, 60)}];
     
@@ -67,22 +67,22 @@
     
     NSMutableDictionary *dic3 = [[NSMutableDictionary alloc] init];
     [dic3 setObject:@"discover_yeb" forKey:@"icon"];
-    NSString *s = [FUNCTION_MANAGER getApplicationName];
+    NSString *s = [[FunctionManager sharedInstance] getApplicationName];
     s = [s stringByReplacingOccurrencesOfString:@"红包" withString:@""];
     s = [NSString stringWithFormat:@"%@余额宝",s];
     [dic3 setObject:s forKey:@"title"];
     [dic3 setObject:@"3" forKey:@"tag"];
-//    if([FUNCTION_MANAGER appType] == AppType_XZHB)
+//    if([[FunctionManager sharedInstance] appType] == AppType_XZHB)
 //        [dic3 setObject:@"小猪余额宝" forKey:@"title"];
-//    else if([FUNCTION_MANAGER appType] == AppType_TTHB)
+//    else if([[FunctionManager sharedInstance] appType] == AppType_TTHB)
 //        [dic3 setObject:@"天天余额宝" forKey:@"title"];
-//    else if([FUNCTION_MANAGER appType] == AppType_WWHB)
+//    else if([[FunctionManager sharedInstance] appType] == AppType_WWHB)
 //        [dic3 setObject:@"旺旺余额宝" forKey:@"title"];
-//    else if([FUNCTION_MANAGER appType] == AppType_WBHB)
+//    else if([[FunctionManager sharedInstance] appType] == AppType_WBHB)
 //        [dic3 setObject:@" 5 8 余额宝" forKey:@"title"];
-//    else if([FUNCTION_MANAGER appType] == AppType_CSHB)
+//    else if([[FunctionManager sharedInstance] appType] == AppType_CSHB)
 //        [dic3 setObject:@"测试余额宝" forKey:@"title"];
-//    else if([FUNCTION_MANAGER appType] == AppType_QQHB)
+//    else if([[FunctionManager sharedInstance] appType] == AppType_QQHB)
 //        [dic3 setObject:@"全球余额宝" forKey:@"title"];
     
     NSMutableDictionary *dic4 = [[NSMutableDictionary alloc] init];

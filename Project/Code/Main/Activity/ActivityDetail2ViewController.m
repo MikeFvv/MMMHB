@@ -151,20 +151,15 @@
         [NET_REQUEST_MANAGER getActivityFaBaoListWithId:self.infoDic[@"id"] success:^(id object) {
             [weakSelf getDataBack:object];
         } fail:^(id object) {
-            [FUNCTION_MANAGER handleFailResponse:object];
+            [[FunctionManager sharedInstance] handleFailResponse:object];
         }];
     }else{
         [NET_REQUEST_MANAGER getActivityQiaoBaoListWithId:self.infoDic[@"id"] success:^(id object) {
             [weakSelf getDataBack:object];
         } fail:^(id object) {
-            [FUNCTION_MANAGER handleFailResponse:object];
+            [[FunctionManager sharedInstance] handleFailResponse:object];
         }];
     }
-}
-
--(void)viewWillDisappear:(BOOL)animated{
-    [self.timer invalidate];
-    self.timer = nil;
 }
 
 -(void)getDataBack:(NSDictionary *)dict{
@@ -263,7 +258,7 @@
             [NET_REQUEST_MANAGER getRewardWithId:self.infoDic[@"id"] type:self.type success:^(id object) {
                 [weakSelf getData];
             } fail:^(id object) {
-                [FUNCTION_MANAGER handleFailResponse:object];
+                [[FunctionManager sharedInstance] handleFailResponse:object];
             }];
         }
     }];
@@ -289,6 +284,12 @@
             [self starViewAni];
         }];
     }];
+}
+
+-(void)viewWillDisappear:(BOOL)animated{
+    [self.timer invalidate];
+    self.timer = nil;
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 
 - (void)viewWillAppear:(BOOL)animated{

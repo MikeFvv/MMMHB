@@ -24,7 +24,7 @@ static NSString *const NotificationMessageCellId = @"NotificationMessageCellId";
 
 
 static const CGFloat   SSChatCellTopOrBottom             = 10;  //顶部距离cell or 底部距离cell
-static const CGFloat   FYChatNameWidth             = 80;  //原型昵称尺寸宽度
+static const CGFloat   FYChatNameWidth             = 120;  //原型昵称尺寸宽度
 static const CGFloat   FYChatNameSpacingHeight     = 16;  //名称+间隔
 static const CGFloat   SSChatIconWH             = 40;  //原型头像尺寸
 
@@ -64,9 +64,9 @@ static const CGFloat   SSChatTextRowSpacing             = 0;  //文本间距
 
 
 // 红包宽度
-static const CGFloat   FYRedEnvelopeBackWidth             = 193;  // 红包宽度
+#define   FYRedEnvelopeBackWidth              (UIScreen.mainScreen.bounds.size.width - (CD_WidthScal(60, 320) * 1) -(CD_WidthScal(70, 320) * 1))  //200 红包宽度
 // 红包高度
-static const CGFloat   FYRedEnvelopeBackHeight             = 88;  // 红包高度
+#define   FYRedEnvelopeBackHeight              bgWidth*85/200  // 红包高度
 
 //文本颜色
 #define SSChatTextColor         [UIColor blackColor]

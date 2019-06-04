@@ -114,7 +114,7 @@
         NSArray *arr = object[@"data"];
         [weakSelf.billTypeList addObjectsFromArray:arr];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 - (void)datePickerByType:(NSInteger)type{
@@ -157,7 +157,7 @@
         [weakSelf reload];
     } failure:^(NSError *error) {
         [weakSelf reload];
-        [FUNCTION_MANAGER handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
 }
 
@@ -237,22 +237,24 @@
     
     CDTableModel *model = _model.dataList[indexPath.section];
     self.sendPId = [model.obj[@"userId"] stringValue];
-
-    switch ([model.obj[@"billtId"] integerValue]) {
-        case 3:
-        case 4:
-        case 16:
-        case 17:
-            [self getRedpDetGrabId:model.obj[@"bizId"]];
-            break;
-        case 5:
-        case 6:
-        case 18:
-            [self getRedpDetSendId:model.obj[@"bizId"]];
-            break;
-        default:
-            break;
+    if (![FunctionManager isEmpty:model.obj[@"billtId"]]) {
+        switch ([model.obj[@"billtId"] integerValue]) {
+            case 3:
+            case 4:
+            case 16:
+            case 17:
+                [self getRedpDetGrabId:model.obj[@"bizId"]];
+                break;
+            case 5:
+            case 6:
+            case 18:
+                [self getRedpDetSendId:model.obj[@"bizId"]];
+                break;
+            default:
+                break;
+        }
     }
+    
 }
 
 -(void)getRedpDetSendId:(id)packetId {
@@ -267,7 +269,7 @@
         }
         
     } failureBlock:^(NSError *error) {
-        [FUNCTION_MANAGER handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
 }
 
@@ -282,7 +284,7 @@
             SVP_ERROR_STATUS([dic objectForKey:@"msg"]);
         }
     } failureBlock:^(NSError *error) {
-        [FUNCTION_MANAGER handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
 }
 
@@ -299,7 +301,7 @@
 }
 
 -(void)detailAction:(id)sender{
-    //    UITableViewCell *cell = [FUNCTION_MANAGER cellForChildView:sender];
+    //    UITableViewCell *cell = [[FunctionManager sharedInstance] cellForChildView:sender];
     //    NSIndexPath *path = [_tableView indexPathForCell:cell];
     //    NSInteger section = path.section;
     //    CDTableModel *model = _model.dataList[section];

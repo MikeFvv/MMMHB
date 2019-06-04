@@ -14,7 +14,6 @@ typedef NS_ENUM(NSInteger, FixTypes)
     FixTypes_height,
 };//哪个固定
 
-#define FUNCTION_MANAGER [FunctionManager sharedInstance]
 
 @interface FunctionManager : NSObject<CLLocationManagerDelegate,UIAlertViewDelegate>{
     
@@ -37,9 +36,11 @@ typedef NS_ENUM(NSInteger, FixTypes)
 -(id)getCacheDataByKey:(NSString*)key;
 
 -(void)setCacheDataWithKey:(NSString*)key data:(id)data;
++ (BOOL)isPureInt:(NSString*)string;
 +(BOOL)isEmpty:(NSString *)text;
 +(BOOL)getDataSuccessed:(NSDictionary *)dic;
 + (CGFloat)getContentHeightWithParagraphStyleLineSpacing:(CGFloat)lineSpacing fontWithString:(NSString*)fontWithString fontOfSize:(CGFloat)fontOfSize boundingRectWithWidth:(CGFloat)width;
++(NSString *)getAppSource;
 -(NSString *)getDeviceModel;//机器型号 如iPod4,1,
 -(NSString *)getIosVersion;//系统版本号 如4.3.5
 -(NSString *)getApplicationVersion;//软件版本

@@ -32,6 +32,8 @@
 #import "CWCarousel.h"
 #import "CWPageControl.h"
 #import "UIImageView+WebCache.h"
+#import "NetworkIndicatorView.h"
+
 #define kViewTag 666
 
 @interface MessageViewController ()<UITableViewDelegate,UITableViewDataSource,CWCarouselDatasource, CWCarouselDelegate>
@@ -43,9 +45,10 @@
 @property(nonatomic,strong) ScrollBarView *scrollBarView;
 
 @property(nonatomic, strong) NSMutableArray *menuItems;
-
 //
 @property (nonatomic,assign) BOOL isFirst;
+
+@property (nonatomic,assign) BOOL isCurrentController;
 
 @end
 
@@ -64,15 +67,29 @@
     UIBarButtonItem *rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"nav_add_r"] style:UIBarButtonItemStyleDone target:self action:@selector(rightBarButtonDown:)];
     [self.navigationItem setRightBarButtonItem:rightBarButtonItem];
     
-//    [self announcementBar];
+    //    [self announcementBar];
     
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(action_reload) name:kReloadMyMessageGroupList object:nil];
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(updateValue)name:@"CDReadNumberChange" object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reload) name:@"updateScrollBarView" object:nil];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(updateValue:)name:kUnreadMessageNumberChange object:nil];
+    //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reload) name:@"updateScrollBarView" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(enterFore) name:UIApplicationWillEnterForegroundNotification object:[UIApplication sharedApplication]];
-
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationDidBecomeActive:)
+                                                 name:UIApplicationDidBecomeActiveNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(noNetwork) name:kNoNetworkNotification object:nil];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(yesNetwork) name:kYesNetworkNotification object:nil];
+    
+    if (self.model.myJoinDataList.count > 0) {
+        [_tableView reloadData];
+        [self calculateUnreadMessages];
+    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMessageViewControllerDisplayNotification object: nil];
 }
 
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
+    
+}
 
 
 
@@ -104,17 +121,27 @@
 -(void)enterFore {
     [self performSelector:@selector(getData) withObject:nil afterDelay:1.0];
     NSLog(@"进入前台");
+    if(self.scrollBarView) {
+        [self.scrollBarView start];
+    }
+    
 }
 
 #pragma mark 收到消息重新刷新
-- (void)updateValue{
-    dispatch_async(dispatch_get_main_queue(), ^{
-//        [self->_tableView reloadData];
-        [self reload];
-    });
+- (void)updateValue:(NSNotification *)noti {
+    if (self.isCurrentController) {
+        NSString *info = [noti object];
+        if (![info isEqualToString:@"updateBadeValue"]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [UIView performWithoutAnimation:^{
+                    [self.tableView reloadSections:[[NSIndexSet alloc]initWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
+                }];
+            });
+        }
+    }
 }
 
-- (void)initData{
+- (void)initData {
     _model = [MessageNet shareInstance];
 }
 
@@ -139,9 +166,10 @@
     _tableView.delegate = self;
     _tableView.dataSource = self;
     _tableView.rowHeight = 70;
-    _tableView.separatorColor = TBSeparaColor;
-    _tableView.separatorInset = UIEdgeInsetsMake(0, 80, 0, 0);
-
+    [_tableView YBGeneral_configuration];
+//    _tableView.separatorColor = TBSeparaColor;
+//    _tableView.separatorInset = UIEdgeInsetsMake(0, 80, 0, 0);
+    
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         weakModel.page = 1;
@@ -158,7 +186,7 @@
     }];
     
     _tableView.StateView = [StateView StateViewWithHandle:^{
-       __strong __typeof(weakSelf)strongSelf = weakSelf;
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
         [strongSelf getData];
     }];
     
@@ -166,6 +194,7 @@
     [NET_REQUEST_MANAGER requestSystemNoticeWithSuccess:^(id object) {
 //        [self announcementBar];
         [self.tableView reloadData];
+        [self calculateUnreadMessages];
     } fail:^(id object) {
         
     }];
@@ -173,20 +202,49 @@
     [self getData];
 }
 
+#pragma mark - 计算未读消息
+- (void)calculateUnreadMessages {
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        
+        [AppModel shareInstance].unReadCount = 0;
+        
+        for (NSInteger index = 1; index < _model.myJoinDataList.count; index++) {
+            CDTableModel *tableModel =  _model.myJoinDataList[index];
+            MessageItem *item = nil;
+            if ([tableModel.obj isKindOfClass:[MessageItem class]]) {
+                item = (MessageItem *)tableModel.obj;
+            } else {
+                item = [MessageItem mj_objectWithKeyValues:tableModel.obj];
+            }
+            
+            NSString *queryId = [NSString stringWithFormat:@"%@-%@",item.groupId,[AppModel shareInstance].userInfo.userId];
+            PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].myJoinGroupMessage[queryId];
+            
+            [AppModel shareInstance].unReadCount += pmModel.number;
+            [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:@"updateBadeValue"];
+        }
+    });
+}
+
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     SVP_DISMISS;
-    //    [self updateScrollBarView];
-    //    [self.tableView reloadData];
-    [self reload];//s1
-    [self.tableView reloadData];
+//    [self reload];//s1
+    
+    if(self.scrollBarView) {
+        [self.scrollBarView start];
+    }
+    [self calculateUnreadMessages];
     [self.carousel controllerWillAppear];
+    self.isCurrentController = YES;
+    [self.tableView reloadData];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     [EasyOperater remove];
     [self.carousel controllerWillDisAppear];
+    self.isCurrentController = NO;
 }
 
 -(UIView*)updateScrollBarView{
@@ -224,26 +282,18 @@
         view.textArray = arr;
         [view start];
         self.scrollBarView = view;
-//        [_tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
-//            make.left.right.bottom.equalTo(self.view);
-//            make.top.equalTo(self.scrollBarView.mas_bottom).offset(3);
-//        }];
+        //        [_tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
+        //            make.left.right.bottom.equalTo(self.view);
+        //            make.top.equalTo(self.scrollBarView.mas_bottom).offset(3);
+        //        }];
     }else{
-//        [_tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
-//            make.edges.equalTo(self.view);
-//        }];
+        //        [_tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
+        //            make.edges.equalTo(self.view);
+        //        }];
     }
     return self.scrollBarView;
 }
 
--(void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    if(self.scrollBarView) {
-        [self.scrollBarView stop];
-        [self.scrollBarView removeFromSuperview];
-        self.scrollBarView = nil;
-    }
-}
 - (void)action_reload {
     [self getData];
 }
@@ -263,7 +313,7 @@
             }
         }
     } failureBlock:^(NSError *err) {
-        [FUNCTION_MANAGER handleFailResponse:err];
+        [[FunctionManager sharedInstance] handleFailResponse:err];
         [weakSelf reload];
     }];
     
@@ -279,7 +329,7 @@
             self.animationView = [[UIView alloc] initWithFrame:CGRectMake(7,0, SCREEN_WIDTH-14, kGETVALUE_HEIGHT(505, 107, SCREEN_WIDTH-14))];
             
             self.animationView.tag = 200;
-//            self.animationView.backgroundColor = [UIColor whiteColor];
+            //            self.animationView.backgroundColor = [UIColor whiteColor];
             [self.view addSubview:self.animationView];
             if(self.carousel) {
                 [self.carousel releaseTimer];
@@ -302,7 +352,7 @@
                                                                                        options:kNilOptions
                                                                                        metrics:nil
                                                                                          views:dic]];
-
+            
             carousel.isAuto = YES;
             carousel.autoTimInterval = [model.data.carouselTime intValue];
             carousel.endless = YES;
@@ -399,19 +449,7 @@
 - (void)CWCarousel:(CWCarousel *)carousel didSelectedAtIndex:(NSInteger)index {
     
     BannerItem* item = self.bannerModel.data.skAdvDetailList[index];
-    if (![FunctionManager isEmpty:item.advLinkUrl]) {
-        WebViewController *vc = [[WebViewController alloc] initWithUrl:item.advLinkUrl];
-        vc.navigationItem.title = item.name;
-        vc.hidesBottomBarWhenPushed = YES;
-        //[vc loadWithURL:url];
-        [self.navigationController pushViewController:vc animated:YES];
-        [NET_REQUEST_MANAGER requestClickBannerWithAdvSpaceId:self.bannerModel.data.ID Id:item.ID success:^(id object) {
-            
-        } fail:^(id object) {
-            
-        }];
-        
-    }
+    [self fromBannerPushToVCWithBannerItem:item isFromLaunchBanner:NO];
 }
 
 
@@ -434,37 +472,21 @@
     [_tableView.mj_header endRefreshing];
     if(_model.isNetError){
         [_tableView.StateView showNetError];
-    }
-    else if(_model.isEmptyMyJoin){
+    } else if(_model.isEmptyMyJoin){
         [_tableView.StateView showEmpty];
-    }else{
+    } else{
         [_tableView.StateView hidState];
     }
-//    NSInteger count = self.model.myJoinDataList.count;
-//    if (count>0) {
-//        NSMutableArray* mutaArr = [NSMutableArray array];
-//
-//        for (int i=0; i<count; i++) {
-//            NSIndexPath *te=[NSIndexPath indexPathForRow:i inSection:0];
-//            [mutaArr addObject:te];
-//        }
-//        NSArray * array = [mutaArr copy];
-//        
-//        [self->_tableView reloadRowsAtIndexPaths:array  withRowAnimation:UITableViewRowAnimationNone];
-//    }else{
-//        [self->_tableView reloadData];
-//    }
     
     dispatch_async(dispatch_get_main_queue(), ^{
-//        [self->_tableView reloadData];
-    
+//        [self.tableView reloadData];
         [UIView performWithoutAnimation:^{
-            [self->_tableView reloadSections:[[NSIndexSet alloc]initWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
+            [self.tableView reloadSections:[[NSIndexSet alloc]initWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
         }];
-        
-    
     });
 }
+
+
 
 #pragma mark - SectonHeader
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
@@ -485,7 +507,8 @@
     return section==0?0:_model.myJoinDataList.count;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
     switch (indexPath.section) {
         case 0:
             return Nil;
@@ -497,44 +520,43 @@
             break;
     }
     
-    
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section==1) {
         
-    
-    CDTableModel *model = _model.myJoinDataList[indexPath.row];
-    
-    MessageItem *item = [model.obj isKindOfClass:[NSDictionary class]] ? [MessageItem mj_objectWithKeyValues:model.obj] : (MessageItem *)model.obj;
-    if ([item.chatgName isEqualToString:@"通知消息"]) {
-        CDPush(self.navigationController, CDVC(@"NotifViewController"), YES);
-        return;
-    }
-    if ([item.chatgName isEqualToString:@"在线客服"]) {
         
-        [self actionShowCustomerServiceAlertView:nil];
-        return;
-    }
-    
-    SVP_SHOW;
-    __weak __typeof(self)weakSelf = self;
-    
-    [[MessageNet shareInstance] checkGroupId:item.groupId Completed:^(BOOL complete) {
-        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        if (complete) {
-            SVP_DISMISS;
-            [strongSelf goto_groupChat:item];
+        CDTableModel *model = _model.myJoinDataList[indexPath.row];
+        
+        MessageItem *item = [model.obj isKindOfClass:[NSDictionary class]] ? [MessageItem mj_objectWithKeyValues:model.obj] : (MessageItem *)model.obj;
+        if ([item.chatgName isEqualToString:@"通知消息"]) {
+            CDPush(self.navigationController, CDVC(@"NotifViewController"), YES);
+            return;
         }
-        else{
-            //            [MessageNet joinGroup:@{@"groupId":item.groupId,@"uid":[AppModel shareInstance].user.userId} Success:^(NSDictionary *info) {
-            //                SVP_DISMISS;
-            //                [self groupChat:item];
-            //            } Failure:^(NSError *error) {
-            //                SVP_ERROR(error);
-            //            }];
+        if ([item.chatgName isEqualToString:@"在线客服"]) {
+            
+            [self actionShowCustomerServiceAlertView:nil];
+            return;
         }
-    }];
+        
+        SVP_SHOW;
+        __weak __typeof(self)weakSelf = self;
+        
+        [[MessageNet shareInstance] checkGroupId:item.groupId Completed:^(BOOL complete) {
+            __strong __typeof(weakSelf)strongSelf = weakSelf;
+            if (complete) {
+                SVP_DISMISS;
+                [strongSelf goto_groupChat:item];
+            }
+            else{
+                //            [MessageNet joinGroup:@{@"groupId":item.groupId,@"uid":[AppModel shareInstance].user.userId} Success:^(NSDictionary *info) {
+                //                SVP_DISMISS;
+                //                [self groupChat:item];
+                //            } Failure:^(NSError *error) {
+                //                SVP_ERROR(error);
+                //            }];
+            }
+        }];
     }
 }
 
@@ -622,57 +644,55 @@
                                              vc.hidesBottomBarWhenPushed = YES;
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
                                          }],
-                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_share"]
-                                          title:@"分享赚钱"
-                                         action:^(FYMenuItem *item) {
-                                             ShareViewController *vc = [[ShareViewController alloc] init];
-                                             vc.hidesBottomBarWhenPushed = YES;
-                                             [weakSelf.navigationController pushViewController:vc animated:YES];
-                                         }],
+//                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_share"]
+//                                          title:@"分享赚钱"
+//                                         action:^(FYMenuItem *item) {
+//                                             ShareViewController *vc = [[ShareViewController alloc] init];
+//                                             vc.hidesBottomBarWhenPushed = YES;
+//                                             [weakSelf.navigationController pushViewController:vc animated:YES];
+//                                         }],
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_agent"]
                                           title:@"代理中心"
                                          action:^(FYMenuItem *item) {
-//                                             BecomeAgentViewController *vc = [[BecomeAgentViewController alloc] init];
-//                                             vc.hidesBottomBarWhenPushed = YES;
-//                                             vc.hiddenNavBar = YES;
-//                                             vc.imageUrl = @"http://app.520qun.com/img/proxy_info.jpg";
-//                                             [weakSelf.navigationController pushViewController:vc animated:YES];
                                              AgentCenterViewController *vc = [[AgentCenterViewController alloc] init];
                                              vc.hidesBottomBarWhenPushed = YES;
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
-
+                                             
                                          }],
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_help"]
                                           title:@"帮助中心"
                                          action:^(FYMenuItem *item) {
-                                             //                                              AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
-                                             //                                              [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
-
                                              HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:nil];
                                              vc.hidesBottomBarWhenPushed = YES;
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
                                              
                                          }],
-//                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_redp_play"]
-//                                          title:@"红包玩法"
-//                                         action:^(FYMenuItem *item) {
-////                                             HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:nil];
-////                                             vc.hidesBottomBarWhenPushed = YES;
-////                                             [weakSelf.navigationController pushViewController:vc animated:YES];
-//                                             NSString *url = [AppModel shareInstance].commonInfo[@"chat_howplay_img"];
-//                                             ImageDetailViewController *vc = [[ImageDetailViewController alloc] init];
-//                                             vc.imageUrl = url;
-//                                             vc.hiddenNavBar = YES;
-//                                             vc.hidesBottomBarWhenPushed = YES;
-//                                             vc.title = @"红包玩法";
-//                                             [weakSelf.navigationController pushViewController:vc animated:YES];
-//                                         }],
+                    [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_redp_play"]
+                                        title:@"玩法规则"
+                                       action:^(FYMenuItem *item) {
+                                           NSString *url = [NSString stringWithFormat:@"%@/dist/#/mainRules", [AppModel shareInstance].commonInfo[@"website.address"]];
+                                           WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+                                           vc.navigationItem.title = @"玩法规则";
+                                           vc.hidesBottomBarWhenPushed = YES;
+                                           //[vc loadWithURL:url];
+                                           [self.navigationController pushViewController:vc animated:YES];
+                                                               }],
+                      
                       nil];
     }
     
     return _menuItems;
 }
 
+#pragma mark - 无网络警告视图
+- (void)noNetwork {
+    NetworkIndicatorView *view = [[NetworkIndicatorView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 40)];
+    self.tableView.tableHeaderView = view;
+}
+
+- (void)yesNetwork {
+    self.tableView.tableHeaderView = nil;
+}
 
 //导航栏弹出
 - (void)rightBarButtonDown:(UIBarButtonItem *)sender

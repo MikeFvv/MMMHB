@@ -34,7 +34,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.title = @"充值中心";
-//    [self.navigationController.navigationBar setBackgroundImage:[FUNCTION_MANAGER imageWithColor:[UIColor whiteColor]] forBarMetrics:UIBarMetricsDefault];
+//    [self.navigationController.navigationBar setBackgroundImage:[[FunctionManager sharedInstance] imageWithColor:[UIColor whiteColor]] forBarMetrics:UIBarMetricsDefault];
    // 获取状态栏的rect
 //    CGRect statusRect = [[UIApplication sharedApplication] statusBarFrame];
 //    //获取导航栏的rect
@@ -63,7 +63,7 @@
         weakSelf.infoDic = object[@"data"];
         [weakSelf reloadData];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -370,8 +370,8 @@
             NSInteger bottom = y;
             for (NSInteger i = 0; i < array.count; i ++) {
                 UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-                [btn setBackgroundImage:[FUNCTION_MANAGER imageWithColor:COLOR_X(193, 201, 220)] forState:UIControlStateNormal];
-                [btn setBackgroundImage:[FUNCTION_MANAGER imageWithColor:COLOR_X(70, 131, 215)] forState:UIControlStateSelected];
+                [btn setBackgroundImage:[[FunctionManager sharedInstance] imageWithColor:COLOR_X(193, 201, 220)] forState:UIControlStateNormal];
+                [btn setBackgroundImage:[[FunctionManager sharedInstance] imageWithColor:COLOR_X(70, 131, 215)] forState:UIControlStateSelected];
                 btn.tag = i;
                 [btn addTarget:self action:@selector(selectMoney:) forControlEvents:UIControlEventTouchUpInside];
                 btn.titleLabel.font = [UIFont systemFontOfSize2:17];
@@ -507,7 +507,7 @@
         SVP_ERROR_STATUS(@"请输入金额");
         return;
     }
-    if(![FUNCTION_MANAGER checkIsNum:money]){
+    if(![[FunctionManager sharedInstance] checkIsNum:money]){
         SVP_ERROR_STATUS(@"请输入正确的金额");
     }
     
@@ -545,7 +545,7 @@
             SVP_DISMISS;
            [weakSelf goToCheck:object[@"data"]];
         } fail:^(id object) {
-            [FUNCTION_MANAGER handleFailResponse:object];
+            [[FunctionManager sharedInstance] handleFailResponse:object];
         }];
     }
 }
@@ -631,7 +631,7 @@
         tipLabel2.numberOfLines = 0;
         NSString *s = [AppModel shareInstance].commonInfo[@"pay_rule"];
         tipLabel2.text = s;
-        CGSize size = [FUNCTION_MANAGER getFitSizeWithLabel:tipLabel2];
+        CGSize size = [[FunctionManager sharedInstance] getFitSizeWithLabel:tipLabel2];
         CGRect rect = tipLabel2.frame;
         rect.size.height = size.height + 15;
         tipLabel2.frame = rect;

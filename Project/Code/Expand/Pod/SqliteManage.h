@@ -13,7 +13,7 @@
 
 + (SqliteManage *)shareInstance;
 
-+ (void)updateGroup:(NSString *)group number:(int)number lastMessage:(NSString *)last;
+
 + (void)removeGroupSql:(NSString *)groupId;
 + (PushMessageModel *)queryById:(NSString *)groupId;
 

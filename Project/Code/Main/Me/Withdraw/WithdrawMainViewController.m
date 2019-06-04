@@ -265,7 +265,7 @@
     [self.wdView.bankIconImageView sd_setImageWithURL:[NSURL URLWithString:self.selectBankDic[@"icon"]]];
     
     NSString *s = [NSString stringWithFormat:@"%@_selectBankDic",[AppModel shareInstance].userInfo.userId];
-    [FUNCTION_MANAGER archiveWithData:self.selectBankDic andFileName:s];
+    [[FunctionManager sharedInstance] archiveWithData:self.selectBankDic andFileName:s];
 }
 
 -(void)submit{
@@ -280,7 +280,7 @@
         SVP_ERROR_STATUS(@"请输入正确的提现金额");
         return;
     }
-    if(![FUNCTION_MANAGER checkIsNum:money]){
+    if(![[FunctionManager sharedInstance] checkIsNum:money]){
         SVP_ERROR_STATUS(@"请输入正确的金额");
         return;
     }
@@ -296,7 +296,7 @@
         [weakSelf requestBalance];
         [weakSelf requestHistoryListWithPage:1];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -310,7 +310,7 @@
     [NET_REQUEST_MANAGER getMyBankCardListWithSuccess:^(id object) {
         [weakSelf requestBankListBack:object[@"data"]];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -349,7 +349,7 @@
             [weakSelf.historyArray removeAllObjects];
         [weakSelf requestHistoryListBack:data[@"records"]];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -376,7 +376,7 @@
 //        [self.wdView.bankIconImageView sd_setImageWithURL:[NSURL URLWithString:self.selectBankDic[@"icon"]]];
 //
 //        NSString *s = [NSString stringWithFormat:@"%@_selectBankDic",[AppModel shareInstance].user.userId];
-//        [FUNCTION_MANAGER archiveWithData:self.selectBankDic andFileName:s];
+//        [[FunctionManager sharedInstance] archiveWithData:self.selectBankDic andFileName:s];
 //    }
     [_tableView reloadData];
 }

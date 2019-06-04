@@ -20,7 +20,7 @@ MJCodingImplementation
 
 //-(void)saveToDisk{
 //    NSString *fileName = [NSString stringWithFormat:@"%@%@",self.userId,NSStringFromClass([UserInfo class])];
-//    [FUNCTION_MANAGER archiveWithData:self andFileName:fileName];
+//    [[FunctionManager sharedInstance] archiveWithData:self andFileName:fileName];
 //}
 
 

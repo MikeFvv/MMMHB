@@ -26,6 +26,9 @@
 
 @property (nonatomic ,assign) BOOL isNetError; ///
 
+@property (nonatomic ,assign) BOOL isOnce; // 是否第一次请求
+
+
 + (MessageNet *)shareInstance;
 
 //- (void)getGroupObj:(id)obj

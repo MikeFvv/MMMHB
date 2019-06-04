@@ -21,10 +21,18 @@
     
 }
 -(void)removeAndBack{
-    [self.navigationController popViewControllerAnimated:YES];
-    if (self.block) {
-        self.block(@1);
+    if ([_webView canGoBack]) {
+        [_webView goBack];
+    } else {
+        [self.navigationController popViewControllerAnimated:YES];
+        if (self.block) {
+            self.block(@1);
+        }
     }
+//    [self.navigationController popViewControllerAnimated:YES];
+//    if (self.block) {
+//        self.block(@1);
+//    }
 }
 
 - (instancetype)initWithUrl:(NSString *)url{

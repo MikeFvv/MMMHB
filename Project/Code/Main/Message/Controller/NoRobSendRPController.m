@@ -334,7 +334,7 @@
         }
         
         [dic setObject:self.isNotPlaying ? @"2" : @"1" forKey:@"type"];   // 游戏类型  2不中玩法
-        self.selectNumArray = (NSMutableArray *)[FUNCTION_MANAGER orderBombArray:self.selectNumArray];
+        self.selectNumArray = (NSMutableArray *)[[FunctionManager sharedInstance] orderBombArray:self.selectNumArray];
         [dic setObject:self.selectNumArray forKey:@"bombList"];  // 雷号列表
     }
     
@@ -383,7 +383,7 @@
         strongSelf.submit.enabled = YES;
         SVP_DISMISS;
         SVP_ERROR_STATUS(kSystemBusyMessage);
-        //        [FUNCTION_MANAGER handleFailResponse:error];
+        //        [[FunctionManager sharedInstance] handleFailResponse:error];
     } progressBlock:nil];
 }
 

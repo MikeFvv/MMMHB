@@ -65,7 +65,7 @@
         [weakSelf.tableView reloadData];
     } fail:^(id object) {
         [weakSelf.tableView.mj_header endRefreshing];
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -172,7 +172,7 @@
 }
 
 -(void)getReword:(UIButton *)btn{
-    UITableViewCell *cell = [FUNCTION_MANAGER cellForChildView:btn];
+    UITableViewCell *cell = [[FunctionManager sharedInstance] cellForChildView:btn];
     NSIndexPath *path = [self.tableView indexPathForCell:cell];
     self.selectIndex = path.row;
     WEAK_OBJ(weakSelf, self);
@@ -197,12 +197,12 @@
         SVP_SUCCESS_STATUS(object[@"data"]);
         [weakSelf getData];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
 -(void)xiangQingAction:(UIButton *)btn{
-    UITableViewCell *cell = [FUNCTION_MANAGER cellForChildView:btn];
+    UITableViewCell *cell = [[FunctionManager sharedInstance] cellForChildView:btn];
     NSIndexPath *path = [self.tableView indexPathForCell:cell];
     NSMutableDictionary *dic = [_dataArray objectAtIndex:path.row];
     NSDictionary *promotDic = dic[@"skPromot"];
@@ -213,7 +213,7 @@
     vc.hiddenNavBar = YES;
     vc.title = @"活动详情";
     vc.hidesBottomBarWhenPushed = YES;
-    [[FUNCTION_MANAGER currentViewController].navigationController pushViewController:vc animated:YES];
+    [[[FunctionManager sharedInstance] currentViewController].navigationController pushViewController:vc animated:YES];
 }
 
 -(void)headAction:(UIButton *)btn{
@@ -231,7 +231,7 @@
         vc.title = @"我的二充奖励";
     }
     vc.hidesBottomBarWhenPushed = YES;
-    [[FUNCTION_MANAGER currentViewController].navigationController pushViewController:vc animated:YES];
+    [[[FunctionManager sharedInstance] currentViewController].navigationController pushViewController:vc animated:YES];
 }
 
 -(void)showTimeSelectView{

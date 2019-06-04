@@ -103,7 +103,7 @@
     [sectionArray addObject:cellData10];
     [self.dataArray addObject:sectionArray];
 
-    NSString *s = [FUNCTION_MANAGER getApplicationVersion];
+    NSString *s = [[FunctionManager sharedInstance] getApplicationVersion];
     CellData *cellData5 = [[CellData alloc] initWithTitle:@"版本" subTitle:s icon:@"my-version" showArrow:NO tag:5];
     CellData *cellData6 = [[CellData alloc] initWithTitle:@"设置" subTitle:nil icon:@"my-option" showArrow:YES tag:6];
     CellData *cellData7 = [[CellData alloc] initWithTitle:@"退出" subTitle:nil icon:@"my-exit" showArrow:YES tag:7];
@@ -178,7 +178,7 @@
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         [strongSelf update];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -291,7 +291,7 @@
         PUSH_C(self, RecommendedViewController, YES);
     } else if(data.tag == 5){
         SVP_SHOW;
-        [FUNCTION_MANAGER checkVersion:YES];
+        [[FunctionManager sharedInstance] checkVersion:YES];
     } else if(data.tag == 6){
         PUSH_C(self, SettingViewController, YES);
     }  else if(data.tag == 7){

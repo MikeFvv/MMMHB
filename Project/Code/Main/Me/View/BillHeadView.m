@@ -143,7 +143,7 @@
         [sheet showWithAnimationWithAni:YES];
     }else if(sender.tag == BClickTAG + 5){
         WithdrawMainViewController *vc = [[WithdrawMainViewController alloc] init];
-        [[FUNCTION_MANAGER currentViewController].navigationController pushViewController:vc animated:YES];
+        [[[FunctionManager sharedInstance] currentViewController].navigationController pushViewController:vc animated:YES];
     }
 }
 

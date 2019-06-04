@@ -80,7 +80,7 @@
         [weakSelf reloadData];
     } fail:^(id object) {
         [weakSelf.collectionView.mj_header endRefreshing];
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

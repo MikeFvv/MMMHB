@@ -9,7 +9,6 @@
 //#import <RongIMKit/RongIMKit.h>
 #import "FYSystemBaseCell.h"
 
-
 NS_ASSUME_NONNULL_BEGIN
 
 #define bgWidth (UIScreen.mainScreen.bounds.size.width - (CD_WidthScal(60, 320) * 2))//

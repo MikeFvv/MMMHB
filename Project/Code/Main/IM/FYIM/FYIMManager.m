@@ -73,8 +73,8 @@
 }
 
 #pragma mark - FYReceiveMessageDelegate 消息来源
-- (void)onFYIMReceiveMessage:(FYMessage *)message left:(NSInteger)left {
-    int number = 0;
+- (void)onFYIMReceiveMessage:(FYMessage *)message messageCount:(NSInteger)messageCount left:(NSInteger)left {
+    NSInteger number = 0;
     NSString *tid = nil;
     
     ChatViewController *vc = [ChatViewController currentChat];
@@ -91,10 +91,10 @@
     } else {
         lastMessage = message.text;
     }
-    [self updateGroup:message.sessionId number:number lastMessage:lastMessage];
+    [self updateGroup:message.sessionId number:number lastMessage:lastMessage messageCount:messageCount left:left];
 }
 
-- (void)updateGroup:(NSString *)groupId number:(int)number lastMessage:(NSString *)last {
+- (void)updateGroup:(NSString *)groupId number:(NSInteger)number lastMessage:(NSString *)last messageCount:(NSInteger)messageCount left:(NSInteger)left {
     NSString *queryId = [NSString stringWithFormat:@"%@-%@",groupId,[AppModel shareInstance].userInfo.userId];
     PushMessageModel *oldModel = (PushMessageModel *)[MessageSingle shareInstance].myJoinGroupMessage[queryId];
     
@@ -108,6 +108,7 @@
             }
             oldModel.number += 1;
             [AppModel shareInstance].unReadCount += 1;
+            oldModel.messageCountLeft = messageCount;
         }
         
         if (last.length >0) {
@@ -124,16 +125,18 @@
         newModel.number = 1;
         newModel.lastMessage = last;
         newModel.sessionId = groupId;
+        newModel.messageCountLeft = messageCount;
         
         [[MessageSingle shareInstance].myJoinGroupMessage setObject:newModel forKey:queryId];
         
     }
     
-    if (oldModel.number <= 99) {
-        [[NSNotificationCenter defaultCenter]postNotificationName:@"CDReadNumberChange" object:nil];
+    if ((left == 0 && oldModel.number <= 99) || (messageCount > 0 && left == 0)) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:nil];
     }
-    
 }
+
+
 
 
 #pragma mark - 获取IM Token
@@ -144,6 +147,9 @@
     
     NSString *password = [SSKeychain passwordForService:@"password" account:[AppModel shareInstance].userInfo.mobile];
     if (password == nil) {
+        if([AppModel shareInstance].userInfo.isLogined == YES) {
+            [[AppModel shareInstance] logout];
+        }
         return;
     }
     NSString *key = @"1234567887654321";
@@ -179,8 +185,6 @@
     } progressBlock:nil];
 }
 
-
-
 /**
  通知服务器 登录了
  */
@@ -200,7 +204,7 @@
 }
 
 
-//设置群组通知消息没有提示音
+//设置群组通知消息没有提示音  NO 有声音
 - (BOOL)onFYIMCustomAlertSound:(FYMessage *)message {
     //    当应用处于前台运行，收到消息不会有提示音。
     NSString *switchKeyStr = [NSString stringWithFormat:@"%@-%@", [AppModel shareInstance].userInfo.userId,message.sessionId];
@@ -215,6 +219,7 @@
 - (void)userSignout {
     [[FYIMMessageManager shareInstance] userSignout];
     [WHC_ModelSqlite removeModel:[PushMessageModel class]];
+    [[MessageSingle shareInstance].myJoinGroupMessage removeAllObjects];
 }
 
 @end

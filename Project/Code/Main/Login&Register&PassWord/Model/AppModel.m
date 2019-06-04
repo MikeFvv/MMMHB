@@ -140,7 +140,7 @@ static NSString *Path = @"COM.XMFX.path";
 }
 
 -(void)login{
-    if([[FUNCTION_MANAGER currentViewController] isKindOfClass:[LoginBySMSViewController class]] || [[FUNCTION_MANAGER currentViewController] isKindOfClass:[LoginViewController class]])
+    if([[[FunctionManager sharedInstance] currentViewController] isKindOfClass:[LoginBySMSViewController class]] || [[[FunctionManager sharedInstance] currentViewController] isKindOfClass:[LoginViewController class]])
     [self reSetRootAnimation:YES];
 }
 
@@ -263,7 +263,8 @@ static NSString *Path = @"COM.XMFX.path";
 -(NSArray *)ipArray{
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSArray *arr = [ud objectForKey:@"ipArray"];
-    NSDictionary *dic1 = @{@"url":kServerUrl,@"rongYunKey":kRongYunKey, @"isBeta":@(NO),@"baseKey":kBaseKey};
+//    NSDictionary *dic1 = @{@"url":kServerUrl,@"rongYunKey":kRongYunKey, @"isBeta":@(NO),@"baseKey":kBaseKey};
+    NSDictionary *dic1 = @{@"url":kServerUrl, @"isBeta":@(NO),@"baseKey":kBaseKey};
     NSMutableArray *array = [NSMutableArray arrayWithObjects:dic1, nil];
     NSArray *testArr = [kServerJson mj_JSONObject];
     [array addObjectsFromArray:testArr];

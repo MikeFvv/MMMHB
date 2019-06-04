@@ -31,7 +31,7 @@
         weakSelf.imageUrl = image;
         [weakSelf showImage];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 /*

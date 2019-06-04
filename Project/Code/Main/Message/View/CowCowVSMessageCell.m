@@ -7,7 +7,6 @@
 //
 
 #import "CowCowVSMessageCell.h"
-#import "CowCowVSMessageModel.h"
 
 @interface CowCowVSMessageCell()
 
@@ -257,14 +256,9 @@
  查看详情
  */
 - (void)action_seeDetails {
-    NSMutableDictionary *dictPar = [[NSMutableDictionary alloc] init];
-    if (self.message == nil) {
-        dictPar = nil;
-    } else {
-      [dictPar setObject:self.message == nil ? @"" : self.message forKey:@"VS_FYMessage"];
+    if(self.delegate && [self.delegate respondsToSelector:@selector(didTapVSCowcowCell:)]){
+        [self.delegate didTapVSCowcowCell:self.message];
     }
-    [[NSNotificationCenter defaultCenter]
-     postNotificationName:@"VSViewSeeDetailsNoticafication" object:dictPar];
 }
 
 @end

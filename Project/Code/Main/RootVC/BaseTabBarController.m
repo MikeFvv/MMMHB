@@ -13,8 +13,10 @@
 
 @interface BaseTabBarController ()<UITabBarControllerDelegate>{
     TabbarButton *_tabbar[5];
-    NSInteger _selectIndex;
 }
+
+// 记录上次数
+@property (nonatomic,assign) NSInteger lastNum;
 
 @end
 
@@ -27,7 +29,7 @@
     
     [UITabBar appearance].translucent = NO;
     
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(updateValue)name:@"CDReadNumberChange" object:nil];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(updateValue:)name:kUnreadMessageNumberChange object:nil];
     
 //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //        [self test];
@@ -51,10 +53,24 @@
 
 
 #pragma mark 收到消息重新刷新
-- (void)updateValue {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self->_tabbar[0] setBadeValue:([AppModel shareInstance].unReadCount>0)?@"1":@"null"];
-    });
+- (void)updateValue:(NSNotification *)noti {
+//    NSString *info = [noti object];
+//    if ([info isEqualToString:@"updateBadeValue"]) {
+//
+//    }
+    
+    BOOL isRefresh = YES;
+    //
+    if ((self.lastNum > 0 && [AppModel shareInstance].unReadCount > 0) || (self.lastNum == 0 && [AppModel shareInstance].unReadCount == 0)) {
+        isRefresh = NO;
+    }
+    self.lastNum = [AppModel shareInstance].unReadCount;
+    
+    if (isRefresh) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_tabbar[0] setBadeValue:([AppModel shareInstance].unReadCount>0)?@"1":@"null"];
+        });
+    }
 }
 
 - (void)initSubViewControllers{
@@ -114,7 +130,7 @@
         else
             _tabbar[i].animationType = 1;
         if (i == 0){
-            [self updateValue];
+            [self updateValue:nil];
         }
         m += _tabbar[i].frame.size.width;
     }
@@ -128,11 +144,13 @@
     if(_selectIndex == index){
         return;
     }
+    [self hadSelectedIndex:index];
+}
+- (void)hadSelectedIndex:(NSUInteger)index{
     _tabbar[_selectIndex].tabbarSelected = NO;
     _tabbar[index].tabbarSelected = YES;
     _selectIndex = index;
 }
-
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter]removeObserver:self];
 }

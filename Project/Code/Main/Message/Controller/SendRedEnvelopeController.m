@@ -374,7 +374,7 @@
         strongSelf.submit.enabled = YES;
         SVP_DISMISS;
         SVP_ERROR_STATUS(kSystemBusyMessage);
-        //        [FUNCTION_MANAGER handleFailResponse:error];
+        //        [[FunctionManager sharedInstance] handleFailResponse:error];
     } progressBlock:nil];
 }
 

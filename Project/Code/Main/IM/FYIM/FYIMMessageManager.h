@@ -45,6 +45,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setRedEnvelopeMessage:(NSString *)messageId redEnvelopeMessage:(EnvelopeMessage *)redEnvelopeMessage;
 
 /**
+ 聊天界面下拉请求数据
+ */
+- (void)sendDropdownRequest:(NSString *)groupId endTime:(NSTimeInterval)endTime;
+
+/**
  用户主动退出登录
  */
 - (void)userSignout;

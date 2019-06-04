@@ -49,7 +49,7 @@
     CGRect rectt = self.remarkLabel.frame;
     rectt.size.width = SCREEN_WIDTH - 151;
     self.remarkLabel.frame = rectt;
-    CGSize size = [FUNCTION_MANAGER getFitSizeWithLabel:self.remarkLabel];
+    CGSize size = [[FunctionManager sharedInstance] getFitSizeWithLabel:self.remarkLabel];
     rectt.size.height = size.height;
     self.remarkLabel.frame = rectt;
     NSInteger bottom = self.remarkLabel.frame.size.height + self.remarkLabel.frame.origin.y;

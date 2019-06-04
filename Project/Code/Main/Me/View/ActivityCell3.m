@@ -19,7 +19,7 @@
 -(void)initView{
     [super initView];
 //    UIImageView *progressBar = [self.progressBg viewWithTag:1];
-//    progressBar.image = [FUNCTION_MANAGER imageWithColor:COLOR_X(255, 29, 89)];
+//    progressBar.image = [[FunctionManager sharedInstance] imageWithColor:COLOR_X(255, 29, 89)];
 }
 
 -(void)setPointArray:(NSArray *)pointDataArray andCurrentMoney:(float)currentMoney{

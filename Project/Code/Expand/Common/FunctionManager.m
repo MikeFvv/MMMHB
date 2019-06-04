@@ -22,10 +22,10 @@
 #import <ifaddrs.h>
 #import <arpa/inet.h>
 #import <net/if.h>
-//#include <mach/mach_host.h>
-//#include <mach/machine.h>
-//#include <mach/host_info.h>
-//#include <mach/mach_time.h>
+#include <mach/mach_host.h>
+#include <mach/machine.h>
+#include <mach/host_info.h>
+#include <mach/mach_time.h>
 
 @interface FunctionManager()
 
@@ -92,6 +92,16 @@
         [NSKeyedArchiver archiveRootObject:data toFile:filePath];
     }
 }
+
++ (BOOL)isPureInt:(NSString*)string{
+    
+    NSScanner* scan = [NSScanner scannerWithString:string];
+    
+    int val;
+    
+    return[scan scanInt:&val] && [scan isAtEnd];
+    
+}
 +(BOOL)isEmpty:(NSString *)text
 {
     if ([[FunctionManager isValueNSStringWith:text] isEqualToString:@""] ||
@@ -104,14 +114,14 @@
 
 +(id)isValueNSStringWith:(NSString *)str{
     NSString *resultStr = nil;
-    str =[str stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+//    str =[str stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if ([str isEqual:[NSNull null]]
         ||[NSString stringWithFormat:@"%@",str]==nil
         ||[NSString stringWithFormat:@"%@",str].length==0
         ||[[NSString stringWithFormat:@"%@",str] isEqual:@"(null)"]
         ||[[NSString stringWithFormat:@"%@",str] isEqual:@"<null>"]
         ||[[NSString stringWithFormat:@"%@",str] isEqual:@"null"]
-        ||[str stringByReplacingOccurrencesOfString:@" " withString:@""].length == 0
+//        ||[str stringByReplacingOccurrencesOfString:@" " withString:@""].length == 0
         ) {
         resultStr = @"";
     }else{
@@ -156,6 +166,11 @@
     height = lableSize.height;
     return height;
 }
+
++(NSString *)getAppSource{
+    return @"2";
+}
+
 -(NSString *)getDeviceModel{
     struct utsname systemInfo;
     uname(&systemInfo);
@@ -532,7 +547,7 @@
         SVP_DISMISS;
         [weakObj checkVersion2:showAlert];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -581,7 +596,7 @@
 //            [cancelAction setValue:Color_0 forKey:@"_titleTextColor"];
 //            [alertController addAction:cancelAction];
 //        }
-//        [[FUNCTION_MANAGER currentViewController] presentViewController:alertController animated:YES completion:nil];
+//        [[[FunctionManager sharedInstance] currentViewController] presentViewController:alertController animated:YES completion:nil];
     }else{
         if(showAlert){
             SVP_SUCCESS_STATUS(@"已是最新版本");

@@ -189,7 +189,7 @@
         [weakSelf requestDataBack:object];
     } fail:^(id object) {
         [weakSelf.tableView.mj_header endRefreshing];
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

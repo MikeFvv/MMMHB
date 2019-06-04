@@ -185,7 +185,7 @@
     if(error == nil)
         SVP_SUCCESS_STATUS(@"保存成功");
     else
-        [FUNCTION_MANAGER handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
 }
 
 -(void)viewDidDisappear:(BOOL)animated{

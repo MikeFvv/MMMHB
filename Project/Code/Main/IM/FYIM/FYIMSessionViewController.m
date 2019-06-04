@@ -29,54 +29,57 @@
 
 
 @interface FYIMSessionViewController ()<SSChatKeyBoardInputViewDelegate,UITableViewDelegate,UITableViewDataSource,FYChatBaseCellDelegate, FYChatManagerDelegate>
-    
-    //承载表单的视图 视图原高度
-    @property (strong, nonatomic) UIView    *mBackView;
-    @property (assign, nonatomic) CGFloat   backViewH;
-    
-    
-    
-    //访问相册 摄像头
-    @property(nonatomic,strong)SSAddImage *mAddImage;
-    @property (nonatomic ,assign) NSInteger page;
-    // 是否最底部
-    @property (nonatomic,assign) BOOL isTableViewBottom;
-    // 未查看消息数量
-    @property (nonatomic,assign) NSInteger notViewedMessagesCount;
-    //
-    @property (nonatomic,strong) UIButton *bottomMessageBtn;
-    @property (nonatomic,strong) UILabel *bottomMessageLabel;
-    @property (nonatomic,strong) UIView *topMessageView;
-    @property (nonatomic,strong) UILabel *topMessageLabel;
-    // top 未读消息条数
-    @property (nonatomic,assign) NSInteger unreadMessageNum;
-    @property (nonatomic,assign) NSInteger topNumIndex;
-    
-    @end
+
+//承载表单的视图 视图原高度
+@property (strong, nonatomic) UIView    *mBackView;
+@property (assign, nonatomic) CGFloat   backViewH;
+
+
+
+//访问相册 摄像头
+@property(nonatomic,strong)SSAddImage *mAddImage;
+@property (nonatomic ,assign) NSInteger page;
+// 是否最底部
+@property (nonatomic,assign) BOOL isTableViewBottom;
+// 未查看消息数量
+@property (nonatomic,assign) NSInteger notViewedMessagesCount;
+//
+@property (nonatomic,strong) UIButton *bottomMessageBtn;
+@property (nonatomic,strong) UILabel *bottomMessageLabel;
+@property (nonatomic,strong) UIView *topMessageView;
+@property (nonatomic,strong) UILabel *topMessageLabel;
+// top 未读消息条数
+@property (nonatomic,assign) NSInteger unreadMessageNum;
+@property (nonatomic,assign) NSInteger topNumIndex;
+// 本地是否还有数据
+@property (nonatomic,assign) BOOL isLocalData;
+
+
+@end
 
 @implementation FYIMSessionViewController
-    
-    static FYIMSessionViewController *_chatVC;
-    
-    
-    //-(instancetype)init{
-    //    if(self = [super init]){
-    //        _chatType = ConversationType_PRIVATE;
-    //        _dataSource = [NSMutableArray new];
-    //        [FYSocketMessageManager shareInstance].delegate = self;
-    //    }
-    //    return self;
-    //}
-    
-    
-    /*!
-     初始化会话页面
-     
-     @param conversationType 会话类型
-     @param targetId         目标会话ID
-     
-     @return 会话页面对象
-     */
+
+static FYIMSessionViewController *_chatVC;
+
+
+//-(instancetype)init{
+//    if(self = [super init]){
+//        _chatType = ConversationType_PRIVATE;
+//        _dataSource = [NSMutableArray new];
+//        [FYSocketMessageManager shareInstance].delegate = self;
+//    }
+//    return self;
+//}
+
+
+/*!
+ 初始化会话页面
+ 
+ @param conversationType 会话类型
+ @param targetId         目标会话ID
+ 
+ @return 会话页面对象
+ */
 - (id)initWithConversationType:(FYChatConversationType)conversationType targetId:(NSString *)targetId {
     if(self = [super init]) {
         _chatType = conversationType;
@@ -90,18 +93,18 @@
     _chatVC = self;
     return self;
 }
-    
-    
+
+
 + (FYIMSessionViewController *)currentChat {
     return _chatVC;
 }
-    
-    
-    //不采用系统的旋转
+
+
+//不采用系统的旋转
 - (BOOL)shouldAutorotate {
     return NO;
 }
-    
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     //    self.navigationItem.title = _titleString;
@@ -110,6 +113,7 @@
     self.reloadFinish = YES;
     // 初始化数据
     self.unreadMessageNum = 0;
+    self.isLocalData = YES;
     
     _sessionInputView = [SSChatKeyBoardInputView new];
     _sessionInputView.delegate = self;
@@ -124,17 +128,14 @@
     
     
     [self initTableView];
-    
     [self unreadMessageView];
-    //    self.enableUnreadMessageIcon = YES;
-    //    self.enableNewComingMessageIcon = YES;
-    
     [self getUnreadMessageAction];
     
     NSInteger num = kMessagePageNumber -(self.unreadMessageNum % kMessagePageNumber);
     NSInteger numCount = self.unreadMessageNum + num;
     [self getHistoricalData:numCount > kMessagePageNumber ? numCount : kMessagePageNumber];
-    NSInteger topNumIndex = num - (numCount - self.dataSource.count);
+//    NSInteger topNumIndex = num - (numCount - self.dataSource.count);
+    NSInteger topNumIndex = num;
     _topNumIndex = topNumIndex;
     
     if (self.unreadMessageNum > kMessagePageNumber) {
@@ -162,11 +163,11 @@
     //    }
     
 }
-    
-    
-    /**
-     获取未读消息数量
-     */
+
+
+/**
+ 获取未读消息数量
+ */
 - (void)getUnreadMessageAction {
     
     //    NSString *path = [NSString stringWithFormat:@"%@",[AppModel shareInstance].userInfo.userId];
@@ -178,41 +179,129 @@
     
     self.unreadMessageNum = pmModel.number;
     if (pmModel.number  > kMessagePageNumber) {
-        self.topMessageView.hidden = NO;
+//        self.topMessageView.hidden = NO;
         NSString *mgsStr = (pmModel.number - self.dataSource.count) > 99 ? @"99+条新消息" : [NSString stringWithFormat:@"%zd 条新消息",pmModel.number - self.dataSource.count];
         self.topMessageLabel.text = mgsStr;
     } else {
-        self.topMessageView.hidden = YES;
+//        self.topMessageView.hidden = YES;
         self.topMessageLabel.text = 0;
     }
 }
-    
-    
+
+
+
+
 #pragma mark - 获取历史消息 下拉刷新获取数据
 - (void)getHistoricalData:(NSInteger)count {
     
     NSString *pageStr = [NSString stringWithFormat:@"%zd,%zd", (self.page -1)*count,count];
     NSString *whereStr = [NSString stringWithFormat:@"sessionId = %@ and isDeleted = 0", self.sessionId];
-    NSArray *messageArray = [WHC_ModelSqlite query:[FYMessage class] where:whereStr order:@"by create_time desc" limit:pageStr];
+    NSArray *messageArray = [WHC_ModelSqlite query:[FYMessage class] where:whereStr order:@"by timestamp desc,create_time desc" limit:pageStr];
+    
+    if (count != messageArray.count) {
+        self.isLocalData = NO;
+    }
+    
+    if (messageArray.count == 0) {
+        [self sendGetServerData];
+        return;
+    }
+    
+    
+    NSInteger indexCount = 0;
+    [_tableView.mj_header endRefreshing];
     
     for (NSInteger index = 0; index < messageArray.count; index++) {
         FYMessage *message = (FYMessage *)messageArray[index];
-        [self.dataSource insertObject:[SSChatDatas receiveMessage:message] atIndex:0];
+        
+        if (self.dataSource.count == 0) {
+            indexCount++;
+            [self.dataSource insertObject:[SSChatDatas receiveMessage:message] atIndex:0];
+        } else {
+            // 去重复
+            BOOL isRepeat = NO;
+            for (FYMessagelLayoutModel *layout in self.dataSource) {
+                if([message.messageId isEqualToString:layout.message.messageId]) {
+                    isRepeat = YES;
+                    break;
+                }
+            }
+            if (!isRepeat) {
+                indexCount++;
+                [self.dataSource insertObject:[SSChatDatas receiveMessage:message] atIndex:0];
+            }
+            
+//            indexCount++;
+//            [self.dataSource insertObject:[SSChatDatas receiveMessage:message] atIndex:0];
+        }
     }
-    [_tableView.mj_header endRefreshing];
+    
     if (self.page > 1 && self.dataSource.count > 0) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self->_tableView reloadData];
-            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:messageArray.count inSection:0];
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:indexCount inSection:0];
             [self->_tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:NO];
         });
     }
-    if (messageArray.count == 0) {
-        _tableView.mj_header.hidden = YES;
-    }
+    //    if (messageArray.count == 0) {
+    //        _tableView.mj_header.hidden = YES;
+    //    }
 }
-    
-    
+
+/**
+ 下拉获取服务器返回的消息
+ 
+ @param messageArray 消息数组
+ */
+- (void)downPullGetMessageArray:(NSArray *)messageArray {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        NSInteger indexCount = 0;
+        [self->_tableView.mj_header endRefreshing];
+        
+        for (NSInteger index = 0; index < messageArray.count; index++) {
+            FYMessage *message = (FYMessage *)messageArray[messageArray.count - 1 -index];
+            
+            if (self.dataSource.count == 0) {
+                indexCount++;
+                [self.dataSource insertObject:[SSChatDatas receiveMessage:message] atIndex:0];
+            } else {
+                // 去重复
+                BOOL isRepeat = NO;
+                for (FYMessagelLayoutModel *layout in self.dataSource) {
+                    if([message.messageId isEqualToString:layout.message.messageId]) {
+                        isRepeat = YES;
+                        break;
+                    }
+                }
+                if (!isRepeat) {
+                    indexCount++;
+                    [self.dataSource insertObject:[SSChatDatas receiveMessage:message] atIndex:0];
+                }
+                
+//                indexCount++;
+//                [self.dataSource insertObject:[SSChatDatas receiveMessage:message] atIndex:0];
+                
+            }
+        }
+        
+        if (messageArray.count > 0) {
+            [self->_tableView reloadData];
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:indexCount > 0 ? indexCount -1 : 0 inSection:0];
+            [self->_tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:NO];
+        }
+        
+        if (messageArray.count == 0) {
+            self->_tableView.mj_header.hidden = YES;
+        }
+    });
+}
+
+- (void)sendGetServerData {
+    FYMessagelLayoutModel *fyMessageLayout = self.dataSource.firstObject;
+    [[FYIMMessageManager shareInstance] sendDropdownRequest:self.sessionId endTime:self.dataSource.count == 0 ? -1 : fyMessageLayout.message.timestamp];
+}
+
 - (void)initTableView {
     UITableView *tableView = [[UITableView alloc]initWithFrame:_mBackView.bounds style:UITableViewStylePlain];
     tableView.dataSource = self;
@@ -235,7 +324,14 @@
     tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         strongSelf.page++;
-        [strongSelf getHistoricalData:kMessagePageNumber];
+        NSString *queryId = [NSString stringWithFormat:@"%@-%@",self.sessionId,[AppModel shareInstance].userInfo.userId];
+        PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].myJoinGroupMessage[queryId];
+        if (pmModel.messageCountLeft > 0 || !self.isLocalData) {
+            [strongSelf sendGetServerData];
+            pmModel.messageCountLeft =  pmModel.messageCountLeft > 50 ? pmModel.messageCountLeft -50 : 0;
+        } else {
+            [strongSelf getHistoricalData:kMessagePageNumber];
+        }
     }];
     
     [tableView registerClass:NSClassFromString(@"SSChatTextCell") forCellReuseIdentifier:SSChatTextCellId];
@@ -247,12 +343,14 @@
     [tableView registerClass:NSClassFromString(@"CowCowVSMessageCell") forCellReuseIdentifier:CowCowVSMessageCellId];
     [tableView registerClass:NSClassFromString(@"NotificationMessageCell") forCellReuseIdentifier:NotificationMessageCellId];
 }
-    
-    
-    
+
+
+
+
 #pragma mark - 未读消息 和 未读新消息视图
 - (void)unreadMessageView {
     
+    /*  top 视图
     UIView *topMessageView = [[UIView alloc] init];
     topMessageView.backgroundColor = [UIColor whiteColor];
     topMessageView.layer.cornerRadius = 35/2;
@@ -295,6 +393,8 @@
         make.centerY.mas_equalTo(topMessageView.mas_centerY);
     }];
     
+    */
+    
     // ******************************
     
     UIButton *bottomMessageBtn = [[UIButton alloc] init];
@@ -323,18 +423,18 @@
         make.centerY.mas_equalTo(bottomMessageBtn.mas_centerY).offset(-3);
     }];
 }
-    
+
 - (void)onNewMessageBtnClick {
     [self scrollToBottom];
     [self hidBottomUnreadMessageView];
 }
-    
+
 - (void)hidBottomUnreadMessageView {
     self.notViewedMessagesCount = 0;
     self.bottomMessageLabel.text = 0;
     self.bottomMessageBtn.hidden = YES;
 }
-    
+
 #pragma mark - top未读消息点击事件
 -(void)topViewtapClick:(UITapGestureRecognizer *)sender {
     
@@ -347,16 +447,16 @@
     self.topMessageView.hidden = YES;
     self.topMessageLabel.text = 0;
 }
-    
+
 -(void)dealloc {
     [[NSNotificationCenter defaultCenter]removeObserver:self];
 }
-    
-    //处理监听触发事件
+
+//处理监听触发事件
 -(void)chatListreloadData:(NSNotificationCenter *)notification {
     NSLog(@"1");
 }
-    
+
 #pragma mark - 接收消息
 - (FYMessage *)willAppendAndDisplayMessage:(FYMessage *)message {
     // 更新数据   // 暂时不做
@@ -382,7 +482,7 @@
     //    }
     return message;
 }
-    
+
 -(void)delayReload{
     FYMessagelLayoutModel *message = [self.dataSource lastObject];
     [self.tableView reloadData];
@@ -398,56 +498,59 @@
     }
     self.reloadFinish = YES;
 }
-    /**
-     即将撤回消息
-     
-     @param messageId  消息ID
-     */
+/**
+ 即将撤回消息（服务器已经发送回来撤回命令 客服端还未处理时）
+ 
+ @param messageId  消息ID
+ */
 - (void)willRecallMessage:(NSString *)messageId {
-    [self onDeleteLocalMessage:messageId];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.tableView reloadData];
-    });
+    if (messageId.length > 0) {
+        [self onDeleteLocalMessage:messageId];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.tableView reloadData];
+        });
+    }
 }
-    
-    /**
-     撤回消息
-     
-     @param model 消息模型
-     */
+
+/**
+ 开始撤回消息
+ 
+ @param model 消息模型
+ */
 -(void)onWithdrawMessageCell:(FYMessage *)model {
     
     NSDictionary *parameters = @{
                                  @"id":model.messageId,  // 消息ID
+                                 @"createTime":@(model.timestamp),
                                  @"groupId":model.sessionId,   // 群ID
                                  @"cmd":@"15"      // 聊天命令
                                  };
     [[FYIMMessageManager shareInstance] sendMessageServer:parameters];
     
 }
-    
-    
-    
+
+
+
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView
-    {
-        CGFloat height = scrollView.frame.size.height;
-        CGFloat contentOffsetY = scrollView.contentOffset.y;
-        CGFloat bottomOffset = scrollView.contentSize.height - contentOffsetY;
-        
-        if ((bottomOffset-150) <= height) {
-            //在最底部
-            self.isTableViewBottom = YES;
-            [self hidBottomUnreadMessageView];
-        } else {
-            self.isTableViewBottom = NO;
-        }
+{
+    CGFloat height = scrollView.frame.size.height;
+    CGFloat contentOffsetY = scrollView.contentOffset.y;
+    CGFloat bottomOffset = scrollView.contentSize.height - contentOffsetY;
+    
+    if ((bottomOffset-200) <= height) {
+        //在最底部
+        self.isTableViewBottom = YES;
+        [self hidBottomUnreadMessageView];
+    } else {
+        self.isTableViewBottom = NO;
     }
-    
-    
-    
-    
+}
+
+
+
+
 #pragma mark - 发送消息
-    //发送文本 列表滚动至底部
+//发送文本 列表滚动至底部
 -(void)onChatKeyBoardInputViewSendText:(NSString *)text {
     if ([FYIMMessageManager shareInstance].isConnectFY) {
         NSMutableDictionary *userDict = [[NSMutableDictionary alloc] init];
@@ -460,7 +563,7 @@
         
         NSDictionary *parameters = @{
                                      @"user":userDict,  // 发送者用户信息
-                                     @"extras":extrasDict,  // 发送者用户信息
+                                     @"extras":extrasDict,
                                      @"from":[AppModel shareInstance].userInfo.userId,      // 发送者ID
                                      @"cmd":@"11",      // 聊天命令
                                      @"groupId":self.sessionId,   // 群ID
@@ -483,7 +586,7 @@
         }
         
         // 测试
-//        [self testUse:tempDict text:message.text];
+//              [self testUse:tempDict text:message.text];
         
         [[FYIMMessageManager shareInstance] sendMessageServer:tempDict];
         
@@ -491,7 +594,7 @@
         NSLog(@"🔴没有连接上socket");
     }
 }
-    
+
 // 注意：只能测试时用
 - (void)testUse:(NSMutableDictionary *)muDict text:(NSString *)text {
     // 测试
@@ -500,8 +603,8 @@
         [[FYIMMessageManager shareInstance] sendMessageServer:muDict];
     }
 }
-    
-    //发送消息
+
+//发送消息
 -(void)sendMessage:(FYMessage *)message {
     [SSChatDatas sendMessage:message messageBlock:^(FYMessagelLayoutModel *model, NSError *error, NSProgress *progress) {
         
@@ -512,14 +615,14 @@
         
     }];
 }
-    
 
-    
+
+
 #pragma mark - UITableViewDataSource
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     return self.dataSource.count;
 }
-    
+
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.row == self.topNumIndex) {
         self.topMessageView.hidden = YES;
@@ -532,6 +635,7 @@
         if (cell == nil) {
             cell = [[FYSystemBaseCell alloc]initWithStyle:0 reuseIdentifier:model.message.cellString];
         }
+        cell.delegate = self;
         cell.model = model;
         return cell;
     } else {
@@ -545,30 +649,31 @@
         return cell;
     }
 }
-    
+
 #pragma mark - UITableViewDelegate
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     return [(FYMessagelLayoutModel *)_dataSource[indexPath.row] cellHeight];
 }
-    
-    //视图归位
+
+//视图归位
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [_sessionInputView SetSSChatKeyBoardInputViewEndEditing];
 }
-    
+
 #pragma mark - 删除消息
-    // 删除消息
+// 删除消息
 -(void)onDeleteMessageCell:(FYMessage *)model indexPath:(NSIndexPath *)indexPath {
-    
-    [self onDeleteLocalMessage:model.messageId];
-    [self.tableView reloadData];
+    if (model.messageId.length > 0) {
+        [self onDeleteLocalMessage:model.messageId];
+        [self.tableView reloadData];
+    }
 }
-    
-    /**
-     删除本地消息方法
-     
-     @param messageId 消息ID
-     */
+
+/**
+ 删除本地消息方法
+ 
+ @param messageId 消息ID
+ */
 - (void)onDeleteLocalMessage:(NSString *)messageId {
     for (FYMessagelLayoutModel *modelLayout in self.dataSource) {
         if ([messageId isEqualToString:modelLayout.message.messageId]) {
@@ -581,7 +686,7 @@
         [self.tableView reloadData];
     });
 }
-    
+
 - (void)deleteMessageUpdateSql:(NSString *)messageId {
     NSString *whereStr = [NSString stringWithFormat:@"messageId='%@'", messageId];
     FYMessage *fyMessage = [[WHC_ModelSqlite query:[FYMessage class] where:whereStr] firstObject];
@@ -590,22 +695,22 @@
         [WHC_ModelSqlite update:fyMessage where:whereStr];
     }
 }
-    
-    
-    
-    
+
+
+
+
 -(void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
     [_sessionInputView SetSSChatKeyBoardInputViewEndEditing];
 }
-    
+
 - (void)viewWillDisappear:(BOOL)animated
-    {
-        [super viewWillDisappear:animated];
-        [self.sessionInputView endEditing:YES];
-    }
-    
+{
+    [super viewWillDisappear:animated];
+    [self.sessionInputView endEditing:YES];
+}
+
 #pragma SSChatKeyBoardInputViewDelegate 底部输入框代理回调
-    //点击按钮视图frame发生变化 调整当前列表frame
+//点击按钮视图frame发生变化 调整当前列表frame
 -(void)SSChatKeyBoardInputViewHeight:(CGFloat)keyBoardHeight changeTime:(CGFloat)changeTime{
     
     CGFloat height = _backViewH - keyBoardHeight;
@@ -626,8 +731,8 @@
     }];
     
 }
-    
-    // 滚动到最底部  https://www.jianshu.com/p/03c478adcae7
+
+// 滚动到最底部  https://www.jianshu.com/p/03c478adcae7
 -(void)scrollToBottom {
     if (self.dataSource.count > 0) {
         if ([self.tableView numberOfRowsInSection:0] > 0) {
@@ -638,18 +743,18 @@
     self.notViewedMessagesCount = 0;
     self.isTableViewBottom = YES;
 }
-    
-    
-    // 发送语音
+
+
+// 发送语音
 -(void)SSChatKeyBoardInputViewBtnClick:(SSChatKeyBoardInputView *)view sendVoice:(NSData *)voice time:(NSInteger)second{
     
     NSDictionary *dic = @{@"voice":voice,
                           @"second":@(second)};
     [self sendMessage:dic messageType:FYMessageTypeVoice];
 }
-    
-    
-    //多功能视图点击回调  图片10  视频11  位置12
+
+
+//多功能视图点击回调  图片10  视频11  位置12
 -(void)fyChatFunctionBoardClickedItemWithTag:(NSInteger)tag {
     
     if(tag==10 || tag==11){
@@ -681,11 +786,11 @@
         
     }
 }
-    
-    
-    
-    
-    //发送消息
+
+
+
+
+//发送消息
 -(void)sendMessage:(NSDictionary *)dic messageType:(FYMessageType)messageType {
     
     //    [SSChatDatas sendMessage:dic sessionId:_sessionId messageType:messageType messageBlock:^(FYMessagelLayoutModel *model, NSError *error, NSProgress *progress) {
@@ -697,15 +802,15 @@
     //
     //    }];
 }
-    
-    
+
+
 #pragma - FYChatBaseCellDelegate
-    
+
 #pragma 点击Cell消息背景视图
 - (void)didTapMessageCell:(FYMessage *)model {
     
 }
-    
+
 #pragma 点击图片 点击短视频
 -(void)didChatImageVideoCellIndexPatch:(NSIndexPath *)indexPath layout:(FYMessagelLayoutModel *)layout{
     
@@ -750,7 +855,7 @@
     
     [self.sessionInputView SetSSChatKeyBoardInputViewEndEditing];
 }
-    
+
 #pragma FYChatBaseCellDelegate 点击定位
 -(void)didChatMapCellIndexPath:(NSIndexPath *)indexPath layout:(FYMessagelLayoutModel *)layout{
     
@@ -759,7 +864,7 @@
     vc.longitude = layout.message.longitude;
     [self.navigationController pushViewController:vc animated:YES];
 }
-    
-    
-    
-    @end
+
+
+
+@end

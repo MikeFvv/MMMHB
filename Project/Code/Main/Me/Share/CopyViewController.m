@@ -45,7 +45,7 @@
     [NET_REQUEST_MANAGER requestCopyListWithSuccess:^(id object) {
         [weakObj getDataBack:object];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

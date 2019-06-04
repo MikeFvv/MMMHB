@@ -171,7 +171,7 @@
             SVP_ERROR_STATUS([response objectForKey:@"msg"]);
         }
     } failureBlock:^(NSError *error) {
-        [FUNCTION_MANAGER handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     } progressBlock:nil];
 }
 

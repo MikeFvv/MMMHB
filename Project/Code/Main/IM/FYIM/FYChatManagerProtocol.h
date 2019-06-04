@@ -37,12 +37,21 @@ NS_ASSUME_NONNULL_BEGIN
  如果此回调的返回值不为nil，SDK会将返回消息实体对应的消息Cell数据模型插入数据源，并在会话页面中显示。
  */
 - (FYMessage *)willAppendAndDisplayMessage:(FYMessage *)message;
+
 /**
- 即将撤回消息
+ 即将撤回消息（服务器已经发送回来撤回命令 客服端还未处理时）
 
  @param messageId  消息ID
  */
 - (void)willRecallMessage:(NSString *)messageId;
+
+
+/**
+ 下拉获取服务器返回的消息
+
+ @param messageArray 消息数组
+ */
+- (void)downPullGetMessageArray:(NSArray *)messageArray;
 
 @end
 
@@ -65,9 +74,10 @@ NS_ASSUME_NONNULL_BEGIN
  接收消息的回调方法
  
  @param message     当前接收到的消息
- @param left        还剩余的未接收的消息数，left>=0      注意： ！还没实现  参考融云sdk
+ @param messageCount  未读消息总数  获取未读消息时有
+ @param left        还剩余的未接收的消息数，left>=0      参考融云sdk
  */
-- (void)onFYIMReceiveMessage:(FYMessage *)message left:(NSInteger)left;
+- (void)onFYIMReceiveMessage:(FYMessage *)message messageCount:(NSInteger)messageCount left:(NSInteger)left;
 
 
 //  默认 NO 播放  返回YES 不再播放声音

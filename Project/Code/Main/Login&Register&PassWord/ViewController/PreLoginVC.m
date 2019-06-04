@@ -186,7 +186,7 @@
     //    CGFloat sdy = 90;
     //    CGFloat sdw = 220;
     //    CGFloat sdh = 150;
-    NSDictionary *object = (NSDictionary*)[FUNCTION_MANAGER getCacheDataByKey:kLoginBannerModel];
+    NSDictionary *object = (NSDictionary*)[[FunctionManager sharedInstance] getCacheDataByKey:kLoginBannerModel];
     if (object!=nil) {
         BannerModel* model = [BannerModel mj_objectWithKeyValues:object];
         if (model.data.skAdvDetailList.count>0) {
@@ -203,7 +203,7 @@
     [NET_REQUEST_MANAGER requestMsgBannerWithId:OccurBannerAdsTypeLogin WithPictureSpe:OccurBannerAdsPictureTypeNormal success:^(id object) {
         BannerModel* model = [BannerModel mj_objectWithKeyValues:object];
         if (model.data.skAdvDetailList.count>0) {
-            [FUNCTION_MANAGER setCacheDataWithKey:kLoginBannerModel data:object];
+            [[FunctionManager sharedInstance] setCacheDataWithKey:kLoginBannerModel data:object];
             
             [weakSelf richElementsInView:model];
             
@@ -238,13 +238,14 @@
     
     [uploadImageHV actionBlock:^(id data) {
         BannerItem* item = data;
-        if (![FunctionManager isEmpty:item.advLinkUrl]) {
-            WebViewController *vc = [[WebViewController alloc] initWithUrl:item.advLinkUrl];
-            vc.navigationItem.title = item.name;
-            vc.hidesBottomBarWhenPushed = YES;
-            //[vc loadWithURL:url];
-            [self.navigationController pushViewController:vc animated:YES];
-        }
+        [self fromBannerPushToVCWithBannerItem:item isFromLaunchBanner:NO];
+//        if (![FunctionManager isEmpty:item.advLinkUrl]) {
+//            WebViewController *vc = [[WebViewController alloc] initWithUrl:item.advLinkUrl];
+//            vc.navigationItem.title = item.name;
+//            vc.hidesBottomBarWhenPushed = YES;
+//            //[vc loadWithURL:url];
+//            [self.navigationController pushViewController:vc animated:YES];
+//        }
         
     }];
 }

@@ -58,7 +58,7 @@
         [weakSelf.collectionView.mj_header endRefreshing];
         [weakSelf.collectionView reloadData];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -113,7 +113,7 @@
         [ud synchronize];
         [weakSelf requestUrlBack];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

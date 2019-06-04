@@ -29,7 +29,6 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     NSLog(@"服务器地址 %@",kServerUrl);
-    NSLog(@"融云key %@",kRongYunKey);
     NSLog(@"微信key %@ 微信secret %@",kWXKey,kWXSecret);
     [self check];
     [self getAppConfig];
@@ -178,7 +177,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
         PushMessageModel *pmModel = (PushMessageModel *)userGroupArray[index];
         
         if (pmModel != nil && pmModel.sessionId != nil && ![pmModel.sessionId isEqualToString:@""]) {
-            [AppModel shareInstance].unReadCount += pmModel.number;
+//            [AppModel shareInstance].unReadCount += pmModel.number;
             
             NSString *queryId = [NSString stringWithFormat:@"%@-%@",pmModel.sessionId,[AppModel shareInstance].userInfo.userId];
             [MessageSingle shareInstance].myJoinGroupMessage[queryId] = pmModel;
@@ -205,7 +204,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     CGFloat timeSpace = currentTime - [requestJStime floatValue];
     if (requestJStime.length==0 | timeSpace > 3600) {
         [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%f",currentTime] forKey:@"requestJStime"];
-        [JSPatchManager asyncUpdate:YES]
+        [JSPatchManager asyncUpdate:YES];
     }
 }
 
@@ -223,17 +222,17 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
      */
     [manager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
         switch (status) {
-            case AFNetworkReachabilityStatusUnknown:
-                NSLog(@"未知");
-                break;
             case AFNetworkReachabilityStatusNotReachable:
                 SVP_ERROR_STATUS(@"当前网络错误，请检查网络");
+                [[NSNotificationCenter defaultCenter] postNotificationName:kNoNetworkNotification object:nil];
                 break;
+            case AFNetworkReachabilityStatusUnknown:
+                NSLog(@"未知");
             case AFNetworkReachabilityStatusReachableViaWWAN:
                 NSLog(@"3G");
-                break;
             case AFNetworkReachabilityStatusReachableViaWiFi:
                 NSLog(@"WIFI");
+                [[NSNotificationCenter defaultCenter] postNotificationName:kYesNetworkNotification object:nil];
                 break;
                 
             default:

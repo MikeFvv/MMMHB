@@ -9,13 +9,23 @@
 #import <UIKit/UIKit.h>
 #import "FYMessagelLayoutModel.h"
 
-NS_ASSUME_NONNULL_BEGIN
+
+@protocol FYSystemBaseCellDelegate <NSObject>
+
+@optional;
+// 点击VS牛牛Cell消息背景视图
+- (void)didTapVSCowcowCell:(FYMessage *)model;
+
+@end
+
+
+
 
 @interface FYSystemBaseCell : UITableViewCell
 
 -(void)initChatCellUI;
 @property(nonatomic, strong) FYMessagelLayoutModel  *model;
 
-@end
+@property(nonatomic, weak) id <FYSystemBaseCellDelegate> delegate;
 
-NS_ASSUME_NONNULL_END
+@end

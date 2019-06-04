@@ -165,7 +165,12 @@
     //        make.centerX.mas_equalTo(self);
     //    }];
     
-    BannerData* data = _requestParams;
+    [self richElemenstsInView:_requestParams];
+    
+}
+
+-(void)richElemenstsInView:(id)requestParams{
+    BannerData* data = requestParams;
     _sdCycleScrollView.autoScrollTimeInterval = [data.carouselTime intValue];
     
     NSArray* imagesModels = data.skAdvDetailList;
@@ -198,13 +203,13 @@
         
         //        NSDictionary *model = imagesModels[index];
         if (item!=nil) {
-            if (![FunctionManager isEmpty:item.advLinkUrl]) {
-                [NET_REQUEST_MANAGER requestClickBannerWithAdvSpaceId:data.ID Id:item.ID success:^(id object) {
-                    
-                } fail:^(id object) {
-                    
-                }];
-            }
+            //            if (![FunctionManager isEmpty:item.advLinkUrl]) {
+            //                [NET_REQUEST_MANAGER requestClickBannerWithAdvSpaceId:data.ID Id:item.ID success:^(id object) {
+            //
+            //                } fail:^(id object) {
+            //
+            //                }];
+            //            }
             
             
             if (weakSelf.block) {
@@ -214,6 +219,5 @@
         }
         
     };
-    
 }
 @end

@@ -22,6 +22,8 @@ NS_ASSUME_NONNULL_BEGIN
 //本地
 @property (nonatomic ,copy) NSString *lastMessage; ///<最后一条消息
 @property (nonatomic ,assign) NSInteger number;      // 消息条数
+// 未读消息总量剩余
+@property (nonatomic ,assign) NSInteger messageCountLeft;
 
 - (void)encodeWithCoder:(nonnull NSCoder *)aCoder;
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)aDecoder;

@@ -32,8 +32,8 @@
 //        titles = @[@"照片",@"视频",@"位置"];
 //        images = @[@"zhaopian",@"shipin",@"weizhi"];
         
-        titles = @[@"福利",@"加盟",@"红包",@"充值",@"赚钱",@"群规",@"玩法",@"客服",@"照片",@"拍照",@"帮助",@"",@"",@"",@""];
-        images = @[@"csb_welfare",@"csb_join",@"csb_tuo_redpocket",@"csb_refill",@"csb_make_money",@"csb_rule",@"csb_wanfa",@"csb_tuo_customer_service",@"csb_photo_album",@"csb_camera",@"csb_help",@"",@"",@"",@""];
+        titles = @[@"福利",@"加盟",@"红包",@"充值",@"玩法",@"群规",@"帮助",@"客服",@"照片",@"拍照",@"赚钱",@"",@"",@"",@""];
+        images = @[@"csb_welfare",@"csb_join",@"csb_tuo_redpocket",@"csb_refill",@"csb_wanfa",@"csb_rule",@"csb_help",@"csb_tuo_customer_service",@"csb_photo_album",@"csb_camera",@"csb_make_money",@"",@"",@"",@""];
         
         
         NSInteger number = titles.count/count+1;

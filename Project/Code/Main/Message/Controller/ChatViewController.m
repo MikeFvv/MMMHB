@@ -27,7 +27,6 @@
 
 #import "RedEnvelopeDetListController.h"
 #import "CowCowVSMessageCell.h"
-#import "CowCowVSMessageModel.h"
 #import "ImageDetailViewController.h"
 #import "NotificationMessageModel.h"
 #import "NotificationMessageCell.h"
@@ -40,8 +39,9 @@
 #import "CustomerServiceAlertView.h"
 #import "AgentCenterViewController.h"
 
+
 //@interface ChatViewController ()<RCPluginBoardViewDelegate,RCMessageCellDelegate>
-@interface ChatViewController ()
+@interface ChatViewController ()<FYSystemBaseCellDelegate>
 
 @property (nonatomic, strong) MessageItem *messageItem;
 // 红包详情模型
@@ -140,8 +140,6 @@ static ChatViewController *_chatVC;
     self.isCreateRpView = NO;
     self.isVSViewClick = NO;
     
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(action_VSViewSeeDetails:) name:@"VSViewSeeDetailsNoticafication" object:nil];
-    
     //    self.view.backgroundColor = [UIColor greenColor];
     //    self.tableView.backgroundColor = [UIColor redColor];
     
@@ -152,7 +150,7 @@ static ChatViewController *_chatVC;
     }
 }
 
--(void)dealloc {
+- (void)dealloc {
     [[NSNotificationCenter defaultCenter]removeObserver:self];
 }
 
@@ -183,27 +181,26 @@ static ChatViewController *_chatVC;
 
 
 #pragma mark - VS 视图查看详情 goto
-/**
- VS 视图查看详情
- */
-- (void)action_VSViewSeeDetails:(NSNotification *)notification {
+
+// 点击VS牛牛Cell消息背景视图
+- (void)didTapVSCowcowCell:(FYMessage *)model {
     if (self.isVSViewClick) {
         return;
     }
     self.isVSViewClick = YES;
-    NSDictionary *infoDic = [notification object];
-    FYMessage *model = (FYMessage *)[infoDic objectForKey:@"VS_FYMessage"];
-    self.bankerId = model.messageSendId;
-    [self vsViewGetRedPacketDetailsData:[model.cowcowRewardInfoDict objectForKey:@"id"]];
+    
+    self.bankerId = [[model.cowcowRewardInfoDict objectForKey:@"userId"] stringValue];
+//    [self vsViewGetRedPacketDetailsData:[model.cowcowRewardInfoDict objectForKey:@"id"]];
+    NSString *redId = [[model.cowcowRewardInfoDict objectForKey:@"id"] stringValue];
+    [self goto_RedPackedDetail:redId];
 }
-
 
 /**
  更新未读消息
  */
 - (void)unreadMessage {
 //    [SqliteManage updateGroup:_messageItem.groupId number:0 lastMessage:@"暂无未读消息"];
-    [[FYIMManager shareInstance] updateGroup:_messageItem.groupId number:0 lastMessage:@"暂无未读消息"];
+    [[FYIMManager shareInstance] updateGroup:_messageItem.groupId number:0 lastMessage:@"暂无未读消息" messageCount:0 left:0];
     
 }
 
@@ -218,8 +215,7 @@ static ChatViewController *_chatVC;
     [super viewWillDisappear:animated];
     [IQKeyboardManager sharedManager].enableAutoToolbar = YES;
     [[IQKeyboardManager sharedManager]setEnable:YES];
-    
-    [[NSNotificationCenter defaultCenter]postNotificationName:@"CDReadNumberChange" object:nil];
+
     self.isCreateRpView = NO;
     self.isVSViewClick = NO;
 }
@@ -267,30 +263,30 @@ static ChatViewController *_chatVC;
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
         
-    } else if (tag == 2004){   // 赚钱
-        PUSH_C(self, ShareViewController, YES);
-    } else if (tag == 2005){   // 群规
-        [self groupRuleView];
-    } else if (tag == 2006){   // 玩法
+    } else if (tag == 2004){   // 玩法
         ImageDetailViewController *vc = [[ImageDetailViewController alloc] init];
         vc.imageUrl = self.messageItem.howplayImg;
         vc.hiddenNavBar = YES;
         vc.title = @"玩法";
         [self.navigationController pushViewController:vc animated:YES];
-    } else if (tag == 2007){  // 客服
-         [self actionShowCustomerServiceAlertView:nil];
-    } else if (tag == 2008){
-        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
-        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
-    } else if (tag == 2009){
-        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
-        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
-    } else if(tag == 2010){  // 帮助
+    } else if (tag == 2005){   // 群规
+        [self groupRuleView];
+    } else if (tag == 2006){  // 帮助
         // 输入扩展功能板View
-//        [super fyChatFunctionBoardClickedItemWithTag:tag];
+        //        [super fyChatFunctionBoardClickedItemWithTag:tag];
         HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:nil];
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
+    } else if (tag == 2007){  // 客服
+         [self actionShowCustomerServiceAlertView:nil];
+    } else if (tag == 2008){ // 照片
+        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
+    } else if (tag == 2009){ // 拍照
+        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
+    } else if(tag == 2010){  // 赚钱
+         PUSH_C(self, ShareViewController, YES);
     } else {
 //        [super pluginBoardView:pluginBoardView clickedItemWithTag:tag];
 
@@ -379,8 +375,9 @@ static ChatViewController *_chatVC;
             SVP_ERROR_STATUS([success objectForKey:@"msg"]);
         }
     } failureBlock:^(NSError *error) {
+         __strong __typeof(weakSelf)strongSelf = weakSelf;
         SVP_DISMISS;
-        weakSelf.isVSViewClick = NO;
+        strongSelf.isVSViewClick = NO;
         //        __strong __typeof(weakSelf)strongSelf = weakSelf;
         SVP_ERROR_STATUS(kSystemBusyMessage);
     }];
@@ -396,28 +393,37 @@ static ChatViewController *_chatVC;
         return;
     }
     
-    if ([self.messageItem.userId isEqualToString:AppModel.shareInstance.userInfo.userId] ) {
-        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
-        [view showWithText:[NSString stringWithFormat:@"昵称：%@\nID：%@",userInfo.nick,userInfo.userId] button:@"好的" callBack:nil];
-        
-        //        ChatUserInfoController *vc = [[ChatUserInfoController alloc] init];
-//        vc.userId = userInfo.userId;
-//        [self.navigationController pushViewController:vc animated:YES];
-    } else {
-        [self.sessionInputView addMentionedUser:userInfo];
-    }
+//    if ([self.messageItem.userId isEqualToString:AppModel.shareInstance.userInfo.userId] ) {
+//        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+//        [view showWithText:[NSString stringWithFormat:@"昵称：%@\nID：%@",userInfo.nick,userInfo.userId] button:@"好的" callBack:nil];
+//
+//        //        ChatUserInfoController *vc = [[ChatUserInfoController alloc] init];
+////        vc.userId = userInfo.userId;
+////        [self.navigationController pushViewController:vc animated:YES];
+//    } else {
+//        [self.sessionInputView addMentionedUser:userInfo];
+//    }
+    
+    [self.sessionInputView addMentionedUser:userInfo];
 }
 
 // 长按头像
 -(void)didLongPressCellChatHeaderImg:(UserInfo *)userInfo {
     [self.view endEditing:YES];
     
+    // 自己
     if ([userInfo.userId isEqualToString:[AppModel shareInstance].userInfo.userId]) {
         return;
     }
     
-    if ([self.messageItem.userId isEqualToString:AppModel.shareInstance.userInfo.userId] ) {
-       [self.sessionInputView addMentionedUser:userInfo];
+//    if ([self.messageItem.userId isEqualToString:[AppModel shareInstance].userInfo.userId] ) {
+//       [self.sessionInputView addMentionedUser:userInfo];
+//    }
+    
+    // 群主
+    if ([self.messageItem.userId isEqualToString:[AppModel shareInstance].userInfo.userId] || [AppModel shareInstance].userInfo.innerNumFlag) {
+        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+        [view showWithText:[NSString stringWithFormat:@"昵称：%@\nID：%@",userInfo.nick,userInfo.userId] button:@"好的" callBack:nil];
     }
 }
 
@@ -454,7 +460,7 @@ static ChatViewController *_chatVC;
         [strongSelf uploadTimer:nil];
         SVP_ERROR_STATUS(kSystemBusyMessage);
         [strongSelf.redpView disMissRedView];
-        //        [FUNCTION_MANAGER handleFailResponse:error];
+        //        [[FunctionManager sharedInstance] handleFailResponse:error];
     } progressBlock:nil];
     
 }

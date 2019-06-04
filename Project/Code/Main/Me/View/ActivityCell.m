@@ -50,7 +50,7 @@
     }];
     self.numBtn = numBtn;
     
-    UIImageView *progressBg = [[UIImageView alloc] initWithImage:[FUNCTION_MANAGER imageWithColor:COLOR_X(255, 29, 89)]];
+    UIImageView *progressBg = [[UIImageView alloc] initWithImage:[[FunctionManager sharedInstance] imageWithColor:COLOR_X(255, 29, 89)]];
     [conView addSubview:progressBg];
     progressBg.layer.masksToBounds = YES;
     progressBg.layer.cornerRadius = 2.5;

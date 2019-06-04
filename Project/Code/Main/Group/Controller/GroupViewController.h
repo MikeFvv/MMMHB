@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface GroupViewController : UIViewController
+@interface GroupViewController : BaseVC
 
 
 @end

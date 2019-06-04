@@ -57,7 +57,6 @@ typedef NS_ENUM(NSInteger, FYUserGender) {
 
 @property(nonatomic,assign) BOOL managerFlag; // 是否管理员
 @property(nonatomic,assign) BOOL groupowenFlag; // 是否是群主
-
 @property (nonatomic ,assign) BOOL innerNumFlag; // yes  内部号 不限制说话字符
 
 // 3个月变更   如果有退出也会变更

@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface PreLoginVC : SuperViewController
+@interface PreLoginVC : BaseVC
 - (void)actionBlock:(ActionBlock)block;
 @end
 

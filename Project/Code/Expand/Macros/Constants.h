@@ -46,11 +46,22 @@ static NSString * const kRCNotificationMessage = @"RC:NotiMessage";
 
 
 
-// ***************** 通知 *****************
-// 刷新token
+// ************************ 通知 ************************
+// 刷新token 通知
 static NSString * const kOnConnectSocketNotification = @"kOnConnectSocketNotification";
-
+// 刷新群信息通知
 static NSString * const kReloadMyMessageGroupList = @"kReloadMyMessageGroupList";
+// 未读消息数有变更
+static NSString * const kUnreadMessageNumberChange = @"kUnreadMessageNumberChange";
+// 已经获取到我加入的群通知
+static NSString * const kDoneGetMyJoinedGroupsNotification = @"kDoneGetMyJoinedGroupsNotification";
+
+// 无网络通知
+static NSString * const kNoNetworkNotification = @"kNoNetworkNotification";
+// 有网络通知
+static NSString * const kYesNetworkNotification = @"kYesNetworkNotification";
+// 控制器已显示通知
+static NSString * const kMessageViewControllerDisplayNotification = @"kMessageViewControllerDisplayNotification";
 
 
 #endif /* Constants_h */

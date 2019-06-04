@@ -12,7 +12,6 @@
 #import "MessageItem.h"
 //#import "SqliteManage.h"
 #import "BANetManager_OC.h"
-#import "MessageNet.h"
 #import "ScrollBarView.h"
 
 #import "FYMenu.h"
@@ -55,9 +54,17 @@
     [self initSubviews];
     [self initLayout];
 //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reload) name:@"updateScrollBarView" object:nil];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(enterFore) name:UIApplicationWillEnterForegroundNotification object:[UIApplication sharedApplication]];
     UIBarButtonItem *rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"nav_add_r"] style:UIBarButtonItemStyleDone target:self action:@selector(rightBarButtonDown:)];
     [self.navigationItem setRightBarButtonItem:rightBarButtonItem];
+    
+}
+
+-(void)enterFore {
+//    [self performSelector:@selector(getData) withObject:nil afterDelay:1.0];
+    if(self.scrollBarView) {
+        [self.scrollBarView start];
+    }
     
 }
 
@@ -65,8 +72,11 @@
     [super viewWillAppear:animated];
     SVP_DISMISS;
     //    [self updateScrollBarView];
-    [self reload];
-    [self.tableView reloadData];
+//    [self reload];
+//    [self.tableView reloadData];
+    if(self.scrollBarView) {
+        [self.scrollBarView start];
+    }
     [self.carousel controllerWillAppear];
 }
 
@@ -102,8 +112,9 @@
     _tableView.delegate = self;
     _tableView.dataSource = self;
     _tableView.rowHeight = 70;
-    _tableView.separatorInset = UIEdgeInsetsMake(0, 80, 0, 0);
-    _tableView.separatorColor = TBSeparaColor;
+    [_tableView YBGeneral_configuration];
+//    _tableView.separatorInset = UIEdgeInsetsMake(0, 80, 0, 0);
+//    _tableView.separatorColor = TBSeparaColor;
     __weak __typeof(self)weakSelf = self;
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
         __strong __typeof(weakSelf)strongSelf = weakSelf;
@@ -169,7 +180,7 @@
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         [strongSelf reload];
     } failureBlock:^(NSError *err) {
-        [FUNCTION_MANAGER handleFailResponse:err];
+        [[FunctionManager sharedInstance] handleFailResponse:err];
     }];
     
     
@@ -302,21 +313,8 @@
 }
 
 - (void)CWCarousel:(CWCarousel *)carousel didSelectedAtIndex:(NSInteger)index {
-    
     BannerItem* item = self.bannerModel.data.skAdvDetailList[index];
-    if (![FunctionManager isEmpty:item.advLinkUrl]) {
-        WebViewController *vc = [[WebViewController alloc] initWithUrl:item.advLinkUrl];
-        vc.navigationItem.title = item.name;
-        vc.hidesBottomBarWhenPushed = YES;
-        //[vc loadWithURL:url];
-        [self.navigationController pushViewController:vc animated:YES];
-        [NET_REQUEST_MANAGER requestClickBannerWithAdvSpaceId:self.bannerModel.data.ID Id:item.ID success:^(id object) {
-            
-        } fail:^(id object) {
-            
-        }];
-    }
-    
+    [self fromBannerPushToVCWithBannerItem:item isFromLaunchBanner:NO];
     
 }
 
@@ -507,20 +505,12 @@
     return self.scrollBarView;
 }
 
--(void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    if(self.scrollBarView) {
-        [self.scrollBarView stop];
-        [self.scrollBarView removeFromSuperview];
-        self.scrollBarView = nil;
-    }
-}
-
 #pragma mark - 下拉菜单
 - (NSMutableArray *)menuItems {
     if (!_menuItems) {
         __weak __typeof(self)weakSelf = self;
         _menuItems = [[NSMutableArray alloc] initWithObjects:
+                      
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_recharge"]
                                           title:@"快速充值"
                                          action:^(FYMenuItem *item) {
@@ -528,44 +518,40 @@
                                              vc.hidesBottomBarWhenPushed = YES;
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
                                          }],
-                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_share"]
-                                          title:@"分享赚钱"
-                                         action:^(FYMenuItem *item) {
-                                             ShareViewController *vc = [[ShareViewController alloc] init];
-                                             vc.hidesBottomBarWhenPushed = YES;
-                                             [weakSelf.navigationController pushViewController:vc animated:YES];
-                                         }],
+                      //                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_share"]
+                      //                                          title:@"分享赚钱"
+                      //                                         action:^(FYMenuItem *item) {
+                      //                                             ShareViewController *vc = [[ShareViewController alloc] init];
+                      //                                             vc.hidesBottomBarWhenPushed = YES;
+                      //                                             [weakSelf.navigationController pushViewController:vc animated:YES];
+                      //                                         }],
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_agent"]
                                           title:@"代理中心"
                                          action:^(FYMenuItem *item) {
                                              AgentCenterViewController *vc = [[AgentCenterViewController alloc] init];
                                              vc.hidesBottomBarWhenPushed = YES;
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
+                                             
                                          }],
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_help"]
                                           title:@"帮助中心"
                                          action:^(FYMenuItem *item) {
-                                             //                                              AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
-                                             //                                              [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
-
                                              HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:nil];
                                              vc.hidesBottomBarWhenPushed = YES;
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
+                                             
                                          }],
-//                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_redp_play"]
-//                                          title:@"红包玩法"
-//                                         action:^(FYMenuItem *item) {
-//                                             //                                             HelpCenterWebController *vc = [[HelpCenterWebController alloc] initWithUrl:nil];
-//                                             //                                             vc.hidesBottomBarWhenPushed = YES;
-//                                             //                                             [weakSelf.navigationController pushViewController:vc animated:YES];
-//                                             NSString *url = [AppModel shareInstance].commonInfo[@"chat_howplay_img"];
-//                                             ImageDetailViewController *vc = [[ImageDetailViewController alloc] init];
-//                                             vc.imageUrl = url;
-//                                             vc.hiddenNavBar = YES;
-//                                             vc.hidesBottomBarWhenPushed = YES;
-//                                             vc.title = @"红包玩法";
-//                                             [weakSelf.navigationController pushViewController:vc animated:YES];
-//                                         }],
+                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_redp_play"]
+                                          title:@"玩法规则"
+                                         action:^(FYMenuItem *item) {
+                                             NSString *url = [NSString stringWithFormat:@"%@/dist/#/mainRules", [AppModel shareInstance].commonInfo[@"website.address"]];
+                                             WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+                                             vc.navigationItem.title = @"玩法规则";
+                                             vc.hidesBottomBarWhenPushed = YES;
+                                             //[vc loadWithURL:url];
+                                             [self.navigationController pushViewController:vc animated:YES];
+                                         }],
+                      
                       nil];
     }
     return _menuItems;

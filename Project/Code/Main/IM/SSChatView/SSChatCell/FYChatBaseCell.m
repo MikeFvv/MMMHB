@@ -56,8 +56,9 @@
     _mHeaderImgBtn.clipsToBounds = YES;
     [_mHeaderImgBtn addTarget:self action:@selector(onHeadImageBtn:) forControlEvents:UIControlEventTouchUpInside];
     UILongPressGestureRecognizer *longPgr =  [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
-    longPgr.minimumPressDuration = 2;
+     longPgr.minimumPressDuration = 0.5;
     [_mHeaderImgBtn addGestureRecognizer:longPgr];
+    
     
     // 创建昵称
     _nicknameLabel = [UILabel new];
@@ -103,8 +104,7 @@
     _model = model;
     
     _mMessageTimeLab.hidden = !model.message.showTime;
-    _mMessageTimeLab.text = [FYIMKitUtil showTime:model.message.timestamp showDetail:YES];
-//    [NSTimer getTimeWithTimeStamp:layout.message.timestamp];
+    _mMessageTimeLab.text = [FYIMKitUtil showTime:model.message.timestamp/1000 showDetail:YES];
     [_mMessageTimeLab sizeToFit];
     _mMessageTimeLab.height = SSChatTimeHeight;
     _mMessageTimeLab.width += 20;
@@ -147,17 +147,18 @@
 }
 
 
-/**
- 头像长按手势
-
- @param sender UIButton
- */
--(void)longPress:(UIButton *)sender {
-    if(self.delegate && [self.delegate respondsToSelector:@selector(didLongPressCellChatHeaderImg:)]){
-        [self.delegate didLongPressCellChatHeaderImg:self.model.message.user];
+// 头像长按手势
+-(void)longPress:(UILongPressGestureRecognizer *)longPressGesture {
+    // 当识别到长按手势时触发(长按时间到达之后触发)
+    if (UIGestureRecognizerStateBegan ==longPressGesture.state) {
+        if(self.delegate && [self.delegate respondsToSelector:@selector(didLongPressCellChatHeaderImg:)]){
+            [self.delegate didLongPressCellChatHeaderImg:self.model.message.user];
+        }
     }
-    
 }
+
+
+
 
 // 点击消息背景事件
 -(void)bubbleBackViewAction:(UIImageView *)sender{

@@ -208,7 +208,7 @@
     }];
     tLabel.text = @"温馨提示";
     
-    NSDictionary *dic = [FUNCTION_MANAGER appConstants];
+    NSDictionary *dic = [[FunctionManager sharedInstance] appConstants];
     UILabel *tipLabel2 = [[UILabel alloc] init];
     tipLabel2.backgroundColor = [UIColor clearColor];
     tipLabel2.textColor = COLOR_X(190, 190, 190);
@@ -274,7 +274,7 @@
         weakSelf.rechargeTypeList = arr;
         [weakSelf.tableView reloadData];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -284,7 +284,7 @@
         NSArray *arr = object[@"data"];
         weakSelf.rechargeTypeList2 = arr;
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 @end

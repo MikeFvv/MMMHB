@@ -64,7 +64,7 @@
     [NET_REQUEST_MANAGER getActivityDetailWithId:self.infoDic[@"id"] type:type success:^(id object) {
         [weakSelf getDataBack:object];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -187,6 +187,7 @@
 -(void)viewWillDisappear:(BOOL)animated{
     [self.timer invalidate];
     self.timer = nil;
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 
 - (void)viewWillAppear:(BOOL)animated{

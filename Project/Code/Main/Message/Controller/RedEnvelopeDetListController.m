@@ -55,15 +55,17 @@
     [super viewDidLoad];
     
     [self initData];
+    [self getData];
+    
     self.bottomViewHeight = 0;
     self.oldTimeStr = @"99999";
     self.isClosed = NO;
     [self setNavUI];
     [self initSubviews];
     [self initLayout];
+
     [self setHeadData];
     [self setRefreshUserInfo];
-    [self getData];
     
     [_tableView registerClass:NSClassFromString(@"RedPackedDetTableCell") forCellReuseIdentifier:@"RedPackedDetTableCell"];
     [_tableView addSubview:self.headBackView];
@@ -220,6 +222,11 @@
     }];
     
     _tableView.tableFooterView = footView;
+}
+
+-(void)dealloc {
+    NSLog(@"1");
+    self.model = nil;
 }
 
 - (void)redpackedHeadUI {
@@ -452,19 +459,9 @@
         if([type isKindOfClass:[NSNumber class]])
             type = [(NSNumber *)type stringValue];
         NSArray *bombNumArray = (NSArray *)[(NSString *)attrDict[@"bombList"] mj_JSONObject];
-        bombNumArray = [FUNCTION_MANAGER orderBombArray:bombNumArray];
-        NSString *mineNumStr = [FUNCTION_MANAGER formatBombArrayToString:bombNumArray];
-//        NSString *mineNumStr = @"[";
-//
-//        for (NSInteger index = 0; index < bombNumArray.count; index++) {
-//            if (index == bombNumArray.count -1) {
-//                mineNumStr = [mineNumStr stringByAppendingString: [NSString stringWithFormat:@"%@]", bombNumArray[index]]];
-//            } else {
-//               mineNumStr = [mineNumStr stringByAppendingString: [NSString stringWithFormat:@"%@,", bombNumArray[index]]];
-//            }
-//        }
-        
-        
+        bombNumArray = [[FunctionManager sharedInstance] orderBombArray:bombNumArray];
+        NSString *mineNumStr = [[FunctionManager sharedInstance] formatBombArrayToString:bombNumArray];
+
         mineNumStr = [mineNumStr stringByAppendingString: [[NSString stringWithFormat:@"%ld",type.integerValue] isEqualToString:@"1"] ? @"" : @" 不"];
         _mineLabel.text = [NSString stringWithFormat:@"￥%zd-%zd包-%@", [self.model.redPackedInfoDetail[@"money"] integerValue], [self.model.redPackedInfoDetail[@"total"] integerValue], mineNumStr];
         _bankerPlayerImageView.hidden = YES;
@@ -632,7 +629,7 @@
         }
     } failureBlock:^(NSError *error) {
         [weakSelf setReLoadData];
-        [FUNCTION_MANAGER handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
 }
 

@@ -139,7 +139,7 @@
 #pragma mark action
 - (void)action_getCode{
     NSString *phone = _textField[0].text;
-    if (phone.length < 8 || ![FUNCTION_MANAGER checkIsNum:phone]) {
+    if (phone.length < 8 || ![[FunctionManager sharedInstance] checkIsNum:phone]) {
         SVP_ERROR_STATUS(@"请输入正确的手机号");
         return;
     }
@@ -150,7 +150,7 @@
         SVP_SUCCESS_STATUS(@"发送成功，请注意查收短信");
         [weakSelf.codeBtn beginTime:60];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -181,7 +181,7 @@
         SVP_SUCCESS_STATUS(@"重设成功，请重新登录");
         [weakSelf.navigationController popViewControllerAnimated:YES];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

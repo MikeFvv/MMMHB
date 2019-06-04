@@ -73,12 +73,18 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
          __strong __typeof(weakSelf)strongSelf = weakSelf;
         
         if (index - (strongSelf.model.dataList.count -1) == 1) {
-            // 添加群员
-            [strongSelf addGroupMember];
+            
+            if ([strongSelf.groupInfo.userId isEqualToString:[AppModel shareInstance].userInfo.userId] ) {
+                // 添加群员
+                [strongSelf addGroupMember];
+            }
             return;
         } else if (index - (strongSelf.model.dataList.count-1) == 2) {
-            // 删减群员
-            [strongSelf deleteGroupMember];
+            
+            if ([strongSelf.groupInfo.userId isEqualToString:[AppModel shareInstance].userInfo.userId] ) {
+                // 删减群员
+                [strongSelf deleteGroupMember];
+            }
             return;
         }
         
@@ -153,7 +159,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                 NSLog(@"%zd", code);
             }
         }
-        [FUNCTION_MANAGER handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     } progressBlock:nil];
 }
 

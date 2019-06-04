@@ -248,7 +248,7 @@
         SVP_SUCCESS_STATUS(@"保存成功");
         [strongSelf.navigationController popViewControllerAnimated:YES];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -269,7 +269,7 @@
         self-> _headUrl = [object objectForKey:@"data"];
         self-> _headIcon.image = img;
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
         NSError *error = object;
         if ([error.userInfo isKindOfClass:[NSDictionary class]]) {
             NSLog(@"%@", error.userInfo[@"NSErrorFailingURLKey"]);
@@ -319,11 +319,14 @@
         if (index == 3) {
             return;
         }
+#if TARGET_IPHONE_SIMULATOR
+#elif TARGET_OS_IPHONE
         UIImagePickerController *pick = [[UIImagePickerController alloc]init];
         pick.sourceType = index;
         pick.delegate = self;
         pick.allowsEditing = YES;
         [self presentViewController:pick animated:YES completion:nil];
+#endif
     }
 }
     

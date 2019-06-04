@@ -181,7 +181,7 @@
         SVP_SUCCESS_STATUS(@"添加成功");
         [weakSelf.navigationController popViewControllerAnimated:YES];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

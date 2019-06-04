@@ -95,12 +95,12 @@
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
         NSString *userKey = [NSString stringWithFormat:@"%@%@", message.sessionId, [AppModel shareInstance].userInfo.userId];
         if([user valueForKey:userKey] == nil){
-            [user setValue:@(message.timestamp) forKey:userKey];
+            [user setValue:@(message.timestamp/1000) forKey:userKey];
             message.showTime = YES;
         }else{
-            [message showTimeWithLastShowTime:[[user valueForKey:userKey] doubleValue] currentTime:message.timestamp];
+            [message showTimeWithLastShowTime:[[user valueForKey:userKey] doubleValue] currentTime:message.timestamp/1000];
             if(message.showTime){
-                [user setValue:@(message.timestamp) forKey:userKey];
+                [user setValue:@(message.timestamp/1000) forKey:userKey];
             }
         }
         

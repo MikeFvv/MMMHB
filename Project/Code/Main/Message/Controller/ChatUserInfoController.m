@@ -70,7 +70,7 @@
         
     } failureBlock:^(NSError *error) {
          SVP_DISMISS;
-        [FUNCTION_MANAGER handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     } progressBlock:nil];
 }
 #pragma mark UITableViewDataSource

@@ -117,9 +117,9 @@
     manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/octet-stream",@"text/html",@"text/json",@"application/json",@"text/javascript",@"image/jpeg",@"image/png",@"text/plain", nil];
     [_httpManagerArray addObject:manager];
     
-    NSString *iosVersion = [FUNCTION_MANAGER getIosVersion];
-    NSString *model = [FUNCTION_MANAGER getDeviceModel];
-    NSString *appVersion = [FUNCTION_MANAGER getApplicationVersion];
+    NSString *iosVersion = [[FunctionManager sharedInstance] getIosVersion];
+    NSString *model = [[FunctionManager sharedInstance] getDeviceModel];
+    NSString *appVersion = [[FunctionManager sharedInstance] getApplicationVersion];
     if(iosVersion)
         [manager.requestSerializer setValue:iosVersion forHTTPHeaderField:@"systemVersion"];
     if(model)
@@ -148,7 +148,7 @@
     data = [data AES128EncryptWithKey:key gIv:key];
     data = [GTMBase64 encodeData:data];
     NSString *s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    s = [FUNCTION_MANAGER encodedWithString:s];
+    s = [[FunctionManager sharedInstance] encodedWithString:s];
     NSString *url = [NSString stringWithFormat:@"%@?username=%@&password=%@&randomStr=82701535096009570&code=5app&grant_type=password&scope=server",info.url,account,s];
     info.url = url;
     [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
@@ -399,6 +399,7 @@
     //    info.url = url;
     //    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
     NSMutableDictionary *bodyDic = [self createDicWithHead];
+    [bodyDic setObject:[NSString stringWithFormat:@"%@",[FunctionManager getAppSource]] forKey:@"clientType"];
     [bodyDic setObject:[NSString stringWithFormat:@"%ld",adId] forKey:@"id"];
     [bodyDic setObject:[NSString stringWithFormat:@"%ld",pictureSpe] forKey:@"pictureSpe"];
     [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
@@ -412,6 +413,7 @@
     //    [self requestWithData:nil requestInfo:info success:successBlock fail:failBlock];
     
     NSMutableDictionary *bodyDic = [self createDicWithHead];
+    [bodyDic setObject:[NSString stringWithFormat:@"%@",[FunctionManager getAppSource]] forKey:@"clientType"];
     [bodyDic setObject:[NSString stringWithFormat:@"%@",advSpaceId] forKey:@"advSpaceId"];
     [bodyDic setObject:[NSString stringWithFormat:@"%@",adId] forKey:@"id"];
     [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];

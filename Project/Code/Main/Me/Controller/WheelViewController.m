@@ -142,7 +142,7 @@
         SVP_DISMISS;
         [weakSelf requestDataBack:object];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -192,7 +192,7 @@
         [weakSelf.indicatorView stopAnimating];
         weakSelf.indicatorView.hidden = YES;
         self.wheelView.button.userInteractionEnabled = YES;
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

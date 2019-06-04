@@ -409,7 +409,7 @@
         SVP_ERROR_STATUS(@"请输入金额");
         return;
     }
-    if(![FUNCTION_MANAGER checkIsNum:money]){
+    if(![[FunctionManager sharedInstance] checkIsNum:money]){
         SVP_ERROR_STATUS(@"请输入正确的金额");
     }
     
@@ -459,7 +459,7 @@
             SVP_DISMISS;
             [weakSelf goToCheck:object[@"data"]];
         } fail:^(id object) {
-            [FUNCTION_MANAGER handleFailResponse:object];
+            [[FunctionManager sharedInstance] handleFailResponse:object];
         }];
     }
 }

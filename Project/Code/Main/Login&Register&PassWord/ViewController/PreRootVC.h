@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface PreRootVC : UIViewController
+@interface PreRootVC : BaseVC
 
 @end

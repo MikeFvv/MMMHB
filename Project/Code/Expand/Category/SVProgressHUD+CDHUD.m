@@ -33,11 +33,17 @@
             NSHTTPURLResponse *http = (NSHTTPURLResponse *)dic[@"com.alamofire.serialization.response.error.response"];
             NSInteger code = http.statusCode;
             NSLog(@"错误状态:%zd", code);
-            if (code == 401 || code == 400) {
-                msg = kAccountOrPasswordErrorMessage;
-            } else if (code == 403) {
-                msg = @"403-授权失败，禁止访问";
+
+            NSDictionary *serializedData = [NSJSONSerialization JSONObjectWithData: dic[@"com.alamofire.serialization.response.error.data"] options:kNilOptions error:nil];
+            
+            if([serializedData isKindOfClass:[NSDictionary class]]){
+                if (code == 403 && [[serializedData objectForKey:@"code"] integerValue] == 1) {
+                    msg = [serializedData objectForKey:@"msg"];
+                } else if (code == 500) {
+                    msg = @"内部服务器错误，请稍后重试-500";
+                }
             }
+            
         }
     }
     

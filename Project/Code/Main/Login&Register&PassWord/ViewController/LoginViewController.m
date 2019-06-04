@@ -191,9 +191,9 @@
     versionLabel.font = [UIFont systemFontOfSize:13];
     versionLabel.textAlignment = NSTextAlignmentCenter;
     #ifdef DEBUG
-        versionLabel.text = [NSString stringWithFormat:@"debug v%@",[FUNCTION_MANAGER getApplicationVersion]];
+        versionLabel.text = [NSString stringWithFormat:@"debug v%@",[[FunctionManager sharedInstance] getApplicationVersion]];
     #else
-        versionLabel.text = [NSString stringWithFormat:@"v%@",[FUNCTION_MANAGER getApplicationVersion]];
+        versionLabel.text = [NSString stringWithFormat:@"v%@",[[FunctionManager sharedInstance] getApplicationVersion]];
     #endif
     versionLabel.textColor = COLOR_X(200, 200, 200);
     
@@ -318,7 +318,7 @@
         [NET_REQUEST_MANAGER requestTockenWithAccount:_textField[0].text password:_textField[1].text success:^(id object) {
             SVP_DISMISS;
             if([object isKindOfClass:[NSDictionary class]]){
-                if ([object objectForKey:@"code"] && [[object objectForKey:@"code"] integerValue] == 0) {
+                if ([[object objectForKey:@"userId"] stringValue].length > 0) {
                     [SSKeychain setPassword:_textField[1].text forService:@"password" account:_textField[0].text];
                 }
                 [self getUserInfo];
@@ -342,11 +342,14 @@
  获取用户信息
  */
 - (void)getUserInfo {
+    __weak __typeof(self)weakSelf = self;
     [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
 //        [[AppModel shareInstance] reSetRootAnimation:YES];
         [[AppModel shareInstance] reSetTabBarAsRootAnimation];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf failData:object];
+//        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
     [NET_REQUEST_MANAGER requestAppConfigWithSuccess:nil fail:nil];
 }
@@ -382,21 +385,105 @@
         [ud setObject:INT_TO_STR(index) forKey:@"serverIndex"];
         [ud synchronize];
         SVP_SUCCESS_STATUS(@"切换成功，重启生效");
-        [FUNCTION_MANAGER performSelector:@selector(exitApp) withObject:nil afterDelay:1.0];
+        [[FunctionManager sharedInstance] performSelector:@selector(exitApp) withObject:nil afterDelay:1.0];
     }
 }
     
 - (void)failData:(id)object {
     if([object isKindOfClass:[NSDictionary class]]){
+        
         if ([[object objectForKey:@"error"] isEqualToString:@"unauthorized"]) {
             SVP_ERROR_STATUS(kAccountOrPasswordErrorMessage);
             return;
+        } else if ([[object objectForKey:@"error"] isEqualToString:@"Unauthorized"]) {
+            SVP_ERROR_STATUS(@"客户端异常");
+            return;
         } else if ([[object objectForKey:@"error"] isEqualToString:@"invalid_grant"]) {
-            SVP_ERROR_STATUS(kAccountOrPasswordErrorMessage);
+            
+            if([[object objectForKey:@"error_description"] isEqualToString:@"Bad credentials"]){
+                // 密码错误
+                SVP_ERROR_STATUS(kAccountOrPasswordErrorMessage);
+            }else if([[object objectForKey:@"error_description"] isEqualToString:@"User account is locked"]){
+                // 封号
+                SVP_ERROR_STATUS(@"此账号已被封禁，请联系客服");
+            }
             return;
         }
     }
-    [FUNCTION_MANAGER handleFailResponse:object];
+    [self handleFailResponse:object];
+}
+
+-(void)handleFailResponse:(id)object{
+    if([object isKindOfClass:[NSError class]]){
+        NSError *error = (NSError *)object;
+        [self showError:error];
+//        SVP_ERROR(error);
+    }else if([object isKindOfClass:[NSDictionary class]]){
+        NSDictionary *dd = (NSDictionary *)object;
+        if(dd[@"msg"])
+            SVP_ERROR_STATUS(dd[@"msg"]);
+        else if(dd[@"error"]){
+            if([dd[@"error"] isEqualToString:@"unauthorized"]){
+                SVP_ERROR_STATUS(kAccountOrPasswordErrorMessage);
+            }else
+                SVP_ERROR_STATUS(dd[@"error"]);
+        }
+    }else if([object isKindOfClass:[NSString class]])
+        SVP_ERROR_STATUS(object);
+    else
+        SVP_DISMISS;
+}
+
+- (void)showError:(NSError *)error {
+    NSDictionary *dic = error.userInfo;
+    NSString *msg = @"服务器连接失败,请稍后再试";
+    if ([dic objectForKey:@"msg"]) {
+        msg = [dic objectForKey:@"msg"];
+    }
+    else if ([dic objectForKey:@"NSLocalizedDescriptionKey"]){
+        msg = [dic objectForKey:@"NSLocalizedDescriptionKey"];
+    }
+    else if ([dic objectForKey:@"NSErrorUserInfoKey"]){
+        msg = [dic objectForKey:@"NSErrorUserInfoKey"];
+    }
+    
+    
+    if ([dic isKindOfClass:[NSDictionary class]]) {
+        NSLog(@"请求地址:%@", dic[@"NSErrorFailingURLKey"]);
+        NSLog(@"错误原因:%@", dic[@"NSLocalizedDescription"]);
+        msg = [dic objectForKey:@"NSLocalizedDescription"] == nil ? msg : [dic objectForKey:@"NSLocalizedDescription"];
+        
+        if ([dic[@"com.alamofire.serialization.response.error.response"] isKindOfClass:[NSHTTPURLResponse class]]) {
+            NSHTTPURLResponse *http = (NSHTTPURLResponse *)dic[@"com.alamofire.serialization.response.error.response"];
+            NSInteger code = http.statusCode;
+            
+            NSDictionary *serializedData = [NSJSONSerialization JSONObjectWithData: dic[@"com.alamofire.serialization.response.error.data"] options:kNilOptions error:nil];
+            [self failData:serializedData];
+            
+            NSLog(@"错误状态:%zd", code);
+            if (code == 403) {
+                msg = @"授权失败，禁止访问";
+                SVP_ERROR_STATUS(msg);
+            } else if (code == 500) {
+                 msg = @"内部服务器错误，请稍后重试";
+                SVP_ERROR_STATUS(msg);
+            }
+            return;
+//            if (code == 401 || code == 400) {
+//
+//                if ([serializedData[@"error"] isEqualToString:@"unauthorized"]) {
+//
+//                }
+//                msg = kAccountOrPasswordErrorMessage;
+//            } else if (code == 403) {
+//                msg = @"授权失败，禁止访问-403";
+//            } else if (code == 400) {
+//                msg = @"错误请求-400";
+//            }
+        }
+    }
+//    SVP_ERROR_STATUS(msg);
+//    [SVProgressHUD showErrorWithStatus:msg];
 }
 
 -(void)action_loginBySMS{

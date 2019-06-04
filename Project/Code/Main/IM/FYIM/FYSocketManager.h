@@ -52,6 +52,8 @@ typedef void(^FYSocketDidReceiveBlock)(id message ,FYSocketReceiveType type);
  */
 @property (nonatomic, assign)NSUInteger reconnectCount;
 
+@property (nonatomic,assign) BOOL isViewLoad;
+
 + (instancetype)shareManager;
 /**
  *  开启socket

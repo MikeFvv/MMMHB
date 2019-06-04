@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setRedEnvelopeMessage:(NSString *)messageId redEnvelopeMessage:(EnvelopeMessage *)redEnvelopeMessage;
 
 
-- (void)updateGroup:(NSString *)groupId number:(int)number lastMessage:(NSString *)last;
+- (void)updateGroup:(NSString *)groupId number:(NSInteger)number lastMessage:(NSString *)last messageCount:(NSInteger)messageCount left:(NSInteger)left;
 
 
 /**

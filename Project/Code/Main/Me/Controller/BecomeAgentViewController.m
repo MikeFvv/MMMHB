@@ -60,7 +60,7 @@
         SVP_SUCCESS_STATUS(object[@"data"]);
         //[weakSelf performSelector:@selector(back) withObject:nil afterDelay:1.0];
     } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

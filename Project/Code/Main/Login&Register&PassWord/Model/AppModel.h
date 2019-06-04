@@ -17,7 +17,7 @@
 //@property (nonatomic ,strong) UserInfo *user;///<用户信息
 @property (nonatomic ,strong) UserInfo *userInfo;///<用户信息
 @property (nonatomic ,copy) NSString *rongYunToken;
-@property (nonatomic ,assign) NSInteger unReadCount;  //< 未读总消息
+@property (nonatomic ,assign) NSInteger unReadCount;  ///< 未读总消息
 @property (nonatomic ,strong) NSDictionary *commonInfo;
 @property (nonatomic ,copy) NSString *appClientIdInCommonInfo;
 @property (nonatomic ,strong) NSDictionary *noticeArray;
@@ -31,6 +31,8 @@
 
 // 我加入的群id
 @property (nonatomic ,strong) NSArray *myGroupArray;
+
+
 
 + (instancetype)shareInstance;
 - (void)saveAppModel;///<登录存档

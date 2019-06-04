@@ -28,7 +28,7 @@
     self.title = @"帮助中心";
     UIButton *regisBtn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 60, 44)];
     regisBtn.titleLabel.font = [UIFont systemFontOfSize:15];
-    [regisBtn setTitle:@"新手引导" forState:UIControlStateNormal];
+    [regisBtn setTitle:@"玩法规则" forState:UIControlStateNormal];
     [regisBtn addTarget:self action:@selector(guideAction) forControlEvents:UIControlEventTouchUpInside];
     [regisBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     UIBarButtonItem *rightItem = [[UIBarButtonItem alloc]initWithCustomView:regisBtn];
@@ -37,19 +37,25 @@
 
 #pragma mark - 新手引导页
 - (void)guideAction{
-    SVP_SHOW;
-    WEAK_OBJ(weakSelf, self);
-    [NET_REQUEST_MANAGER getGuideImageListWithSuccess:^(id object) {
-        SVP_DISMISS;
-        NSArray *arr = object[@"data"];
-        weakSelf.guideArray = [NSMutableArray array];
-        for (NSDictionary *dic in arr) {
-            [weakSelf.guideArray addObject:dic[@"content"]];
-        }
-        [weakSelf showGuide];
-    } fail:^(id object) {
-        [FUNCTION_MANAGER handleFailResponse:object];
-    }];
+    NSString *url = [NSString stringWithFormat:@"%@/dist/#/mainRules", [AppModel shareInstance].commonInfo[@"website.address"]];
+    WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+    vc.navigationItem.title = @"玩法规则";
+    vc.hidesBottomBarWhenPushed = YES;
+    //[vc loadWithURL:url];
+    [self.navigationController pushViewController:vc animated:YES];
+//    SVP_SHOW;
+//    WEAK_OBJ(weakSelf, self);
+//    [NET_REQUEST_MANAGER getGuideImageListWithSuccess:^(id object) {
+//        SVP_DISMISS;
+//        NSArray *arr = object[@"data"];
+//        weakSelf.guideArray = [NSMutableArray array];
+//        for (NSDictionary *dic in arr) {
+//            [weakSelf.guideArray addObject:dic[@"content"]];
+//        }
+//        [weakSelf showGuide];
+//    } fail:^(id object) {
+//        [[FunctionManager sharedInstance] handleFailResponse:object];
+//    }];
 }
 
 -(void)showGuide{

@@ -2,7 +2,7 @@
 //  MessageSingle.h
 //  Project
 //
-//  Created by 罗耀生 on 2019/5/7.
+//  Created by Mike on 2019/5/7.
 //  Copyright © 2019 CDJay. All rights reserved.
 //
 
@@ -19,5 +19,6 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+
 
 

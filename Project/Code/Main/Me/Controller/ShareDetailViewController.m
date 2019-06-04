@@ -219,14 +219,14 @@
     WXShareModel *model = [[WXShareModel alloc]init];
     model.WXShareType = scene;//WXSceneTimeline;
     model.title = self.shareInfo[@"title"];
-    model.imageIcon = [UIImage imageNamed:[FUNCTION_MANAGER getAppIconName]];
+    model.imageIcon = [UIImage imageNamed:[[FunctionManager sharedInstance] getAppIconName]];
     model.content = WXShareDescription;
     //CGSize size = self.shareImage.size;
     if(mediaType == MediaType_url){
 //        NSString *shareUrl = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].commonInfo[@"share.url"],[AppModel shareInstance].user.invitecode];
         model.link = self.shareUrl;
         NSLog(@"url= %@",model.link);
-        model.imageData = UIImageJPEGRepresentation([UIImage imageNamed:[FUNCTION_MANAGER getAppIconName]],1.0);
+        model.imageData = UIImageJPEGRepresentation([UIImage imageNamed:[[FunctionManager sharedInstance] getAppIconName]],1.0);
     }
     else{
         model.imageData = UIImageJPEGRepresentation(self.shareImage, 1.0);

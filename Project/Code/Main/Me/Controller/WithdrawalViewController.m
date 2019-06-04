@@ -94,7 +94,7 @@
         [weakObj reload];
     } fail:^(id object) {
         [weakObj reload];
-        //[FUNCTION_MANAGER handleFailResponse:object];
+        //[[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
@@ -349,7 +349,7 @@
         SVP_ERROR_STATUS(@"请输入金额");
         return;
     }
-    if (![FUNCTION_MANAGER checkIsNum:_textField[0].text]) {
+    if (![[FunctionManager sharedInstance] checkIsNum:_textField[0].text]) {
         SVP_ERROR_STATUS(@"请输入正确的金额");
         return;
     }
@@ -391,7 +391,7 @@
         [weakSelf.navigationController popViewControllerAnimated:YES];
     } fail:^(id object) {
         weakSelf.submitBtn.userInteractionEnabled = YES;
-        [FUNCTION_MANAGER handleFailResponse:object];
+        [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 

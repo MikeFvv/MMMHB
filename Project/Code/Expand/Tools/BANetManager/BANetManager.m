@@ -89,9 +89,9 @@ static NSMutableArray *tasks;
     [BANetManagerShare.sessionManager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     
     
-    NSString *iosVersion = [FUNCTION_MANAGER getIosVersion];
-    NSString *model = [FUNCTION_MANAGER getDeviceModel];
-    NSString *appVersion = [FUNCTION_MANAGER getApplicationVersion];
+    NSString *iosVersion = [[FunctionManager sharedInstance] getIosVersion];
+    NSString *model = [[FunctionManager sharedInstance] getDeviceModel];
+    NSString *appVersion = [[FunctionManager sharedInstance] getApplicationVersion];
     if(iosVersion)
         [BANetManagerShare.sessionManager.requestSerializer setValue:iosVersion forHTTPHeaderField:@"systemVersion"];
     if(model)

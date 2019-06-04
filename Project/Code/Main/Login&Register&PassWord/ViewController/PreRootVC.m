@@ -17,6 +17,7 @@
 @property (nonatomic, strong) UIButton *timeBtn;
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, assign) NSInteger timeCount;
+@property (nonatomic, assign) BOOL isFirstDisappearedSelf;
 @end
 
 @implementation PreRootVC
@@ -32,7 +33,9 @@
     [super viewWillDisappear:animated];
     [UIApplication sharedApplication].statusBarStyle=UIStatusBarStyleDefault;
     [self.navigationController setNavigationBarHidden:NO animated:animated];
-    [self distoryTimer];
+    
+    [self distoryTimer];//when push web
+    _isFirstDisappearedSelf = YES;
 }
 
 - (void)viewDidLoad {
@@ -86,11 +89,12 @@
     //    _collectionView.showsHorizontalScrollIndicator = NO;
     //    [_collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"class"];
     //
-    NSDictionary *object = (NSDictionary*)[FUNCTION_MANAGER getCacheDataByKey:kLaunchBannerModel];
+    NSDictionary *object = (NSDictionary*)[[FunctionManager sharedInstance] getCacheDataByKey:kLaunchBannerModel];
     if (object!=nil) {
         BannerModel* model = [BannerModel mj_objectWithKeyValues:object];
         if (model.data.skAdvDetailList.count>0) {
             [self richElementsInView:model];
+            [self richTimerElementsInView:model];
         }else{
             [self removeViewJumpMainPage];
         }
@@ -101,16 +105,22 @@
     [NET_REQUEST_MANAGER requestMsgBannerWithId:OccurBannerAdsTypeLaunch WithPictureSpe:[FunctionManager isIphoneX]?OccurBannerAdsPictureTypeLarge:OccurBannerAdsPictureTypeNormal success:^(id object) {
         BannerModel* model = [BannerModel mj_objectWithKeyValues:object];
         if (model.data.skAdvDetailList.count>0) {
-            [FUNCTION_MANAGER setCacheDataWithKey:kLaunchBannerModel data:object];
-            //            NSDictionary* dic = @{kArr:
-            //                                      @[
-            //                                          @{kImg:@"group_banner1",kUrl:@"https://www.baidu.com"},
-            //                                          @{kImg:@"group_banner2",kUrl:@"https://news.baidu.com"}
-            //                                          ]
-            //                                  };
-            [self richElementsInView:model];
-            [self richTimerElementsInView:model];
+            [[FunctionManager sharedInstance] setCacheDataWithKey:kLaunchBannerModel data:object];
+//            [self richElementsInView:model];
+            for (UIView* view in [self.view subviews]) {
+                if (view.tag == 200) {
+                    MsgHeaderView* uploadImageHV = (MsgHeaderView*)view;
+                    [uploadImageHV richElemenstsInView:model.data];
+                    [uploadImageHV actionBlock:^(id data) {
+                        BannerItem* item = data;
+                        [self fromBannerPushToVCWithBannerItem:item isFromLaunchBanner:YES];
+                    }];
+                }
+            }
             
+            if (self.isFirstDisappearedSelf) {
+                [self distoryTimer];
+            }
         }else{
             [self removeViewJumpMainPage];
         }
@@ -128,6 +138,7 @@
     }
     [self action_done];
 }
+
 - (void)richElementsInView:(BannerModel*)model{
     
     MsgHeaderView * uploadImageHV = [[MsgHeaderView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT) WithLaunchAndLoginModel:model.data WithOccurBannerAdsType:OccurBannerAdsTypeLaunch];
@@ -135,18 +146,7 @@
     [self.view addSubview:uploadImageHV];
     [uploadImageHV actionBlock:^(id data) {
         BannerItem* item = data;
-        if (![FunctionManager isEmpty:item.advLinkUrl]) {
-            WebViewController *vc = [[WebViewController alloc] initWithUrl:item.advLinkUrl];
-            vc.navigationItem.title = item.name;
-            vc.hidesBottomBarWhenPushed = YES;
-            //[vc loadWithURL:url];
-            [self.navigationController pushViewController:vc animated:YES];
-            [vc actionBlock:^(id data) {
-                [self action_done];
-            }];
-        }
-        
-        
+        [self fromBannerPushToVCWithBannerItem:item isFromLaunchBanner:YES];
     }];
 }
 
@@ -174,10 +174,10 @@
         [self startTimeCount:model.data.carouselSecTime];
     }
     
-//    else{
-//        self.timeBtn.enabled = true;
-//        [self.timeBtn setTitle:@"进入" forState:UIControlStateNormal];
-//    }
+    else{
+        self.timeBtn.enabled = true;
+        [self.timeBtn setTitle:@"进入" forState:UIControlStateNormal];
+    }
     
     
 }
@@ -223,10 +223,11 @@
     {
         [self distoryTimer];
         self.timeBtn.enabled = true;
-        [self.timeBtn setTitle:@"进入" forState:UIControlStateNormal];
+//        [self.timeBtn setTitle:@"进入" forState:UIControlStateNormal];
+        [self action_done];
         [self.timeBtn mas_updateConstraints:^(MASConstraintMaker *make) {
            
-            make.width.equalTo(@72);
+//            make.width.equalTo(@72);
         }];
         //        [self.timeBtn setTitle:@"00:00" forState:UIControlStateNormal];
         //        [self.timeBtn setTitleColor:HEXCOLOR(0xf6f5fa) forState:UIControlStateNormal];

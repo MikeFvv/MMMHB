@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithFrame:(CGRect)frame WithModel:(id)requestParams;
 - (instancetype)initWithFrame:(CGRect)frame WithLaunchAndLoginModel:(id)requestParams WithOccurBannerAdsType:(OccurBannerAdsType)occurBannerAdsType;
+-(void)richElemenstsInView:(id)requestParams;
 @end
 
 NS_ASSUME_NONNULL_END
