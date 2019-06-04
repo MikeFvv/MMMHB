@@ -9,7 +9,7 @@
 #import "MessageViewController.h"
 #import "MessageNet.h"
 //#import <RongIMKit/RongIMKit.h>
-#import "ChatViewController.h"
+
 #import "MessageItem.h"
 #import "ScrollBarView.h"
 #import "EasyOperater.h"
