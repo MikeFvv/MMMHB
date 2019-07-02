@@ -16,7 +16,7 @@
 
 
 @implementation SSChatKeyBordFunctionView{
-    NSArray *titles,*images;
+    NSArray *titles,*images,*viewTag;
     NSInteger count;
     NSInteger number;
 }
@@ -32,11 +32,19 @@
 //        titles = @[@"照片",@"视频",@"位置"];
 //        images = @[@"zhaopian",@"shipin",@"weizhi"];
         
-        titles = @[@"福利",@"加盟",@"红包",@"充值",@"玩法",@"群规",@"帮助",@"客服",@"照片",@"拍照",@"赚钱",@"",@"",@"",@""];
-        images = @[@"csb_welfare",@"csb_join",@"csb_tuo_redpocket",@"csb_refill",@"csb_wanfa",@"csb_rule",@"csb_help",@"csb_tuo_customer_service",@"csb_photo_album",@"csb_camera",@"csb_make_money",@"",@"",@"",@""];
+        if ([AppModel shareInstance].chatType == 1) {
+            titles = @[@"福利",@"加盟",@"红包",@"充值",@"玩法",@"群规",@"帮助",@"客服",@"照片",@"拍照",@"赚钱",@"",@"",@"",@""];
+            images = @[@"csb_welfare",@"csb_join",@"csb_tuo_redpocket",@"csb_refill",@"csb_wanfa",@"csb_rule",@"csb_help",@"csb_tuo_customer_service",@"csb_photo_album",@"csb_camera",@"csb_make_money",@"",@"",@"",@""];
+            viewTag = @[@(2000),@(2001),@(2002),@(2003),@(2004),@(2005),@(2006),@(2007),@(2008),@(2009),@(2010),@(0),@(0),@(0),@(0)];
+        } else {
+            titles = @[@"加盟",@"充值",@"玩法",@"帮助",@"客服",@"照片",@"拍照",@"赚钱"];
+            images = @[@"csb_join",@"csb_refill",@"csb_wanfa",@"csb_help",@"csb_tuo_customer_service",@"csb_photo_album",@"csb_camera",@"csb_make_money"];
+            viewTag = @[@(2001),@(2003),@(2004),@(2006),@(2007),@(2008),@(2009),@(2010)];
+        }
         
         
-        NSInteger number = titles.count/count+1;
+        
+        NSInteger number = titles.count%count == 0 ? titles.count/count :titles.count/count +1;
         
         
         _mScrollView = [UIScrollView new];
@@ -83,7 +91,7 @@
                 
                 UIView *btnView = [UIView new];
                 btnView.bounds = CGRectMake(0, 0, backView.width/4, backView.height*0.5);
-                btnView.tag = 2000+j;
+                btnView.tag = [viewTag[j] integerValue];
                 btnView.left = j%4 * btnView.width;
                 btnView.top = (j/4)%2*btnView.height;
                 [backView addSubview:btnView];
@@ -99,7 +107,10 @@
                 btn.titleLabel.font = [UIFont systemFontOfSize:14];
                 btn.centerX = btnView.width*0.5;
                 [btnView addSubview:btn];
-                [btn setImage:[UIImage imageNamed:images[j]] forState:UIControlStateNormal];
+                NSString *icoName = images[j];
+                if (icoName.length > 0) {
+                    [btn setImage:[UIImage imageNamed:icoName] forState:UIControlStateNormal];
+                }
                 btn.userInteractionEnabled = YES;
                 
                 

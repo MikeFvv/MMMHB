@@ -44,6 +44,12 @@
  */
 -(void)onWithdrawMessageCell:(FYMessage *)model;
 
+/**
+ 点击重发
+ 
+ @param model 消息模型
+ */
+-(void)onErrorBtnCell:(FYMessage *)model;
 
 @end
 
@@ -71,7 +77,8 @@
 //视频消息
 @property(nonatomic, strong) UIButton *mVideoBtn;
 @property(nonatomic, strong) UIImageView *mVideoImg;
-
+// 错误标示
+@property(nonatomic, strong) UIButton *errorBtn;
 
 @property(nonatomic, weak) id <FYChatBaseCellDelegate> delegate;
 -(void)initChatCellUI;

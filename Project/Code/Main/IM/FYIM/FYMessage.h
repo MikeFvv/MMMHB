@@ -48,11 +48,26 @@ typedef NS_ENUM(NSInteger, FYMessageDeliveryState){
  */
 @property (nonatomic, copy)         NSString *sessionId;
 
-// 发送者
+/**
+ to   接收者 单聊
+ */
+@property (nonatomic, copy)         NSString *toUserId;
+
+/**
+ to   接收者 对象
+ */
+@property (nonatomic, strong)         NSDictionary *receiver;
+
+/**
+ 发送者
+ */
 @property (nonatomic, copy)  NSString *messageSendId;
 
-// 消息ID,唯一标识
+/**
+ 消息ID,唯一标识
+ */
 @property (nonatomic, copy) NSString    *messageId;
+
 /**
  *  消息发送时间    时间戳
  *  @discussion 本地存储消息可以通过修改时间戳来调整其在会话列表中的位置，发完服务器的消息时间戳将被服务器自动修正
@@ -94,13 +109,10 @@ typedef NS_ENUM(NSInteger, FYMessageDeliveryState){
  消息是否标记为已撤回
  */
 @property (nonatomic,assign)       BOOL isRecallMessage;
-
-
 /**
  *  消息所属会话   群组还是个人 等
  */
-//@property (nullable,nonatomic,copy,readonly)       NIMSession *session;
-
+@property(nonatomic,assign) FYChatConversationType chatType;
 /**
  *  消息附件内容
  */
@@ -158,8 +170,6 @@ typedef NS_ENUM(NSInteger, FYMessageDeliveryState){
 
 // 是否需要显示时间
 @property (nonatomic, assign) BOOL        showTime;
-//消息是否发送失败
-@property (nonatomic, assign) BOOL sendError;
 //单条消息背景图
 @property (nonatomic, copy) NSString    *backImgString;
 
@@ -172,7 +182,10 @@ typedef NS_ENUM(NSInteger, FYMessageDeliveryState){
 //图片消息链接或者本地图片 图片展示格式
 @property (nonatomic, copy) NSString    *imageString;
 //@property (nonatomic, strong) UIImage     *image;
+@property (nonatomic, copy) NSString     *imageUrl;
 //@property (nonatomic, assign) UIViewContentMode contentMode;
+
+@property(nonatomic,strong) NSDictionary *selectPhoto;
 
 //音频时长(单位：秒) 展示时长  音频网络路径  本地路径  音频
 @property (nonatomic, assign) NSInteger   voiceDuration;
@@ -200,6 +213,9 @@ typedef NS_ENUM(NSInteger, FYMessageDeliveryState){
 
 // 拓展消息
 @property(nonatomic,strong) NSDictionary *extDict;
+
+// 消息验证时候使用
+@property(nonatomic,strong) NSDictionary *extras;
 
 
 /**

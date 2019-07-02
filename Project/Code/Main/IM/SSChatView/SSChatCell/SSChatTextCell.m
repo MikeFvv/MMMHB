@@ -39,15 +39,7 @@
 }
 
 
--(void)onTextViewDeleteMessage {
-    [self onDeleteMessage];
-}
 
--(void)onTextViewWithdrawMessage {
-    if(self.delegate && [self.delegate respondsToSelector:@selector(onWithdrawMessageCell:)]){
-        [self.delegate onWithdrawMessageCell:self.model.message];
-    }
-}
 
 -(void)setModel:(FYMessagelLayoutModel *)model{
     [super setModel:model];
@@ -99,8 +91,17 @@
 }
 
 
+-(void)onTextViewWithdrawMessage {
+    if(self.delegate && [self.delegate respondsToSelector:@selector(onWithdrawMessageCell:)]){
+        [self.delegate onWithdrawMessageCell:self.model.message];
+    }
+}
 
 
+#pragma mark - 删除消息代理
+-(void)onTextViewDeleteMessage {
+    [self onDeleteMessage];
+}
 
 /**
  删除消息

@@ -82,17 +82,28 @@
     //traningActivityIndicator
     _traningActivityIndicator = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0,0,20,20)];
     [self.contentView addSubview:_traningActivityIndicator];
-    _traningActivityIndicator.backgroundColor = [UIColor redColor];
+//    _traningActivityIndicator.backgroundColor = [UIColor redColor];
     _traningActivityIndicator.color = [UIColor darkGrayColor];
     _traningActivityIndicator.hidden = YES;
     
 //    _bubbleBackView.backgroundColor = [UIColor greenColor];
    // 高度   45 + 10 + 名称(12) + 4 + 消息内容高度（？）+ 10
     
+    _errorBtn = [[UIButton alloc] initWithFrame:CGRectMake(0,0,20,20)];
+//    _errorBtn.backgroundColor = [UIColor redColor];
+    [_errorBtn setBackgroundImage:[UIImage imageNamed:@"message_ic_warning"] forState:UIControlStateNormal];
+    _errorBtn.hidden = YES;
+    [_errorBtn addTarget:self action:@selector(onErrorBtn) forControlEvents:UIControlEventTouchUpInside];
+    [self.contentView addSubview:_errorBtn];
     
 }
 
 
+- (void)onErrorBtn {
+    if(self.delegate && [self.delegate respondsToSelector:@selector(onErrorBtnCell:)]){
+        [self.delegate onErrorBtnCell:self.model.message];
+    }
+}
 
 
 -(BOOL)canBecomeFirstResponder{

@@ -142,7 +142,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
 
-    NSDictionary *dict = [NSDictionary dictionaryWithDictionary:[MessageSingle shareInstance].myJoinGroupMessage];
+    NSDictionary *dict = [NSDictionary dictionaryWithDictionary:[MessageSingle shareInstance].allUnreadMessagesDict];
     NSArray *arr = [dict allKeys];
     for (NSInteger i = 0; i < arr.count; i++) {
         PushMessageModel *model = (PushMessageModel *)[dict objectForKey:arr[i]];
@@ -160,6 +160,19 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
         }
         //        NSLog(@"%@ : %@", arr[i], [dict objectForKey:arr[i]]); // dic[arr[i]]
     }
+    
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        NSString *whereStr = @"deliveryState = 1";
+        NSArray *modelArray = [WHC_ModelSqlite query:[FYMessage class] where:whereStr];
+        for (NSInteger index =0; index < modelArray.count; index++) {
+           FYMessage *message = (FYMessage *)modelArray[index];
+            message.deliveryState = FYMessageDeliveryStateFailed;
+            NSString *query = [NSString stringWithFormat:@"messageId='%@'",message.messageId];
+            [WHC_ModelSqlite update:message where:query];
+        }
+        
+        
+    });
 }
 
 - (void)gethistoryMessageNum {
@@ -180,7 +193,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
 //            [AppModel shareInstance].unReadCount += pmModel.number;
             
             NSString *queryId = [NSString stringWithFormat:@"%@-%@",pmModel.sessionId,[AppModel shareInstance].userInfo.userId];
-            [MessageSingle shareInstance].myJoinGroupMessage[queryId] = pmModel;
+            [MessageSingle shareInstance].allUnreadMessagesDict[queryId] = pmModel;
         }
     }
 }

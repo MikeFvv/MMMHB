@@ -130,35 +130,38 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 
     SVP_SHOW;
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/quit", _groupInfo.groupId];
-    
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/quit"];
+    NSDictionary *parameters = @{
+                                 @"id":[NSString stringWithFormat:@"%@",_groupInfo.groupId]
+                                 };
+    entity.parameters = parameters;
     entity.needCache = NO;
     
     __weak __typeof(self)weakSelf = self;
-    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
          __strong __typeof(weakSelf)strongSelf = weakSelf;
         if ([response objectForKey:@"code"] && [[response objectForKey:@"code"] integerValue] == 0) {
             [[NSNotificationCenter defaultCenter] postNotificationName:kReloadMyMessageGroupList object:nil];
             [SqliteManage removeGroupSql:strongSelf.groupInfo.groupId];
-            SVP_ERROR_STATUS([response objectForKey:@"msg"]);
-            
+            NSString *msg = [NSString stringWithFormat:@"%@",[response objectForKey:@"alterMsg"]];
+            SVP_SUCCESS_STATUS(msg);
             [strongSelf.navigationController popToViewController:[strongSelf.navigationController.viewControllers objectAtIndex:0] animated:YES];
             
         } else {
-            SVP_ERROR_STATUS([response objectForKey:@"msg"]);
+            [[FunctionManager sharedInstance] handleFailResponse:response];
         }
     } failureBlock:^(NSError *error) {
-        if ([error.userInfo isKindOfClass:[NSDictionary class]]) {
-            NSLog(@"%@", error.userInfo[@"NSErrorFailingURLKey"]);
-            NSLog(@"%@", error.userInfo[@"NSLocalizedDescription"]);
-        
-            
-            if ([error.userInfo[@"com.alamofire.serialization.response.error.response"] isKindOfClass:[NSHTTPURLResponse class]]) {
-                NSHTTPURLResponse *http = (NSHTTPURLResponse *)error.userInfo[@"com.alamofire.serialization.response.error.response"];
-                NSInteger code = http.statusCode;
-                NSLog(@"%zd", code);
-            }
-        }
+//        if ([error.userInfo isKindOfClass:[NSDictionary class]]) {
+//            NSLog(@"%@", error.userInfo[@"NSErrorFailingURLKey"]);
+//            NSLog(@"%@", error.userInfo[@"NSLocalizedDescription"]);
+//
+//
+//            if ([error.userInfo[@"com.alamofire.serialization.response.error.response"] isKindOfClass:[NSHTTPURLResponse class]]) {
+//                NSHTTPURLResponse *http = (NSHTTPURLResponse *)error.userInfo[@"com.alamofire.serialization.response.error.response"];
+//                NSInteger code = http.statusCode;
+//                NSLog(@"%zd", code);
+//            }
+//        }
         [[FunctionManager sharedInstance] handleFailResponse:error];
     } progressBlock:nil];
 }
@@ -231,10 +234,10 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
         if ([info objectForKey:@"code"] && [[info objectForKey:@"code"] integerValue] == 0) {
             [strongSelf updateGroupUser];
         } else {
-            SVP_ERROR_STATUS([info objectForKey:@"msg"]);
+            [[FunctionManager sharedInstance] handleFailResponse:info];
         }
     } failureBlock:^(NSError *error) {
-        SVP_ERROR(error);
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
 }
 

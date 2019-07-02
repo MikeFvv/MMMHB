@@ -145,19 +145,20 @@
     [userIdArray addObject: self.searchTextField.text];
     
     entity.needCache = NO;
-        NSDictionary *parameters = @{
-                                     @"groupId":self.groupId,
-                                     @"userIds": userIdArray
-                                     };
-        entity.parameters = parameters;
+    NSDictionary *parameters = @{
+                                 @"groupId":self.groupId,
+                                 @"userIds": userIdArray
+                                 };
+    entity.parameters = parameters;
     
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         if ([response objectForKey:@"code"] && [[response objectForKey:@"code"] integerValue] == 0) {
-            SVP_ERROR_STATUS([response objectForKey:@"msg"]);
+            NSString *msg = [NSString stringWithFormat:@"%@",[response objectForKey:@"alterMsg"]];
+            SVP_SUCCESS_STATUS(msg);
         } else {
-            SVP_ERROR_STATUS([response objectForKey:@"msg"]);
+            [[FunctionManager sharedInstance] handleFailResponse:response];
         }
     } failureBlock:^(NSError *error) {
         [[FunctionManager sharedInstance] handleFailResponse:error];
@@ -198,12 +199,16 @@
 - (void)getUserInfoData {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/select",self.searchTextField.text];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/select"];
+    NSDictionary *parameters = @{
+                                 @"id":[NSString stringWithFormat:@"%@",self.searchTextField.text]
+                                 };
+    entity.parameters = parameters;
     entity.needCache = NO;
     
     SVP_SHOW;
     __weak __typeof(self)weakSelf = self;
-    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         SVP_DISMISS;
         if ([response objectForKey:@"code"] && [[response objectForKey:@"code"] integerValue] == 0) {

@@ -31,14 +31,17 @@ typedef enum{
     ActRequestVerifyCode,
     ActRegiste,
     ActRequestToken,
-    ActRequestTokenBySMS,
+    ActRequestTokenBySMS,  // 短信验证码获取token
     ActRequestIMToken,
     ActRemoveToken,//删除token
     ActRequestCommonInfo,//APP基本数据
     ActMyPlayer,//我的下线
+    ActCheckMyPlayers,//团队人数查询
+    ActRequestAgentReportInfo,//个人代理报表
+    ActRequestPromotionCourse,//推广教程
+    ActRequestRechargeChannel,//推广教程
     ActUploadImg,
     ActRequestBankList,
-    ActRequestDrawRecordList,//获取提现记录
     ActDraw,//提现
     ActRequestBillList,//账单列表
     ActRequestBillTypeList,//账单类型
@@ -71,6 +74,7 @@ typedef enum{
     ActRequestQiaoBaoReward,//获取抢包奖励金额
     ActRequestFaBaoReward,//获取发包奖励金额
     ActRequestQiaoBaoList,//获取抢包活动阶段
+    ActRequestJiujiJingList,//获取抢包活动阶段
     ActRequestFaBaoList,//获取发包活动阶段
     ActAll,//通用
 }Act;
@@ -135,10 +139,6 @@ typedef enum{
 -(void)requestUserInfoWithSuccess:(CallbackBlock)successBlock
                             fail:(CallbackBlock)failBlock;
 
-#pragma mark 请求用户信息2
--(void)requestUserInfoWithUserId:(NSString *)userId
-                         success:(CallbackBlock)successBlock
-                            fail:(CallbackBlock)failBlock;
 
 #pragma mark 领取福利（暂不知道此接口用处及参数）
 //-(void)drawBoonWithId:(NSString *)bId
@@ -233,9 +233,6 @@ typedef enum{
 -(void)requestSystemNoticeWithSuccess:(CallbackBlock)successBlock
                                  fail:(CallbackBlock)failBlock;
 
-#pragma mark 请求容云tocken
--(void)requestIMTokenWithSuccess:(CallbackBlock)successBlock
-                            fail:(CallbackBlock)failBlock;
 
 #pragma mark 请求分享列表
 -(void)requestShareListWithSuccess:(CallbackBlock)successBlock
@@ -290,9 +287,6 @@ typedef enum{
 #pragma mark 我的银行卡
 -(void)getMyBankCardListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
 
-#pragma mark 获取最后一次的提现信息
--(void)getLastWithdrawInfoWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
-
 #pragma mark 获取首先支付通道列表
 -(void)requestFirstRechargeListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
 
@@ -337,6 +331,7 @@ typedef enum{
 #pragma mark 活动奖励列表
 -(void)getActivityListWithSuccess:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
 
+-(void)getActivityJiujiJingListWithId:(NSString *)activityId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
 #pragma mark 获取抢包活动阶段
 -(void)getActivityQiaoBaoListWithId:(NSString *)activityId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
 

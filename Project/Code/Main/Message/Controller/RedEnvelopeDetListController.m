@@ -63,7 +63,7 @@
     [self setNavUI];
     [self initSubviews];
     [self initLayout];
-
+    
     [self setHeadData];
     [self setRefreshUserInfo];
     
@@ -99,7 +99,7 @@
 }
 
 - (void)onBack {
-
+    
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -117,7 +117,6 @@
         _imgView = [[UIImageView alloc] initWithFrame:CGRectMake(0, -260, [UIScreen mainScreen].bounds.size.width, 260)];
         _imgView.contentMode = UIViewContentModeScaleAspectFill;
         _imgView.clipsToBounds = YES;
-        _imgView.image = [UIImage imageNamed:@"kkkkkk"];
     }
     return _imgView;
 }
@@ -130,7 +129,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-
+    
     [self.navigationController.navigationBar setBackgroundImage:[UIImage imageNamed:@"navBarBg"] forBarMetrics:UIBarMetricsDefault];
     //    [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"navBarBg"] forBarMetrics:UIBarMetricsDefault];
 }
@@ -138,7 +137,7 @@
 
 /**
  设置颜色为背景图片
-
+ 
  @param color <#color description#>
  @param size <#size description#>
  @return <#return value description#>
@@ -177,7 +176,7 @@
     
     [self tableViewUI];
     [self redpackedHeadUI];
-
+    
     _tableView.StateView = [StateView StateViewWithHandle:^{
         
     }];
@@ -199,7 +198,7 @@
         strongSelf.model.page = 1;
         [strongSelf getData];
     }];
-     self.model.page = 1;
+    self.model.page = 1;
     
     UIView *footView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 50)];
     
@@ -208,7 +207,7 @@
     if ([self.model.redPackedInfoDetail[@"type"] integerValue] == 2) {
         mesLabel.text =  kMessCowRefundMessage;
     } else {
-//        mesLabel.text = [NSString stringWithFormat:@"未领取的红包，将于%0.2f分钟后发起退款", self.returnPackageTime/60];
+        //        mesLabel.text = [NSString stringWithFormat:@"未领取的红包，将于%0.2f分钟后发起退款", self.returnPackageTime/60];
     }
     
     mesLabel.font = [UIFont systemFontOfSize:13];
@@ -225,7 +224,6 @@
 }
 
 -(void)dealloc {
-    NSLog(@"1");
     self.model = nil;
 }
 
@@ -283,7 +281,7 @@
     _moneyLabel.textColor = [UIColor blackColor];
     //    _moneyLabel.backgroundColor = [UIColor redColor];
     _moneyLabel.font = [UIFont boldSystemFontOfSize2:48];
-
+    
     [_moneyLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self ->_mineLabel.mas_bottom).offset(5);
         make.centerX.equalTo(headView);
@@ -456,13 +454,30 @@
     } else if ([self.model.redPackedInfoDetail[@"type"] integerValue] == 3) {
         NSDictionary *attrDict = [[self.model.redPackedInfoDetail objectForKey:@"attr"] mj_JSONObject];
         NSString *type = attrDict[@"type"];
+        NSString* handicap = [self.model.redPackedInfoDetail objectForKey:@"handicap"];
         if([type isKindOfClass:[NSNumber class]])
             type = [(NSNumber *)type stringValue];
         NSArray *bombNumArray = (NSArray *)[(NSString *)attrDict[@"bombList"] mj_JSONObject];
         bombNumArray = [[FunctionManager sharedInstance] orderBombArray:bombNumArray];
+        
         NSString *mineNumStr = [[FunctionManager sharedInstance] formatBombArrayToString:bombNumArray];
-
+        
         mineNumStr = [mineNumStr stringByAppendingString: [[NSString stringWithFormat:@"%ld",type.integerValue] isEqualToString:@"1"] ? @"" : @" 不"];
+        if (bombNumArray.count>0
+            && [type integerValue] == 1
+            ) {//&& handicap!=0
+            SetUserDefaultKeyWithObject(kBombList, bombNumArray);
+            SetUserDefaultKeyWithObject(kBombHitCnt, [self.model.redPackedInfoDetail objectForKey:@"bombHitCnt"]);
+            SetUserDefaultKeyWithObject(kBombHandicap, handicap);
+            UserDefaultSynchronize;
+            
+//            &&[[self.model.redPackedInfoDetail objectForKey:@"bombHitCnt"]integerValue]!=0
+        }else{
+            SetUserDefaultKeyWithObject(kBombList, @[]);
+            SetUserDefaultKeyWithObject(kBombHitCnt, @"0");
+            SetUserDefaultKeyWithObject(kBombHandicap, @"0");
+            UserDefaultSynchronize;
+        }
         _mineLabel.text = [NSString stringWithFormat:@"￥%zd-%zd包-%@", [self.model.redPackedInfoDetail[@"money"] integerValue], [self.model.redPackedInfoDetail[@"total"] integerValue], mineNumStr];
         _bankerPlayerImageView.hidden = YES;
     } else {
@@ -493,24 +508,24 @@
     dispatch_source_set_event_handler(_timer, ^{
         
         if (timeOut <= 0) {
-//            NSLog(@"🔴=1==%@", [NSThread currentThread]);
+            //            NSLog(@"🔴=1==%@", [NSThread currentThread]);
             dispatch_source_cancel(_timer);
             dispatch_async(dispatch_get_main_queue(), ^{
                 //                self.timeLabel.backgroundColor = mColor;
                 self.timeLabel.textColor = [UIColor redColor];
                 self.timeLabel.text = title;
-//                self.timeLabel.userInteractionEnabled = YES;
+                //                self.timeLabel.userInteractionEnabled = YES;
             });
             [self getData];
         } else {
-
+            
             NSString *timeStr = [NSString stringWithFormat:@"%0.2ld", (long)timeOut];
             dispatch_async(dispatch_get_main_queue(), ^{
                 //                self.timeLabel.backgroundColor = color;
                 if ([timeStr integerValue] <= [self.oldTimeStr integerValue] && !self.isClosed) {
                     self.timeLabel.textColor = [UIColor redColor];
                     self.timeLabel.text = [NSString stringWithFormat:@"剩余%@%@",timeStr,subTitle];
-//                    self.timeLabel.userInteractionEnabled = NO;
+                    //                    self.timeLabel.userInteractionEnabled = NO;
                     self.oldTimeStr = timeStr;
                 }
                 
@@ -523,7 +538,7 @@
 
 
 -(void)setRefreshUserInfo {
-
+    
     if ([self.model.redPackedInfoDetail[@"isItself"] boolValue]  == YES) {
         if ([self.model.redPackedInfoDetail[@"type"] integerValue] == 2) {
             self.pointsNumImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"cow_%@", self.model.redPackedInfoDetail[@"itselfPointsNum"]]];
@@ -578,9 +593,9 @@
     NSString *timeStr = [NSString stringWithFormat:@"%@",self.model.redPackedInfoDetail[@"exceptOverdueTimes"]];
     CGFloat timeHeihgt = 0;
     if (![timeStr isEqualToString:@"(null)"] && timeStr.length > 0) {
-         timeHeihgt = [timeStr heightWithFont:[UIFont systemFontOfSize:14] constrainedToWidth:SCREEN_WIDTH];
+        timeHeihgt = [timeStr heightWithFont:[UIFont systemFontOfSize:14] constrainedToWidth:SCREEN_WIDTH];
     }
-   
+    
     if ([self.model.redPackedInfoDetail[@"type"] integerValue] == 2 && [[AppModel shareInstance].userInfo.userId isEqualToString: self.bankerId]) {
         self.bottomViewHeight = 30 + 25;
     } else if ([self.model.redPackedInfoDetail[@"type"] integerValue] == 2) {
@@ -597,19 +612,16 @@
 #pragma mark - 获取红包详情
 - (void)getData {
     
-    if (self.model.isGrabId) {
-        [self setReLoadData];
-        return;
-    }
+//    if (self.model.isGrabId) {
+//        [self setReLoadData];
+//        return;
+//    }
     
     NSString *redPackedId;
     if ([self.objPar isKindOfClass:[EnvelopeNet class]]) {
         EnvelopeNet *model = (EnvelopeNet *)self.objPar;
         redPackedId = [model.redPackedInfoDetail[@"id"] stringValue];
-    } else if ([self.objPar isKindOfClass:[NSNumber class]]) {
-        [self setReLoadData];
-        return;
-    } else {
+    }else {
         redPackedId = (NSString *)self.objPar;
         self.model.redPackedInfoDetail = [NSMutableDictionary dictionary];
         [self.model.redPackedListArray removeAllObjects];
@@ -625,7 +637,7 @@
             [strongSelf setReLoadData];
         } else {
             [strongSelf setReLoadData];
-            SVP_ERROR_STATUS([dic objectForKey:@"msg"]);
+            [[FunctionManager sharedInstance] handleFailResponse:dic];
         }
     } failureBlock:^(NSError *error) {
         [weakSelf setReLoadData];
@@ -658,8 +670,8 @@
         CGFloat money = [strMoney floatValue];
         curMoneyTotal += money;
     }
-    
-    NSString *s = [NSString stringWithFormat:@"已领取%ld/%ld个，共%.2f/%@元",self.model.dataList.count,[self.model.redPackedInfoDetail[@"total"] integerValue],curMoneyTotal, self.model.redPackedInfoDetail[@"money"]];
+    NSNumber *moneyde = self.model.redPackedInfoDetail[@"money"];
+    NSString *s = [NSString stringWithFormat:@"已领取%ld/%ld个，共%.2f/%0.2f元",self.model.dataList.count,[self.model.redPackedInfoDetail[@"total"] integerValue],curMoneyTotal, [moneyde floatValue]*1.00];
     
     UIView *sectionHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 45)];
     sectionHeaderView.backgroundColor = Color_F;

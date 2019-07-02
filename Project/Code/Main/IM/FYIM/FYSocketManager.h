@@ -42,7 +42,6 @@ typedef void(^FYSocketDidReceiveBlock)(id message ,FYSocketReceiveType type);
 @property (nonatomic,copy)FYSocketDidCloseBlock close;
 
 
-
 /**
  *  超时重连时间，默认1秒
  */
@@ -51,8 +50,11 @@ typedef void(^FYSocketDidReceiveBlock)(id message ,FYSocketReceiveType type);
  *  重连次数,默认5次
  */
 @property (nonatomic, assign)NSUInteger reconnectCount;
-
+// 视图加载是否完成  messageController
 @property (nonatomic,assign) BOOL isViewLoad;
+// 是否无效token
+@property (nonatomic,assign) BOOL isInvalidToken;
+
 
 + (instancetype)shareManager;
 /**

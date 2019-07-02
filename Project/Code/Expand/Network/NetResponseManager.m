@@ -11,7 +11,7 @@
 #import "GTMBase64.h"
 #import "NSData+AES.h"
 #import "SAMKeychain.h"
-
+#import "RSA.h"
 @implementation NetResponseManager
 
 +(NetResponseManager *)sharedInstance{
@@ -48,7 +48,10 @@
             if(refreshToken.length > 10) {
                 code = ResultCodeSuccess;
             }
-            [self getTokenBack:dict];
+            if(code == ResultCodeSuccess){
+                [self getTokenBack:dict[@"data"]];
+            }
+//            [self getTokenBack:dict];
             [[NSNotificationCenter defaultCenter] postNotificationName:kOnConnectSocketNotification object: nil];
         }else if(httpManager.act == ActRequestIMToken){
             if(code == ResultCodeSuccess){
@@ -62,7 +65,6 @@
             if(code == ResultCodeSuccess){
                 [self getCommonInfoBack:dict[@"data"]];
             }
-            [[NSNotificationCenter defaultCenter] postNotificationName:kOnConnectSocketNotification object: nil];
         }else if(httpManager.act == ActRequestSystemNotice){
             if(code == ResultCodeSuccess){
                 [self getSystemNoticeBack:dict[@"data"]];
@@ -79,17 +81,24 @@
 }
 
 -(void)getTokenBack:(NSDictionary *)responseDic{
-    if(responseDic[@"error"] != nil){
-        SVP_ERROR_STATUS(responseDic[@"error_description"]);
-        return;
-    }
-    if(responseDic[@"code"] && [responseDic[@"code"] integerValue] != ResultCodeSuccess){
-        [[FunctionManager sharedInstance] handleFailResponse:responseDic];
-        return;
-    }
     [AppModel shareInstance].userInfo.userId = responseDic[@"userId"];
     [AppModel shareInstance].userInfo.token = responseDic[@"access_token"];
-    [AppModel shareInstance].userInfo.fullToken = [NSString stringWithFormat:@"Bearer %@",[AppModel shareInstance].userInfo.token];
+    [AppModel shareInstance].userInfo.fullToken = [NSString stringWithFormat:@"%@",[AppModel shareInstance].userInfo.token];
+    if (![FunctionManager isEmpty:responseDic[@"public_key"]]) {
+        NSString *key =
+        [RSA randomlyGenerated16BitString];
+        [AppModel shareInstance].randomly16Key = key;
+        
+        NSString *RSApublicKey =
+        responseDic[@"public_key"];
+        
+        NSString *encRSAPubKey =
+        [RSA encryptString:key publicKey:RSApublicKey];
+        
+        [AppModel shareInstance].encRSAPubKey = encRSAPubKey;
+    }
+
+
 }
 
 -(void)updateUserInfo:(NSDictionary *)dict{
@@ -103,7 +112,6 @@
     [AppModel shareInstance].userInfo = user;
     [AppModel shareInstance].userInfo.isLogined = YES;
     [[AppModel shareInstance] saveAppModel];
-    [NET_REQUEST_MANAGER requestIMTokenWithSuccess:nil fail:nil];
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     [ud setObject:user.userId forKey:@"userId"];
     [ud setObject:user.mobile forKey:@"mobile"];
@@ -122,8 +130,7 @@
     if([dict isKindOfClass:[NSString class]]){
         NSString *s = (NSString *)dict;
         NSData *data = [GTMBase64 decodeString:s];
-        NSString *key = @"1234567887654321";
-        data = [data AES128DecryptWithKey:key gIv:key];
+        data = [data AES128DecryptWithKey:kAccountPasswordKey gIv:kAccountPasswordKey];
         NSString *json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         dict = [json mj_JSONObject];
     }
@@ -132,7 +139,7 @@
     
     if(authKey){
         [AppModel shareInstance].appClientIdInCommonInfo = authKey;
-        [AppModel shareInstance].authKey = [NSString stringWithFormat:@"Basic %@",authKey];
+        [AppModel shareInstance].authKey = [NSString stringWithFormat:@"%@",authKey];
     }
 }
 
@@ -140,5 +147,52 @@
     [AppModel shareInstance].noticeArray = dict[@"records"];
     [[AppModel shareInstance] saveAppModel];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"updateScrollBarView" object:nil];
+    [self handleNoticeArray];
+}
+
+-(void)handleNoticeArray{
+    [AppModel shareInstance].noticeAttributedString = [[NSMutableAttributedString alloc] init];
+    if([AppModel shareInstance].noticeArray.count > 0){
+        NSMutableArray *arr = [[NSMutableArray alloc] init];
+        NSInteger nu = 0;
+        for (NSDictionary *dic in [AppModel shareInstance].noticeArray) {
+            NSString *title = dic[@"title"];
+            NSString *content = dic[@"content"];
+            NSMutableString *s = [[NSMutableString alloc] initWithString:@""];
+            if(title.length > 0)
+                [s appendString:title];
+            if(content.length > 0){
+                if(s.length > 0)
+                    [s appendString:@"："];
+                [s appendString:content];
+            }
+            [arr addObject:s];
+            nu += 1;
+            if(nu == 2)
+                break;
+        }
+        
+        NSMutableString *s = [[NSMutableString alloc] initWithString:@""];
+        for (NSString *txt in arr) {
+            if(s.length > 0)
+                [s appendString:@"     "];
+            [s appendString:txt];
+        }
+        [AppModel shareInstance].noticeAttributedString = [[NSMutableAttributedString alloc] initWithString:s];
+        NSInteger i = 0;
+        for (NSString *txt in arr) {
+            UIColor *color = nil;
+            if(i%2 == 0)
+                color = COLOR_X(100, 100, 100);
+            else
+                color = Color_3;
+            NSRange range = [s rangeOfString:txt];
+            [[AppModel shareInstance].noticeAttributedString addAttributes:@{NSForegroundColorAttributeName:color,
+                                        NSFontAttributeName:[UIFont systemFontOfSize:15]}
+                                range:range];
+            i += 1;
+        }
+    }
+    
 }
 @end

@@ -29,12 +29,13 @@
     size_t bufferSize = dataLength + kCCBlockSizeAES128;
     void *buffer = malloc(bufferSize);
     size_t numBytesCrypted = 0;
-      CCCryptorStatus cryptStatus = CCCrypt(operation,                                                                                        kCCAlgorithmAES128,                                                                                        kCCOptionPKCS7Padding,                                                                                        keyPtr,                                                                                        kCCBlockSizeAES128,                                                                                        ivPtr,                                                                                        [self bytes],                                                                                        dataLength,                                                                                        buffer,                                                                                        bufferSize,                                                                                        &numBytesCrypted);
-        if (cryptStatus == kCCSuccess) {
-                return [NSData dataWithBytesNoCopy:buffer length:numBytesCrypted];
-            }
-        free(buffer);
-        return nil;
+    CCCryptorStatus cryptStatus = CCCrypt(operation,   
+                                          kCCAlgorithmAES128, kCCOptionPKCS7Padding,keyPtr,kCCBlockSizeAES128,ivPtr,[self bytes],dataLength,buffer,bufferSize, &numBytesCrypted);
+    if(cryptStatus == kCCSuccess) {
+    return [NSData dataWithBytesNoCopy:buffer length:numBytesCrypted];
+    }
+    free(buffer);
+    return nil;
     
 }
 

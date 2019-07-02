@@ -19,6 +19,7 @@ target 'ProjectXZHB' do
     pod 'Bugtags'
     pod 'SocketRocket'
     pod 'SSKeychain'
+    pod 'ZLPhotoBrowser'
 
 end
 target 'ProjectBBHB' do
@@ -38,6 +39,7 @@ target 'ProjectBBHB' do
   pod 'Bugtags'
   pod 'SocketRocket'
   pod 'SSKeychain'
+  pod 'ZLPhotoBrowser'
   
 end
 
@@ -58,10 +60,53 @@ target 'ProjectXLHB' do
   pod 'Bugtags'
   pod 'SocketRocket'
   pod 'SSKeychain'
+  pod 'ZLPhotoBrowser'
   
 end
 
 target 'ProjectBWHB' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  # use_frameworks!
+  pod 'SVProgressHUD'
+  pod 'MJExtension'
+  pod 'MJRefresh'
+  pod 'AFNetworking'
+  pod 'SDWebImage'
+  pod 'Masonry'
+  pod 'WHC_ModelSqliteKit'
+  pod 'WechatOpenSDK'
+  pod 'IQKeyboardManager'
+  pod 'YYCache'
+  pod 'JSPatch'
+  pod 'Bugtags'
+  pod 'SocketRocket'
+  pod 'SSKeychain'
+  pod 'ZLPhotoBrowser'
+  
+end
+
+target 'ProjectHBLHB' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  # use_frameworks!
+  pod 'SVProgressHUD'
+  pod 'MJExtension'
+  pod 'MJRefresh'
+  pod 'AFNetworking'
+  pod 'SDWebImage'
+  pod 'Masonry'
+  pod 'WHC_ModelSqliteKit'
+  pod 'WechatOpenSDK'
+  pod 'IQKeyboardManager'
+  pod 'YYCache'
+  pod 'JSPatch'
+  pod 'Bugtags'
+  pod 'SocketRocket'
+  pod 'SSKeychain'
+  pod 'ZLPhotoBrowser'
+  
+end
+
+target 'ProjectQWHB' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
   # use_frameworks!
   pod 'SVProgressHUD'
@@ -98,6 +143,7 @@ target 'ProjectTTHB' do
     pod 'Bugtags'
     pod 'SocketRocket'
     pod 'SSKeychain'
+    pod 'ZLPhotoBrowser'
 end
 
 target 'ProjectWWHB' do
@@ -117,6 +163,7 @@ target 'ProjectWWHB' do
     pod 'Bugtags'
     pod 'SocketRocket'
     pod 'SSKeychain'
+    pod 'ZLPhotoBrowser'
 end
 
 target 'ProjectWBHB' do
@@ -136,6 +183,7 @@ target 'ProjectWBHB' do
     pod 'Bugtags'
     pod 'SocketRocket'
     pod 'SSKeychain'
+    pod 'ZLPhotoBrowser'
 end
 
 target 'ProjectCSHB' do
@@ -155,6 +203,7 @@ target 'ProjectCSHB' do
     pod 'Bugtags'
     pod 'SocketRocket'
     pod 'SSKeychain'
+    pod 'ZLPhotoBrowser'
 end
 
 target 'ProjectQQHB' do
@@ -174,6 +223,7 @@ target 'ProjectQQHB' do
   pod 'Bugtags'
   pod 'SocketRocket'
   pod 'SSKeychain'
+  pod 'ZLPhotoBrowser'
 end
 
 
@@ -194,4 +244,5 @@ target 'ProjectDFSHB' do
   pod 'Bugtags'
   pod 'SocketRocket'
   pod 'SSKeychain'
+  pod 'ZLPhotoBrowser'
 end

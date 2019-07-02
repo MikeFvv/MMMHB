@@ -13,9 +13,11 @@
 @interface WebViewController : SuperViewController{
     NSString *_url;
 }
+@property(nonatomic,assign)BOOL isForceEscapeWebVC;
 @property(nonatomic,strong)WKWebView *webView;
 - (void)actionBlock:(DataBlock)block;
 - (instancetype)initWithUrl:(NSString *)url;
+- (instancetype)initWithUrl:(NSString *)url withBodyDictionary:(NSDictionary *)params;
 - (instancetype)initWithHtmlString:(NSString *)string;
 
 @end

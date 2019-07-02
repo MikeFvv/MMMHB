@@ -35,7 +35,7 @@
     
     WithdrawView *wdView = [[[NSBundle mainBundle] loadNibNamed:@"WithdrawView" owner:nil options:nil] lastObject];
     [wdView initView];
-    [wdView.selectBankBtn addTarget:self action:@selector(selectBank) forControlEvents:UIControlEventTouchUpInside];
+    [wdView.selectBankBtn addTarget:self action:@selector(selectBankAction) forControlEvents:UIControlEventTouchUpInside];
     [wdView.submitBtn addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
     self.wdView = wdView;
     self.wdView.bankIconImageView.image = nil;
@@ -77,7 +77,7 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addNewCard:) name:@"addNewCard" object:nil];
     
-    [self getLastWithdrawInfo];
+    
 }
 
 -(void)addNewCard:(NSNotification *)notification{
@@ -221,10 +221,10 @@
     return view;
 }
 
--(void)selectBank{
+-(void)selectBankAction{
     [self.view endEditing:YES];
     
-    if(self.bankArray == nil){
+    if(self.bankArray == nil||self.bankArray.count==0){
         self.bankArray = [[NSMutableArray alloc] init];
         NSDictionary *dic = @{@"icon":@"",@"title2":@"使用新卡提现"};
         [self.bankArray addObject:[NSMutableDictionary dictionaryWithDictionary:dic]];
@@ -236,7 +236,7 @@
     }
     if(self.selectBankDic){
         for (NSMutableDictionary *dic in self.bankArray) {
-            if([dic[@"bankId"] integerValue] == [self.selectBankDic[@"bankId"] integerValue]){
+            if([dic[@"id"] integerValue] == [self.selectBankDic[@"id"] integerValue]){
                 [dic setObject:@YES forKey:@"selected"];
             }else
                 [dic setObject:@NO forKey:@"selected"];
@@ -291,13 +291,24 @@
     SVP_SHOW;
     WEAK_OBJ(weakSelf, self);
     NSString *bankId = self.selectBankDic[@"bankId"];
-    [NET_REQUEST_MANAGER withDrawWithAmount:money bankId:bankId success:^(id object) {
-        SVP_SUCCESS_STATUS(object[@"msg"]);
+    [NET_REQUEST_MANAGER withDrawWithAmount:money userName:self.selectBankDic[@"user"] bankName:self.selectBankDic[@"title"] bankId:bankId address:self.selectBankDic[@"bankRegion"] uppayNO:self.selectBankDic[@"upayNo"] remark:@"" success:^(id object) {
+        NSString *msg = [NSString stringWithFormat:@"%@",[object objectForKey:@"alterMsg"]];
+        SVP_SUCCESS_STATUS(msg);
         [weakSelf requestBalance];
-        [weakSelf requestHistoryListWithPage:1];
+        
+
     } fail:^(id object) {
         [[FunctionManager sharedInstance] handleFailResponse:object];
-    }];
+    } ];
+    
+//    [NET_REQUEST_MANAGER withDrawWithAmount:money bankId:bankId success:^(id object) {
+//        NSString *msg = [NSString stringWithFormat:@"%@",[object objectForKey:@"alterMsg"]];
+//        SVP_SUCCESS_STATUS(msg);
+//        [weakSelf requestBalance];
+//        [weakSelf requestHistoryListWithPage:1];
+//    } fail:^(id object) {
+//        [[FunctionManager sharedInstance] handleFailResponse:object];
+//    }];
 }
 
 -(void)viewWillAppear:(BOOL)animated{
@@ -308,17 +319,24 @@
 -(void)requestBankList{
     WEAK_OBJ(weakSelf, self);
     [NET_REQUEST_MANAGER getMyBankCardListWithSuccess:^(id object) {
-        [weakSelf requestBankListBack:object[@"data"]];
+        [weakSelf getBankListData:object[@"data"]];
+        if (object[@"data"]!=nil) {
+            NSArray* arr = object[@"data"];
+            if (arr.count>0) {
+                NSArray* arr = object[@"data"];
+                [weakSelf getLastWithdrawInfo:arr.firstObject];
+            }
+        }
     } fail:^(id object) {
         [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
 }
 
--(void)requestBankListBack:(NSArray *)array{
+-(void)getBankListData:(NSArray *)array{
     self.bankArray = [NSMutableArray array];
     for (NSDictionary *dic in array) {
         NSMutableDictionary *dd = [NSMutableDictionary dictionary];
-        NSString *title = dic[@"title"];
+        NSString *title = dic[@"bankName"];
         NSString *uno = dic[@"upayNo"];
         NSString *upayNo = uno;
         if(uno.length > 4)
@@ -327,8 +345,11 @@
         [dd setObject:[NSString stringWithFormat:@"%@(%@)",title,upayNo] forKey:@"title2"];
         if(dic[@"img"])
             [dd setObject:dic[@"img"] forKey:@"icon"];
-        [dd setObject:dic[@"id"] forKey:@"bankId"];
-        
+        [dd setObject:dic[@"upaytId"] forKey:@"bankId"];
+        [dd setObject:dic[@"id"] forKey:@"id"];
+        [dd setObject:dic[@"upayNo"] forKey:@"upayNo"];
+        [dd setObject:dic[@"user"] forKey:@"user"];
+        [dd setObject:dic[@"bankRegion"] forKey:@"bankRegion"];
         [self.bankArray addObject:dd];
     }
     if(self.isAddNewCard){
@@ -385,35 +406,28 @@
     WEAK_OBJ(weakSelf, self);
     [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
         weakSelf.wdView.tipLabel.text = [NSString stringWithFormat:@"当前零钱余额%@元，",[AppModel shareInstance].userInfo.balance];
+        [weakSelf requestHistoryListWithPage:1];
     } fail:^(id object) {
         
     }];
 }
 
--(void)getLastWithdrawInfo{
-    WEAK_OBJ(weakSelf, self);
-    [NET_REQUEST_MANAGER getLastWithdrawInfoWithSuccess:^(id object) {
-        NSDictionary *dic = object[@"data"];
-        if([dic isKindOfClass:[NSNull class]])
-            return ;
-        if(dic.count == 0)
-            return;
-        NSMutableDictionary *dd = [NSMutableDictionary dictionary];
-        NSString *title = dic[@"title"];
-        NSString *uno = dic[@"upayNo"];
-        NSString *upayNo = uno;
-        if(uno.length > 4)
-            upayNo = [uno substringFromIndex:uno.length - 4];
-        [dd setObject:title forKey:@"title"];
-        [dd setObject:[NSString stringWithFormat:@"%@(%@)",title,upayNo] forKey:@"title2"];
-        if(dic[@"img"])
-            [dd setObject:dic[@"img"] forKey:@"icon"];
-        [dd setObject:dic[@"upaytId"] forKey:@"bankId"];
-        weakSelf.selectBankDic = dd;
-        weakSelf.wdView.bankLabel.text = self.selectBankDic[@"title2"];
-        [weakSelf.wdView.bankIconImageView sd_setImageWithURL:[NSURL URLWithString:self.selectBankDic[@"icon"]]];
-    } fail:^(id object) {
-        
-    }];
+-(void)getLastWithdrawInfo:(NSDictionary*)dic{
+    NSMutableDictionary *dd = [NSMutableDictionary dictionary];
+    NSString *title = dic[@"title"];
+    NSString *uno = dic[@"upayNo"];
+    NSString *upayNo = uno;
+    if(uno.length > 4)
+        upayNo = [uno substringFromIndex:uno.length - 4];
+    [dd setObject:title forKey:@"title"];
+    [dd setObject:[NSString stringWithFormat:@"%@(%@)",title,upayNo] forKey:@"title2"];
+    if(dic[@"img"])
+        [dd setObject:dic[@"img"] forKey:@"icon"];
+    [dd setObject:dic[@"upaytId"] forKey:@"bankId"];
+    [dd setObject:dic[@"id"] forKey:@"id"];
+    self.selectBankDic = dd;
+    self.wdView.bankLabel.text = self.selectBankDic[@"title2"];
+    [self.wdView.bankIconImageView sd_setImageWithURL:[NSURL URLWithString:self.selectBankDic[@"icon"]]];
+
 }
 @end

@@ -12,29 +12,6 @@
 
 @interface SSChatDatas : NSObject
 
-
-
-/**
- 获取单聊的初始会话
-
- @param sessionId 传入会话id
- @return 返回会话对象数组
- */
-+(NSMutableArray *)LoadingMessagesStartWithChat:(NSString *)sessionId;
-
-
-
-
-/**
- 获取群聊的初始会话
-
- @param sessionId 传入会话id
- @return 返回会话对象数组
- */
-+(NSMutableArray *)LoadingMessagesStartWithGroupChat:(NSString *)sessionId;
-
-
-
 /**
  处理消息数组 一般进入聊天界面会初始化之前的消息展示
 

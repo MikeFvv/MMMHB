@@ -15,7 +15,7 @@
     
 }
 @property(nonatomic,assign)NSInteger type;
-@property(nonatomic,strong)NSArray *dataArray;
+@property(nonatomic,copy)NSArray *dataArray;
 @property(nonatomic,strong)UITableView *tableView;
 @property(nonatomic,strong)UIButton *getButton;
 @property(nonatomic,strong)NSMutableArray *aniObjArray;
@@ -35,8 +35,11 @@
     self.type = [self.infoDic[@"type"] integerValue];
     if(self.type == RewardType_fbjl){
         [self.view az_setGradientBackgroundWithColors:@[COLOR_X(253, 172, 105),COLOR_X(246, 83, 76)] locations:nil startPoint:CGPointMake(0, 0) endPoint:CGPointMake(0, 1)];
-    }else
+    }else if(self.type == RewardType_qbjl){
         [self.view az_setGradientBackgroundWithColors:@[COLOR_X(103, 204, 130),COLOR_X(183, 185, 67)] locations:nil startPoint:CGPointMake(0, 0) endPoint:CGPointMake(0, 1)];
+    }else{
+        [self.view az_setGradientBackgroundWithColors:@[HexColor(@"#187bea"),HexColor(@"#7bebe4")] locations:nil startPoint:CGPointMake(0, 0) endPoint:CGPointMake(0, 1)];
+    }
     
     self.aniObjArray = [NSMutableArray array];
     
@@ -140,7 +143,7 @@
     float rate = 0;
     if(threshold > 0)
         rate = sum/threshold;
-    [cell setTitle:dic[@"description"] percentString:[NSString stringWithFormat:@"%@/%@",dic[@"sum"],dic[@"threshold"]] percent:rate reward:dic[@"free"] lottery:INT_TO_STR(count)];
+    [cell setTitle:dic[@"description"] percentString:[NSString stringWithFormat:@"%@/%@",dic[@"sum"],dic[@"threshold"]] percent:rate reward:STR_TO_AmountFloatSTR(dic[@"free"]) lottery:INT_TO_STR(count)];
     [cell setBtnTitle:dic[@"strStatus"] status:[dic[@"status"] integerValue]];
     return cell;
 }
@@ -153,8 +156,14 @@
         } fail:^(id object) {
             [[FunctionManager sharedInstance] handleFailResponse:object];
         }];
-    }else{
+    }else if(self.type == RewardType_qbjl){
         [NET_REQUEST_MANAGER getActivityQiaoBaoListWithId:self.infoDic[@"id"] success:^(id object) {
+            [weakSelf getDataBack:object];
+        } fail:^(id object) {
+            [[FunctionManager sharedInstance] handleFailResponse:object];
+        }];
+    }else{
+        [NET_REQUEST_MANAGER getActivityJiujiJingListWithId:self.infoDic[@"id"] success:^(id object) {
             [weakSelf getDataBack:object];
         } fail:^(id object) {
             [[FunctionManager sharedInstance] handleFailResponse:object];
@@ -166,18 +175,17 @@
     SVP_DISMISS;
     self.rewardDic = dict[@"data"];
     self.dataArray = self.rewardDic[@"activityAwardList"];
-    
     BOOL isGet = [self.rewardDic[@"isTodayGet"] boolValue];
     if(self.getButton){
         if(!isGet){
-            [self.getButton setTitle:[NSString stringWithFormat:@"奖励¥%@ 领取",self.rewardDic[@"canGetMoney"]] forState:UIControlStateNormal];
+            [self.getButton setTitle:[NSString stringWithFormat:@"奖励¥%@ 领取",STR_TO_AmountFloatSTR(self.rewardDic[@"canGetMoney"])] forState:UIControlStateNormal];
             [self.getButton setTitleColor:COLOR_X(255, 60, 60) forState:UIControlStateNormal];
             [self.getButton setBackgroundImage:[UIImage imageNamed:@"getRewardBtn"] forState:UIControlStateNormal];
             if(![self.aniObjArray containsObject:self.getButton])
                 [self.aniObjArray addObject:self.getButton];
         }
         else{
-            [self.getButton setTitle:[NSString stringWithFormat:@"奖励¥%@ 已领取",self.rewardDic[@"canGetMoney"]] forState:UIControlStateNormal];
+            [self.getButton setTitle:[NSString stringWithFormat:@"奖励¥%@ 已领取",STR_TO_AmountFloatSTR(self.rewardDic[@"canGetMoney"])] forState:UIControlStateNormal];
             [self.getButton setTitleColor:COLOR_X(255, 255, 255) forState:UIControlStateNormal];
             [self.getButton setBackgroundImage:[UIImage imageNamed:@"getRewardBtn2"] forState:UIControlStateNormal];
             self.getButton.userInteractionEnabled = NO;

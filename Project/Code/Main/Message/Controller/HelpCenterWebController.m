@@ -26,6 +26,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = @"帮助中心";
+    self.isForceEscapeWebVC = YES;
     UIButton *regisBtn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 60, 44)];
     regisBtn.titleLabel.font = [UIFont systemFontOfSize:15];
     [regisBtn setTitle:@"玩法规则" forState:UIControlStateNormal];

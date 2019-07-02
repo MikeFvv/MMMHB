@@ -44,10 +44,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setRedEnvelopeMessage:(NSString *)messageId redEnvelopeMessage:(EnvelopeMessage *)redEnvelopeMessage;
 
+- (void)updateMessage:(NSString *)messageId;
+
 /**
  聊天界面下拉请求数据
  */
-- (void)sendDropdownRequest:(NSString *)groupId endTime:(NSTimeInterval)endTime;
+- (void)sendDropdownRequest:(NSString *)sessionId endTime:(NSTimeInterval)endTime;
 
 /**
  用户主动退出登录

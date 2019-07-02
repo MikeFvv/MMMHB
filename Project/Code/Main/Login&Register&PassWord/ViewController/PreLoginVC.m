@@ -66,7 +66,8 @@
     
     [self createTvView];
     
-    UIImage* decorImage3 = [UIImage imageNamed:@""];//preloginBottom
+//    UIImage* decorImage3 = [UIImage imageNamed:@""];//preloginBottom
+    UIImage* decorImage3 = [UIImage new];
     self.decorIv3 = [[UIImageView alloc]init];
     [self.view addSubview:self.decorIv3];
     [self.decorIv3 mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -160,7 +161,8 @@
 
 
 -(void)createTvView{
-    UIImage* decorImage2 = [UIImage imageNamed:@""];//preloginMid
+//    UIImage* decorImage2 = [UIImage imageNamed:@""];//preloginMid
+    UIImage* decorImage2 = [UIImage new];
     UIImageView* decorIv2 = [[UIImageView alloc]init];
     [self.view addSubview:decorIv2];
     [decorIv2 mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -238,15 +240,7 @@
     
     [uploadImageHV actionBlock:^(id data) {
         BannerItem* item = data;
-        [self fromBannerPushToVCWithBannerItem:item isFromLaunchBanner:NO];
-//        if (![FunctionManager isEmpty:item.advLinkUrl]) {
-//            WebViewController *vc = [[WebViewController alloc] initWithUrl:item.advLinkUrl];
-//            vc.navigationItem.title = item.name;
-//            vc.hidesBottomBarWhenPushed = YES;
-//            //[vc loadWithURL:url];
-//            [self.navigationController pushViewController:vc animated:YES];
-//        }
-        
+        [self fromBannerPushToVCWithBannerItem:item isFromLaunchBanner:NO];        
     }];
 }
 

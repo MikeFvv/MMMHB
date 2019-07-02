@@ -28,6 +28,10 @@
     [self.bubbleBackView addSubview:_redIcon];
     _redIcon.image = [UIImage imageNamed:@"mess_packed_icon_nor"];
     
+    _nograbLandminesIcon = [UIImageView new];
+    [self.bubbleBackView addSubview:_nograbLandminesIcon];
+    _nograbLandminesIcon.image = [UIImage imageNamed:@"landmines"];
+    
     [_redIcon mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.bubbleBackView.mas_left).offset(13);
         make.top.equalTo(self.bubbleBackView.mas_top).offset(22);
@@ -185,7 +189,9 @@
         }];
     }
     
-    
+    self.nograbLandminesIcon.hidden = YES;
+    NSDictionary *nograDict = model.message.redEnvelopeMessage.nograbContent;
+    BOOL isShowNograbLandminesIcon = [nograDict[@"type"] integerValue]==2?NO:[nograDict[@"handicap"] integerValue]==0?NO:YES;
     CGFloat redIconTopM = 18*FYRedEnvelopeBackHeight/85;
     if (model.message.messageFrom == FYMessageDirection_SEND) {
         
@@ -200,6 +206,14 @@
                 make.left.mas_equalTo(self.bubbleBackView.mas_left).offset(12);
                 make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(redIconTopM);
             }];
+            if (redEnveType == FYRedEnvelopeType_NoRob
+                &&isShowNograbLandminesIcon) {
+                self.nograbLandminesIcon.hidden = NO;
+                [self.nograbLandminesIcon mas_updateConstraints:^(MASConstraintMaker *make) {
+                    make.right.mas_equalTo(self.bubbleBackView.mas_right).offset(-12);
+                    make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(0);
+                }];
+            }
         }
         
     } else {
@@ -209,6 +223,14 @@
                 make.left.mas_equalTo(self.bubbleBackView.mas_left).offset(21);
                 make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(redIconTopM);
             }];
+            if (redEnveType == FYRedEnvelopeType_NoRob
+                &&isShowNograbLandminesIcon) {
+                self.nograbLandminesIcon.hidden = NO;
+                [self.nograbLandminesIcon mas_updateConstraints:^(MASConstraintMaker *make) {
+                    make.right.mas_equalTo(self.bubbleBackView.mas_right).offset(0);
+                    make.top.mas_equalTo(self.bubbleBackView.mas_top).offset(0);
+                }];
+            }
         }
         
         self.descLabel.textAlignment = NSTextAlignmentRight;

@@ -208,11 +208,15 @@
 -(void)toBeAgent{
     __weak __typeof(self)weakSelf = self;
     [[NetRequestManager sharedInstance] askForToBeAgentWithSuccess:^(id object) {
-        AlertTipPopUpView* popupView = [[AlertTipPopUpView alloc]init];
-        [popupView showInApplicationKeyWindow];
-        [popupView richElementsInViewWithModel:[object objectForKey:@"data"] actionBlock:^(id data) {
-            
-        }];
+        NSString* str = [object objectForKey:@"alterMsg"];
+        if (![FunctionManager isEmpty:str]) {
+            AlertTipPopUpView* popupView = [[AlertTipPopUpView alloc]init];
+            [popupView showInApplicationKeyWindow];
+            [popupView richElementsInViewWithModel:str actionBlock:^(id data) {
+                
+            }];
+        }
+        
         [weakSelf requestUserinfo];
     } fail:^(id object) {
         [[FunctionManager sharedInstance] handleFailResponse:object];

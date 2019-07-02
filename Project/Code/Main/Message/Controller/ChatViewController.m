@@ -21,7 +21,6 @@
 #import "IQKeyboardManager.h"
 #import "EnvelopeNet.h"
 #import "BANetManager_OC.h"
-#import "ChatUserInfoController.h"
 #import "SqliteManage.h"
 #import "RedEnvelopeAnimationView.h"
 
@@ -39,8 +38,10 @@
 #import "CustomerServiceAlertView.h"
 #import "AgentCenterViewController.h"
 
+#import "FYContacts.h"
+#import "FriendChatInfoController.h"
 
-//@interface ChatViewController ()<RCPluginBoardViewDelegate,RCMessageCellDelegate>
+
 @interface ChatViewController ()<FYSystemBaseCellDelegate>
 
 @property (nonatomic, strong) MessageItem *messageItem;
@@ -82,8 +83,8 @@
 
 static ChatViewController *_chatVC;
 
-
-+ (ChatViewController *)groupChatWithObj:(MessageItem *)obj{
+// 群聊
++ (ChatViewController *)groupChatWithObj:(MessageItem *)obj {
     
     _chatVC = [[ChatViewController alloc] initWithConversationType:FYConversationType_GROUP
                                                           targetId:obj.groupId];
@@ -102,8 +103,34 @@ static ChatViewController *_chatVC;
         _chatVC.title = [NSString stringWithFormat:@"%@...", [title substringToIndex:12]];
     }else
         _chatVC.title = title;
-
     
+    
+    return _chatVC;
+}
+
+// 单聊
++ (ChatViewController *)privateChatWithModel:(FYContacts *)model {
+    FYChatConversationType chatConversationType;
+    if (model.contactsType == 3) {
+        chatConversationType = FYConversationType_CUSTOMERSERVICE;
+    } else {
+        chatConversationType = FYConversationType_PRIVATE;
+    }
+    _chatVC = [[ChatViewController alloc] initWithConversationType:chatConversationType
+                                                          targetId:model.sessionId];
+    //设置聊天会话界面要显示的标题
+    NSString *title = model.nick;
+    NSRange range = [title rangeOfString:@"("];
+    if(range.length == 0)
+        range = [title rangeOfString:@"（"];
+    if(range.length > 0)
+        title = [title substringToIndex:range.location];
+    if(title.length == 0)
+        title = @"";
+    if (title.length > 12) {
+        _chatVC.title = [NSString stringWithFormat:@"%@...", [title substringToIndex:12]];
+    }else
+        _chatVC.title = title;
     return _chatVC;
 }
 
@@ -130,10 +157,11 @@ static ChatViewController *_chatVC;
     
     self.enveModel = [EnvelopeNet shareInstance];
     
+    
     // 多条消息提示
     //    self.enableUnreadMessageIcon = YES;
     //    self.enableNewComingMessageIcon = YES;
-    [self unreadMessage];
+    [self updateUnreadMessage];
     
     self.leftBtn = self.navigationItem.leftBarButtonItem;
     self.rightBtnArray = self.navigationItem.rightBarButtonItems;
@@ -146,7 +174,7 @@ static ChatViewController *_chatVC;
     //        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(scrollToBottom) name:@"scrollToBottom" object:nil];
     
     if (self.isNewMember) {
-         [self sendWelcomeMessage:self.sessionId];
+        [self sendWelcomeMessage:self.sessionId];
     }
 }
 
@@ -160,23 +188,30 @@ static ChatViewController *_chatVC;
 }
 
 - (void)setNavUI {
-    UIButton *redpiconBtn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
-    [redpiconBtn setImage:[UIImage imageNamed:@"redPacketIcon"] forState:UIControlStateNormal];
-    redpiconBtn.titleLabel.font = [UIFont systemFontOfSize:12];
-    [redpiconBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [redpiconBtn addTarget:self action:@selector(goto_sendRedEnvelopeEnt) forControlEvents:UIControlEventTouchUpInside];
     
-    UIBarButtonItem *exItem = [[UIBarButtonItem alloc]initWithCustomView:redpiconBtn];
-    
-    UIButton *info = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
-    [info setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [info setImage:[UIImage imageNamed:@"group-info"] forState:UIControlStateNormal];
-    
-    [info addTarget:self action:@selector(goto_GroupInfo) forControlEvents:UIControlEventTouchUpInside];
-    
-    UIBarButtonItem *infoItem = [[UIBarButtonItem alloc]initWithCustomView:info];
-    
-    self.navigationItem.rightBarButtonItems = @[infoItem,exItem];
+    if (self.chatType == FYConversationType_GROUP) {
+        UIButton *redpiconBtn = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
+        [redpiconBtn setImage:[UIImage imageNamed:@"redPacketIcon"] forState:UIControlStateNormal];
+        redpiconBtn.titleLabel.font = [UIFont systemFontOfSize:12];
+        [redpiconBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [redpiconBtn addTarget:self action:@selector(goto_sendRedEnvelopeEnt) forControlEvents:UIControlEventTouchUpInside];
+        
+        UIBarButtonItem *exItem = [[UIBarButtonItem alloc]initWithCustomView:redpiconBtn];
+        
+        UIButton *info = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 44, 44)];
+        [info setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [info setImage:[UIImage imageNamed:@"group-info"] forState:UIControlStateNormal];
+        
+        [info addTarget:self action:@selector(goto_GroupInfo) forControlEvents:UIControlEventTouchUpInside];
+        
+        UIBarButtonItem *infoItem = [[UIBarButtonItem alloc]initWithCustomView:info];
+        
+        self.navigationItem.rightBarButtonItems = @[infoItem,exItem];
+        
+    } else if (self.chatType == FYConversationType_PRIVATE) {
+        UIBarButtonItem *rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"group-info"] style:UIBarButtonItemStyleDone target:self action:@selector(goto_userInfo)];
+        [self.navigationItem setRightBarButtonItem:rightBarButtonItem];
+    }
 }
 
 
@@ -190,19 +225,12 @@ static ChatViewController *_chatVC;
     self.isVSViewClick = YES;
     
     self.bankerId = [[model.cowcowRewardInfoDict objectForKey:@"userId"] stringValue];
-//    [self vsViewGetRedPacketDetailsData:[model.cowcowRewardInfoDict objectForKey:@"id"]];
+    //    [self vsViewGetRedPacketDetailsData:[model.cowcowRewardInfoDict objectForKey:@"id"]];
     NSString *redId = [[model.cowcowRewardInfoDict objectForKey:@"id"] stringValue];
     [self goto_RedPackedDetail:redId];
 }
 
-/**
- 更新未读消息
- */
-- (void)unreadMessage {
-//    [SqliteManage updateGroup:_messageItem.groupId number:0 lastMessage:@"暂无未读消息"];
-    [[FYIMManager shareInstance] updateGroup:_messageItem.groupId number:0 lastMessage:@"暂无未读消息" messageCount:0 left:0];
-    
-}
+
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
@@ -215,7 +243,7 @@ static ChatViewController *_chatVC;
     [super viewWillDisappear:animated];
     [IQKeyboardManager sharedManager].enableAutoToolbar = YES;
     [[IQKeyboardManager sharedManager]setEnable:YES];
-
+    
     self.isCreateRpView = NO;
     self.isVSViewClick = NO;
 }
@@ -229,11 +257,11 @@ static ChatViewController *_chatVC;
 
 
 - (void)chatBarControl {
-
+    
 }
 
 
-#pragma mark RCPluginBoardViewDelegate 聊天功能扩展拦
+#pragma mark - 聊天功能扩展拦
 //多功能视图点击回调  图片10  视频11  位置12
 -(void)fyChatFunctionBoardClickedItemWithTag:(NSInteger)tag {
     
@@ -278,18 +306,22 @@ static ChatViewController *_chatVC;
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
     } else if (tag == 2007){  // 客服
-         [self actionShowCustomerServiceAlertView:nil];
+        [self actionShowCustomerServiceAlertView:nil];
     } else if (tag == 2008){ // 照片
-        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
-        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
+        
+        [super fyChatFunctionBoardClickedItemWithTag:10];
+        //         [super pluginBoardView:pluginBoardView clickedItemWithTag:tag];
+        
+        //        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+        //        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
     } else if (tag == 2009){ // 拍照
         AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
         [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
     } else if(tag == 2010){  // 赚钱
-         PUSH_C(self, ShareViewController, YES);
+        PUSH_C(self, ShareViewController, YES);
     } else {
-//        [super pluginBoardView:pluginBoardView clickedItemWithTag:tag];
-
+        //        [super pluginBoardView:pluginBoardView clickedItemWithTag:tag];
+        
     }
     
 }
@@ -302,12 +334,6 @@ static ChatViewController *_chatVC;
     vc.title = @"群规";
     [self.navigationController pushViewController:vc animated:YES];
 }
-
-//#pragma mark data
-//- (void)updateCustomMessageInfo:(RCMessageModel *)model{
-//
-//}
-
 
 
 #pragma mark - override Cell点击事件
@@ -348,16 +374,16 @@ static ChatViewController *_chatVC;
             }
         } else {
             strongSelf.isCreateRpView = NO;
-            SVP_ERROR_STATUS([success objectForKey:@"msg"]);
+            [[FunctionManager sharedInstance] handleFailResponse:success];
         }
         
         
     } failureBlock:^(NSError *error) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
-        SVP_DISMISS;
         strongSelf.isCreateRpView = NO;
+        SVP_DISMISS;
         //        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        SVP_ERROR_STATUS(kSystemBusyMessage);
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
     
 }
@@ -372,40 +398,43 @@ static ChatViewController *_chatVC;
         if ([[success objectForKey:@"code"] integerValue] == 0) {
             [strongSelf goto_RedPackedDetail:strongSelf.enveModel];
         } else {
-            SVP_ERROR_STATUS([success objectForKey:@"msg"]);
+            [[FunctionManager sharedInstance] handleFailResponse:success];
         }
     } failureBlock:^(NSError *error) {
-         __strong __typeof(weakSelf)strongSelf = weakSelf;
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
         SVP_DISMISS;
         strongSelf.isVSViewClick = NO;
         //        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        SVP_ERROR_STATUS(kSystemBusyMessage);
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
 }
 
+#pragma mark - 好友聊天信息页
+- (void)goto_FriendChatInfo:(FYContacts *)contacts {
+    [self.view endEditing:YES];
+    FriendChatInfoController *vc = [[FriendChatInfoController alloc] init];
+    vc.contacts = contacts;
+    [self.navigationController pushViewController:vc animated:YES];
+}
 
 #pragma mark - 点击头像事件
 // 点击头像事件
 //- (void)didTapCellPortrait:(NSString *)userId {
 -(void)didTapCellChatHeaderImg:(UserInfo *)userInfo {
+    
+    if (self.chatType == FYConversationType_PRIVATE || self.chatType == FYConversationType_CUSTOMERSERVICE) {
+        // 聊天信息页
+//        [self goto_FriendChatInfo:userInfo];
+        return;
+    }
+    
     [self.view endEditing:YES];
     if ([userInfo.userId isEqualToString:[AppModel shareInstance].userInfo.userId]) {
         return;
     }
-    
-//    if ([self.messageItem.userId isEqualToString:AppModel.shareInstance.userInfo.userId] ) {
-//        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
-//        [view showWithText:[NSString stringWithFormat:@"昵称：%@\nID：%@",userInfo.nick,userInfo.userId] button:@"好的" callBack:nil];
-//
-//        //        ChatUserInfoController *vc = [[ChatUserInfoController alloc] init];
-////        vc.userId = userInfo.userId;
-////        [self.navigationController pushViewController:vc animated:YES];
-//    } else {
-//        [self.sessionInputView addMentionedUser:userInfo];
-//    }
-    
     [self.sessionInputView addMentionedUser:userInfo];
 }
+
 
 // 长按头像
 -(void)didLongPressCellChatHeaderImg:(UserInfo *)userInfo {
@@ -416,9 +445,9 @@ static ChatViewController *_chatVC;
         return;
     }
     
-//    if ([self.messageItem.userId isEqualToString:[AppModel shareInstance].userInfo.userId] ) {
-//       [self.sessionInputView addMentionedUser:userInfo];
-//    }
+    //    if ([self.messageItem.userId isEqualToString:[AppModel shareInstance].userInfo.userId] ) {
+    //       [self.sessionInputView addMentionedUser:userInfo];
+    //    }
     
     // 群主
     if ([self.messageItem.userId isEqualToString:[AppModel shareInstance].userInfo.userId] || [AppModel shareInstance].userInfo.innerNumFlag) {
@@ -437,7 +466,11 @@ static ChatViewController *_chatVC;
 - (void)action_tapCustom:(FYMessage *)messageModel {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@?type=%zd&packetId=%@",[AppModel shareInstance].serverUrl,@"social/redpacket/grab",messageModel.redEnvelopeMessage.type,messageModel.redEnvelopeMessage.redpacketId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"redpacket/redpacket/grab"];
+    NSDictionary *parameters = @{
+                                 @"packetId":messageModel.redEnvelopeMessage.redpacketId
+                                 };
+    entity.parameters = parameters;
     entity.needCache = NO;
     
     self.response = nil;
@@ -458,9 +491,8 @@ static ChatViewController *_chatVC;
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         //        SVP_DISMISS;
         [strongSelf uploadTimer:nil];
-        SVP_ERROR_STATUS(kSystemBusyMessage);
+        [[FunctionManager sharedInstance] handleFailResponse:error];
         [strongSelf.redpView disMissRedView];
-        //        [[FunctionManager sharedInstance] handleFailResponse:error];
     } progressBlock:nil];
     
 }
@@ -538,33 +570,28 @@ static ChatViewController *_chatVC;
 #endif
         }
         
-    } else if (code == 11) {
-        // 红包已抢完
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
-        [self updateRedPackedStatus:self.messageId cellStatus:@"2"];
-        
-    } else if (code == 12) {
-        // 已抢过红包
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
-        [self updateRedPackedStatus:self.messageId cellStatus:@"1"];
-        
-    } else if (code == 13) {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
-        // 余额不足
-    } else if (code == 14) {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
-        // 通讯异常，请重试
-    } else if (code == 15) {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
-        // 单个红包金额不足0.01
-    } else if (code == 16) {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
-        // 红包已逾期
-        [self updateRedPackedStatus:self.messageId cellStatus:@"3"];
-    } else if (code == 17) {
-        [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
     } else {
+        NSInteger code = [[response objectForKey:@"errorcode"] integerValue];
         [self.redpView updateView:_enveModel.redPackedInfoDetail response:response rpOverdueTime:self.messageItem.rpOverdueTime];
+        if (code == 11) {
+            // 红包已抢完
+            [self updateRedPackedStatus:self.messageId cellStatus:@"2"];
+        } else if (code == 12) {
+            // 已抢过红包
+            [self updateRedPackedStatus:self.messageId cellStatus:@"1"];
+        } else if (code == 13) {
+            // 余额不足
+        } else if (code == 14) {
+            // 通讯异常，请重试
+        } else if (code == 15) {
+            // 单个红包金额不足0.01
+        } else if (code == 16) {
+            // 红包已逾期
+            [self updateRedPackedStatus:self.messageId cellStatus:@"3"];
+        } else if (code == 17) {
+        } else {
+        }
+        
     }
     
 }
@@ -676,7 +703,7 @@ static ChatViewController *_chatVC;
 }
 
 
-#pragma mark Group info 群信息
+#pragma mark - Group info 群信息
 /**
  Group Info
  */
@@ -685,6 +712,16 @@ static ChatViewController *_chatVC;
     GroupInfoViewController *vc = [GroupInfoViewController groupVc:_messageItem];
     [self.navigationController pushViewController:vc animated:YES];
 }
+
+#pragma mark - 用户聊天信息
+/**
+ user Info
+ */
+- (void)goto_userInfo {
+    [self.view endEditing:YES];
+    [self goto_FriendChatInfo:self.toContactsModel];
+}
+
 
 // 返回前一个页面的方法
 - (void)leftBarButtonItemPressed:(id)sender{
@@ -703,7 +740,7 @@ static ChatViewController *_chatVC;
 
 #pragma mark - 即将发送消息
 - (FYMessage *)willSendMessage:(FYMessage *)message {
-
+    
     return message;
 }
 
@@ -753,21 +790,21 @@ static ChatViewController *_chatVC;
 
 - (void)sendWelcomeMessage:(NSString *)groupId {
     NSString *content = [NSString stringWithFormat:@"大家好，我是%@", [AppModel shareInstance].userInfo.nick];
-        NSMutableDictionary *userDict = [[NSMutableDictionary alloc] init];
-        [userDict setObject:[AppModel shareInstance].userInfo.userId forKey:@"userId"];  // 用户ID
-        [userDict setObject:[AppModel shareInstance].userInfo.nick forKey:@"nick"];   // 用户昵称
-        [userDict setObject:[AppModel shareInstance].userInfo.avatar forKey:@"avatar"];  // 用户头像
-        
-        NSDictionary *parameters = @{
-                                     @"user":userDict,  // 发送者用户信息
-                                     @"from":[AppModel shareInstance].userInfo.userId,      // 发送者ID
-                                     @"cmd":@"11",      // 聊天命令
-                                     @"groupId":groupId,   // 群ID
-                                     @"chatType":@(FYConversationType_GROUP),  // 1 群聊   2  p2p
-                                     @"msgType":@(FYMessageTypeText),   // 0 文本 6 红包  7 报奖信息
-                                     @"content":content // 消息内容
-                                     };
-        [[FYIMMessageManager shareInstance] sendMessageServer:parameters];
+    NSMutableDictionary *userDict = [[NSMutableDictionary alloc] init];
+    [userDict setObject:[AppModel shareInstance].userInfo.userId forKey:@"userId"];  // 用户ID
+    [userDict setObject:[AppModel shareInstance].userInfo.nick forKey:@"nick"];   // 用户昵称
+    [userDict setObject:[AppModel shareInstance].userInfo.avatar forKey:@"avatar"];  // 用户头像
+    
+    NSDictionary *parameters = @{
+                                 @"user":userDict,  // 发送者用户信息
+                                 @"from":[AppModel shareInstance].userInfo.userId,      // 发送者ID
+                                 @"cmd":@"11",      // 聊天命令
+                                 @"chatId":groupId,   // 群ID
+                                 @"chatType":@(FYConversationType_GROUP),  // 1 群聊   2  p2p
+                                 @"msgType":@(FYMessageTypeText),   // 0 文本 6 红包  7 报奖信息
+                                 @"content":content // 消息内容
+                                 };
+    [[FYIMMessageManager shareInstance] sendMessageServer:parameters];
 }
 
 @end

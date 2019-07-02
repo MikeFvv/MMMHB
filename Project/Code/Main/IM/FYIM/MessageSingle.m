@@ -22,9 +22,10 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _myJoinGroupMessage = [NSMutableDictionary dictionary];
+        _allUnreadMessagesDict = [NSMutableDictionary dictionary];
     }
     return self;
 }
 
 @end
+

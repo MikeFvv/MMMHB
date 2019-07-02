@@ -11,28 +11,34 @@
 
 @class UserInfo;
 
-@interface AppModel : NSObject<NSCoding>
+@interface AppModel : NSObject<NSCoding,NSCopying>
 
 @property (nonatomic ,assign) BOOL turnOnSound;///<声音
 //@property (nonatomic ,strong) UserInfo *user;///<用户信息
 @property (nonatomic ,strong) UserInfo *userInfo;///<用户信息
-@property (nonatomic ,copy) NSString *rongYunToken;
+
 @property (nonatomic ,assign) NSInteger unReadCount;  ///< 未读总消息
+@property (nonatomic ,assign) NSInteger friendUnReadTotal;  // 好友未读总消息
+@property (nonatomic ,assign) NSInteger customerServiceUnReadTotal;  // 客服未读总消息
 @property (nonatomic ,strong) NSDictionary *commonInfo;
 @property (nonatomic ,copy) NSString *appClientIdInCommonInfo;
+@property (nonatomic ,copy) NSString *encRSAPubKey;
+@property (nonatomic ,copy) NSString *randomly16Key;
 @property (nonatomic ,strong) NSDictionary *noticeArray;
-
+@property (nonatomic ,strong) NSMutableAttributedString*  noticeAttributedString;
 @property (nonatomic ,copy) NSString *serverUrl;
-@property (nonatomic ,copy) NSString *rongYunKey;
 @property (nonatomic ,copy) NSString *authKey;
 
 // NO 正式版    YES 测试版
 @property (nonatomic ,assign) BOOL debugMode;
-
 // 我加入的群id
 @property (nonatomic ,strong) NSArray *myGroupArray;
+// 我的好友列表
+@property (nonatomic ,strong) NSDictionary *myFriendListDict;
+// 我的客服列表
+@property (nonatomic ,strong) NSDictionary *myCustomerServiceListDict;
 
-
+@property(nonatomic, assign) NSInteger chatType;
 
 + (instancetype)shareInstance;
 - (void)saveAppModel;///<登录存档

@@ -171,14 +171,22 @@
         vc.top = YES;
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
-    }else if(type == RewardType_fbjl || type == RewardType_qbjl){// 3000发包奖励 4000抢包奖励
+    }else if(type == RewardType_fbjl ||
+             type == RewardType_qbjl
+             ||type == RewardType_jjj){// 3000发包奖励 4000抢包奖励//7000救济金
         ActivityDetail2ViewController *vc = [[ActivityDetail2ViewController alloc] init];
         vc.infoDic = dic;
         vc.title = dic[@"mainTitle"];
         vc.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
     }else{
-        SVP_ERROR_STATUS(@"未知类型活动");
+//        SVP_ERROR_STATUS(@"未知类型活动");
+        ImageDetailViewController *vc = [[ImageDetailViewController alloc] init];
+        vc.imageUrl = ![FunctionManager isEmpty:dic[@"bodyImg"]]?dic[@"bodyImg"]:@"";
+        vc.hiddenNavBar = YES;
+        vc.title = dic[@"mainTitle"];
+        vc.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:vc animated:YES];
     }
 }
 

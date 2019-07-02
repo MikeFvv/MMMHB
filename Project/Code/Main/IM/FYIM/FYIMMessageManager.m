@@ -17,7 +17,7 @@
 #import "EnvelopeMessage.h"
 
 #import "FYIMSessionViewController.h"
-
+#import "BANetManager_OC.h"
 
 @interface FYIMMessageManager ()
 
@@ -66,7 +66,9 @@
 #pragma mark - socket消息处理
 - (void)startConnecting:(NSString *)appKey {
     
-    NSString *url = [NSString stringWithFormat:@"%@?token=%@",[AppModel shareInstance].commonInfo[@"ws_url"], appKey];
+    appKey = [[FunctionManager sharedInstance] encodedWithString:appKey];
+    
+    NSString *url = [NSString stringWithFormat:@"%@?token=%@&deviceType=3",[AppModel shareInstance].commonInfo[@"ws_url"], appKey];
     NSLog(@"======url======>%@", url);
     [[FYSocketManager shareManager] fy_open:url connect:^{
         NSLog(@"✅ === tcp连接IM成功  === ✅");
@@ -81,15 +83,18 @@
                 NSInteger code = [dict[@"code"] integerValue];
                 if (code == 10007) {
                     self.isConnectFY = YES;
+                    [FYSocketManager shareManager].isInvalidToken = NO;
                     NSLog(@"✅✅✅✅✅✅✅ === 登录IM成功  === ✅✅✅✅✅✅✅");
                     // 登录成功，连接建立。收到消息
                     //                    [self sendGetOfflineMessages];
                     [self sendGetNewUnreadMessage];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kLoggedSuccessNotification object:nil];
                 }
                 else if (code == 10008) {
                     NSLog(@"登录失败,无效token!");
-                    [AppModel shareInstance].userInfo.token = nil;
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kOnConnectSocketNotification object: nil];
+                    self.isConnectFY = NO;
+                    [FYSocketManager shareManager].isInvalidToken = YES;
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kTokenInvalidNotification object: nil];
                 } else if (code == 10010) {
                     // 被踢出登录  此账号已在其它终端登录
                     [self kickedOutLogin];
@@ -130,12 +135,24 @@
             NSLog(@"🔴接收 类型2--%@",message);
         }
     } failure:^(NSError *error) {
-        self.isConnectFY = NO;   // 本地dns没有设置也会出现连接不上
+        self.isConnectFY = NO;   // 1 本地dns没有设置也会出现连接不上   2 超时连接服务器 服务器可能挂了
         NSLog(@"🔴 ====== 连接失败 ====== 🔴%@",error);
     }];
 }
 
 
+-(void)receiveMessageSendReceiptMessage:(FYMessage *)message {
+    
+    NSDictionary *parameters = @{
+                                 @"cmd":@"34",
+                                 @"id":message.messageId,
+                                 @"createTime":@(message.timestamp),
+                                 @"from":message.messageSendId,
+                                 @"to":message.toUserId,
+                                 @"chatId":message.sessionId
+                                 };
+    [self sendMessageServer:parameters];
+}
 
 #pragma mark - 获取离线消息数据   command 20
 - (void)getOfflineMessagesData:(NSDictionary *)dict {
@@ -146,7 +163,7 @@
         
         for (NSInteger index = 0; index < groupArray.count; index++) {
             NSDictionary *groupDict = groupArray[index];
-            //            NSString *groupId =  groupDict[@"groupId"];
+            //            NSString *sessionId =  groupDict[@"chatId"];
             NSArray *groupMessageList =  groupDict[@"offlineMsgList"];
             NSInteger num = groupMessageList.count;
             
@@ -158,7 +175,7 @@
     } else if (code == 10018) {
         // 下拉数据
         NSDictionary *groupDict = dict[@"data"];
-        NSString *groupId = [NSString stringWithFormat:@"%@", groupDict[@"groupId"]];
+//        NSString *sessionId = [NSString stringWithFormat:@"%@", groupDict[@"chatId"]];
         NSArray *groupMessageList =  groupDict[@"msgList"];
         
         NSArray *messageList = [self messageJsonModel:groupMessageList];
@@ -209,13 +226,13 @@
         
         for (NSInteger index = 0; index < groupArray.count; index++) {
             NSDictionary *groupDict = groupArray[index];
-            NSString *groupId = [NSString stringWithFormat:@"%@", groupDict[@"groupId"]];
+            NSString *sessionId = [NSString stringWithFormat:@"%@", groupDict[@"chatId"]];
             NSInteger messageCount =  [groupDict[@"count"] integerValue]; // 未读消息总量
             NSArray *groupMessageList =  groupDict[@"msgList"];
             NSInteger num = groupMessageList.count;  // 当前返回数量
             
             if (messageCount >= 100) {
-                NSString *query = [NSString stringWithFormat:@"sessionId='%@'",groupId];
+                NSString *query = [NSString stringWithFormat:@"sessionId='%@'",sessionId];
                 [WHC_ModelSqlite delete:[FYMessage class] where:query];
             }
             
@@ -245,7 +262,7 @@
             NSMutableArray *listArray = [NSMutableArray array];
             for (NSInteger i = 0; i < [AppModel shareInstance].myGroupArray.count; i++) {
                 NSMutableDictionary *listDict = [NSMutableDictionary dictionary];
-                [listDict setObject:[AppModel shareInstance].myGroupArray[i] forKey:@"groupId"];
+                [listDict setObject:[AppModel shareInstance].myGroupArray[i] forKey:@"chatId"];
                 NSString *whereStr = [NSString stringWithFormat:@"sessionId = %@", [AppModel shareInstance].myGroupArray[i]];
                 FYMessage *fyMessage = [[WHC_ModelSqlite query:[FYMessage class] where:whereStr order:@"by timestamp desc" limit:@"0,1"] firstObject];
                 [listDict setObject:@(fyMessage.timestamp) forKey:@"msgCreateTime"];
@@ -254,13 +271,14 @@
             
             NSDictionary *parameters = @{
                                          @"cmd":@"30",
+                                         @"chatType":@(FYConversationType_GROUP),
                                          @"list":listArray
                                          };
-            NSLog(@"✅✅✅%@",parameters);
+            NSLog(@"✅发送获取未读消息请求✅%@",parameters);
             [self sendMessageServer:parameters];
         });
     }
-    NSLog(@"1");
+     [self getOfflinePrivateMessages];
 }
 
 /**
@@ -273,6 +291,43 @@
                                  @"cmd":@"19"
                                  };
     [self sendMessageServer:parameters];
+
+}
+
+- (void)getOfflinePrivateMessages {
+    
+    BADataEntity *entity = [BADataEntity new];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/friend/pullFriendOfflineMsg"];
+    entity.needCache = NO;
+    __weak __typeof(self)weakSelf = self;
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        if ([response objectForKey:@"code"] != nil && [[response objectForKey:@"code"] integerValue] == 0) {
+            [strongSelf offlinePrivateMessagesData:response];
+        } else {
+            [[FunctionManager sharedInstance] handleFailResponse:response];
+        }
+    } failureBlock:^(NSError *error) {
+        [[FunctionManager sharedInstance] handleFailResponse:error];
+    } progressBlock:nil];
+}
+
+- (void)offlinePrivateMessagesData:(NSDictionary *)dict {
+
+    NSArray *dataArray = dict[@"data"];
+    
+    for (NSInteger index = 0; index < dataArray.count; index++) {
+        NSDictionary *dataDict = dataArray[index];
+//        NSString *sessionId = [NSString stringWithFormat:@"%@", groupDict[@"chatId"]];
+        NSInteger messageCount =  [dataDict[@"count"] integerValue]; // 未读消息总量
+        NSArray *dataMessageList =  dataDict[@"msgList"];
+        NSInteger num = dataMessageList.count;  // 当前返回数量
+        
+        for (NSInteger i = 0; i < dataMessageList.count; i++) {
+            num--;
+            [self receiveMessage:dataMessageList[i] isOfflineMsg:YES messageCount:messageCount left:num];
+        }
+    }
 }
 
 - (void)doneGetMyJoinedGroupsNotification {
@@ -288,12 +343,12 @@
 /**
  聊天界面下拉请求数据   对应返回 command 20  code 10018
  */
-- (void)sendDropdownRequest:(NSString *)groupId endTime:(NSTimeInterval)endTime {
+- (void)sendDropdownRequest:(NSString *)sessionId endTime:(NSTimeInterval)endTime {
     // 固定返回50条
     NSDictionary *parameters = @{
                                  @"cmd":@"19",
                                  @"endTime":endTime == -1 ? @"" : @(endTime),
-                                 @"groupId":groupId,
+                                 @"chatId":sessionId,
                                  @"userId":[AppModel shareInstance].userInfo.userId
                                  };
     [self sendMessageServer:parameters];
@@ -330,18 +385,34 @@
  */
 - (void)sysMessage:(NSDictionary *)dict {
     NSInteger code = [dict[@"code"] integerValue];
-    FYMessage *message = [[FYMessage alloc] init];
+//    FYMessage *message = [[FYMessage alloc] init];
+    FYMessage *message = [FYMessage mj_objectWithKeyValues:dict[@"data"]];
     if (code == 10000) {  // 消息发送成功
         NSLog(@"消息发送成功");
     } else if (code == 10024 || code == 10025 || code == 10032 || code == 10033) {
         // 10024 您已被禁言!   // 10025 群组已禁言!   // 10032 聊天字数超过群限制    // 10033 说话速度超过群设置的聊天间隔
-        message.messageType = FYSystemMessage;
+        
         message.create_time = [NSDate date];
+        message.messageFrom = FYChatMessageFromSystem;
+        
+        
+        //    if ([[AppModel shareInstance].userInfo.userId isEqualToString:message.messageSendId]) {
+        message.deliveryState = FYMessageDeliveryStateFailed;
+        message.isReceivedMsg = YES;
+        
+        
+        if (message.messageType == FYMessageTypeImage) {
+            if ([message.messageSendId isEqualToString:[AppModel shareInstance].userInfo.userId]) {
+                NSString *messageId = [NSString stringWithFormat:@"%.f", [message.extras[@"timestamp"] doubleValue]];
+                [self updateMessage:messageId];
+            }
+        }
         
         message.text = dict[@"msg"];
         if (self.delegate && [self.delegate respondsToSelector:@selector(willAppendAndDisplayMessage:)]) {
             message = [self.delegate willAppendAndDisplayMessage:message];
         }
+        
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
             [WHC_ModelSqlite insert:message];
         });
@@ -351,7 +422,7 @@
 #pragma mark - 消息接收
 /**
  common 11 or other 消息接收
- 
+
  @param dict 消息字典数据
  @param isOfflineMsg 是否离线消息
  @param left -
@@ -359,6 +430,15 @@
 - (void)receiveMessage:(NSDictionary *)dict isOfflineMsg:(BOOL)isOfflineMsg messageCount:(NSInteger)messageCount left:(NSInteger)left {
     
     FYMessage *message = [FYMessage mj_objectWithKeyValues:dict];
+    if (message.chatType == FYConversationType_PRIVATE || message.chatType == FYConversationType_CUSTOMERSERVICE) {
+        [self receiveMessageSendReceiptMessage:message];
+        
+        if ([AppModel shareInstance].myCustomerServiceListDict[message.messageSendId]) {
+            message.chatType = FYConversationType_CUSTOMERSERVICE;
+        } else {
+            message.chatType = FYConversationType_PRIVATE;
+        }
+    }
     
     if(message.messageType == FYMessageTypeRedEnvelope){
         if ([dict isKindOfClass:[NSDictionary class]]) {
@@ -368,21 +448,28 @@
     }
     message.create_time = [NSDate date];
     
+    if ([[AppModel shareInstance].userInfo.userId isKindOfClass:[NSNumber class]]) {
+        [AppModel shareInstance].userInfo.userId  = [(NSNumber *)[AppModel shareInstance].userInfo.userId stringValue];
+    }
+    
+    if ([message.messageSendId isEqualToString:[AppModel shareInstance].userInfo.userId]) {
+        message.messageFrom = FYMessageDirection_SEND;
+    } else {
+        message.messageFrom  = FYMessageDirection_RECEIVE;
+    }
+    
+    //    if ([[AppModel shareInstance].userInfo.userId isEqualToString:message.messageSendId]) {
+    message.deliveryState = FYMessageDeliveryStateDeliveried;
+    message.isReceivedMsg = YES;
+    //    }
+    
     NSString *sessionId = nil;
     FYIMSessionViewController *vc = [FYIMSessionViewController currentChat];
     if (vc) {
         sessionId = vc.sessionId;
     }
     
-    if ([[AppModel shareInstance].userInfo.userId isKindOfClass:[NSNumber class]]) {
-        [AppModel shareInstance].userInfo.userId  = [(NSNumber *)[AppModel shareInstance].userInfo.userId stringValue];
-    }
-    if ([[AppModel shareInstance].userInfo.userId isEqualToString:message.messageSendId]) {
-        message.deliveryState = FYMessageDeliveryStateDeliveried;
-        message.isReceivedMsg = YES;
-    }
-    
-    if (self.delegate && [self.delegate respondsToSelector:@selector(willAppendAndDisplayMessage:)] && [sessionId isEqualToString: message.sessionId]) {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(willAppendAndDisplayMessage:)] && ([sessionId isEqualToString: message.sessionId])) {
         message = [self.delegate willAppendAndDisplayMessage:message];
     }
     
@@ -405,11 +492,29 @@
             [self.player play];
 #endif
         }
+        
     }
+    
+    
+    if (message.messageType == FYMessageTypeImage) {
+        
+        if ([message.messageSendId isEqualToString:[AppModel shareInstance].userInfo.userId]) {
+            NSString *whereStr = [NSString stringWithFormat:@"messageId='%@'", [NSString stringWithFormat:@"%.f", [message.extras[@"timestamp"] doubleValue]]];
+//            FYMessage *fyMessage = [[WHC_ModelSqlite query:[FYMessage class] where:whereStr] firstObject];
+            dispatch_async(dispatch_get_global_queue(0, 0), ^{
+                [WHC_ModelSqlite delete:[FYMessage class] where:whereStr];
+            });
+        }
+        
+      }
     
     if ((!isOfflineMsg && self.isGetOfflineMessage) || isOfflineMsg) {
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            [WHC_ModelSqlite insert:message];
+            BOOL isSuccess = [WHC_ModelSqlite insert:message];
+            if (!isSuccess) {
+                [WHC_ModelSqlite removeModel:[FYMessage class]];
+                [WHC_ModelSqlite insert:message];
+            }
         });
     } else {
         // 先保存在属性当中， 之后再保存数据库
@@ -465,7 +570,7 @@
     self.isConnectFY = NO;
     [AppModel shareInstance].userInfo.token = nil;
     [FYSocketManager shareManager].isViewLoad = NO;
-//    [WHC_ModelSqlite removeModel:[FYMessage class]];
+    //    [WHC_ModelSqlite removeModel:[FYMessage class]];
 }
 
 /**
@@ -505,11 +610,22 @@
     }
 }
 
+- (void)updateMessage:(NSString *)messageId {
+
+    NSString *whereStr = [NSString stringWithFormat:@"messageId='%@'", messageId];
+    FYMessage *fyMessage = [[WHC_ModelSqlite query:[FYMessage class] where:whereStr] firstObject];
+    fyMessage.deliveryState = FYMessageDeliveryStateFailed;
+    if (fyMessage != nil) {
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            [WHC_ModelSqlite update:fyMessage where:whereStr];
+        });
+    }
+}
+
 
 
 - (AVAudioPlayer *)player {
     if (!_player) {
-        // 1. 创建播放器对象
         // 虽然传递的参数是NSURL地址, 但是只支持播放本地文件, 远程音乐文件路径不支持
         NSURL *url = [[NSBundle mainBundle]URLForResource:@"fy_sms-received.caf" withExtension:nil];
         _player = [[AVAudioPlayer alloc]initWithContentsOfURL:url error:nil];

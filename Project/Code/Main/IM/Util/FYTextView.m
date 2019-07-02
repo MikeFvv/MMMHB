@@ -32,7 +32,7 @@
 {
     if (action == @selector(copy:) || action == @selector(onDeleteMessage:) || action == @selector(withdrawMessage:)) {
         if (action == @selector(withdrawMessage:) && self.messageFrom == FYMessageDirection_RECEIVE) {
-                if([AppModel shareInstance].userInfo.managerFlag || [AppModel shareInstance].userInfo.groupowenFlag){
+                if([AppModel shareInstance].userInfo.managerFlag || [AppModel shareInstance].userInfo.groupowenFlag || [AppModel shareInstance].userInfo.innerNumFlag){
                     return YES;
                 }
             return NO;

@@ -30,5 +30,5 @@
  类型
  */
 @property(nonatomic, strong) UILabel *redTypeLabel;
- 
+@property(nonatomic, strong) UIImageView *nograbLandminesIcon;
 @end

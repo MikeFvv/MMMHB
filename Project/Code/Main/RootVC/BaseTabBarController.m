@@ -29,7 +29,7 @@
     
     [UITabBar appearance].translucent = NO;
     
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(updateValue:)name:kUnreadMessageNumberChange object:nil];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(updateValue:)name:kUnreadMessageNumberChange object:@"updateBadeValue"];
     
 //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //        [self test];
@@ -68,7 +68,7 @@
     
     if (isRefresh) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self->_tabbar[0] setBadeValue:([AppModel shareInstance].unReadCount>0)?@"1":@"null"];
+            [self->_tabbar[0] setBadeValue:([AppModel shareInstance].unReadCount>0?@"1":@"null")];
         });
     }
 }
@@ -77,8 +77,8 @@
     _selectIndex = 1;
     self.delegate = self;
     
-    NSArray *vcs = @[@"MessageViewController",@"GroupViewController",@"ActivityMainViewController",@"DiscoveryViewController",@"MemberViewController"];
-    NSArray *titles = @[@"消息",@"群组",@"",@"发现",@"我的"];
+    NSArray *vcs = @[@"MessageViewController",@"GroupViewController",@"ActivityMainViewController",@"FYContactsController",@"MemberViewController"];
+    NSArray *titles = @[@"消息",@"群组",@"",@"通讯录",@"我的"];
     NSArray *nors = @[@"footer-icon-tip",@"footer-icon-group",@"tabbar2",@"tabar_find",@"footer-icon-my"];//@"footer-icon-jl"
     NSArray *ses = @[@"footer-icon-tip-on",@"footer-icon-group-on",@"tabbar1",@"tabar_find_on",@"footer-icon-my-on"];//@"footer-icon-jl-on"
     NSMutableArray *vs = [[NSMutableArray alloc]init];
@@ -122,7 +122,7 @@
             _tabbar[i].selectImg = [UIImage imageNamed:ses[i]];
         _tabbar[i].tabbarSelected = (i == _selectIndex)?YES:NO;
         if(i == 3)
-            _tabbar[i].animationType = 2;
+            _tabbar[i].animationType = 1;
         else if(i == 2)
             _tabbar[i].animationType = 5;
         else if(i == 0)

@@ -137,20 +137,25 @@
             [tStr appendString:item.intro];
     }
     _name.text = tStr;
-    _money.text = item.money;
+    _money.text = STR_TO_AmountFloatSTR(item.money);
     _money.textColor = (b)?HexColor(@"#ff4646"):HexColor(@"#369b3c");
     id objj = obj[@"billtId"];
     NSInteger va = 0;
     if(![objj isKindOfClass:[NSNull class]])
         va = [objj integerValue];
     switch (va) {
-        case 3:
-        case 4:
-        case 16:
-        case 17:
-        case 5:
-        case 6:
-        case 18:
+        case 3://扫雷抢包
+        case 4://扫雷收入
+        case 16://豹顺子奖励
+        case 17://豹顺子赔付
+            
+        case 5://扫雷发包
+        case 6://扫雷支出
+        case 18://逾期退包
+        case 34://禁抢群赔付到账
+        case 41://禁抢发包
+        case 24://niu
+        case 25://niu
             _detailBtn.hidden = NO;
             break;
         default:
@@ -160,16 +165,4 @@
     }
    
 }
-
-- (void)awakeFromNib {
-    [super awakeFromNib];
-    // Initialization code
-}
-
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-    [super setSelected:selected animated:animated];
-    
-    // Configure the view for the selected state
-}
-
 @end

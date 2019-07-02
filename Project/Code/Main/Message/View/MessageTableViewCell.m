@@ -136,7 +136,7 @@
 
     if (item.isMyJoined == YES) {
         NSString *queryId = [NSString stringWithFormat:@"%@-%@",item.groupId,[AppModel shareInstance].userInfo.userId];
-         PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].myJoinGroupMessage[queryId];
+         PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].allUnreadMessagesDict[queryId];
         
         if (pmModel.number > 0) {
             
@@ -153,8 +153,30 @@
             _dotView.hidden = YES;
         }
     } else {
-        _descLabel.text = item.notice;
-        _dotView.hidden = YES;
+        
+        if ([item.chatgName isEqualToString:@"在线客服"]) {
+            if ([AppModel shareInstance].customerServiceUnReadTotal > 0) {
+                _descLabel.text = ([AppModel shareInstance].customerServiceUnReadTotal>99) ? @"【99+未读】" : [NSString stringWithFormat:@"【%zd条未读】",[AppModel shareInstance].customerServiceUnReadTotal];
+                _dotView.hidden = NO;
+            } else {
+                _descLabel.text = item.notice;
+                _dotView.hidden = YES;
+            }
+        } else if ([item.chatgName isEqualToString:@"我的好友"]) {
+            
+            if ([AppModel shareInstance].friendUnReadTotal > 0) {
+                _descLabel.text = ([AppModel shareInstance].friendUnReadTotal>99) ? @"【99+未读】" : [NSString stringWithFormat:@"【%zd条未读】",[AppModel shareInstance].friendUnReadTotal];
+                _dotView.hidden = NO;
+            } else {
+                _descLabel.text = @"暂无未读消息";
+                _dotView.hidden = YES;
+            }
+            
+        } else {
+            _descLabel.text = item.notice;
+            _dotView.hidden = YES;
+        }
+        
     }
     
 }

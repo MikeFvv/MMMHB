@@ -81,7 +81,11 @@
     _tableView.mj_footer = [MJRefreshAutoFooter footerWithRefreshingBlock:^{
        __strong __typeof(weakSelf)strongSelf = weakSelf;
         if (!weakModel.isMost) {
-            weakModel.page++;
+            if (weakModel.page < 1) {
+                weakModel.page = 2;
+            } else {
+                weakModel.page++;
+            }
             [strongSelf getGroupUsersData];
         }
     }];
@@ -99,7 +103,7 @@
             [strongSelf->_tableView reloadData];
         }
     } failureBlock:^(NSError *error) {
-        SVP_ERROR(error);
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
 }
 
@@ -151,24 +155,25 @@
 - (void)action_exitGroup:(NSString *)userId {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@?groupId=%@&userId=%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/delgroupMember",self.groupId, userId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/delgroupMember"];
 
     entity.needCache = NO;
-//    NSDictionary *parameters = @{
-//                                 @"groupId":self.groupId,
-//                                 @"userId":userId,
-//                                 };
-//    entity.parameters = parameters;
+    NSDictionary *parameters = @{
+                                 @"chatGroupId":self.groupId,
+                                 @"userId":userId,
+                                 };
+    entity.parameters = parameters;
     
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         if ([response objectForKey:@"code"] && [[response objectForKey:@"code"] integerValue] == 0) {
-            SVP_ERROR_STATUS([response objectForKey:@"msg"]);
+            NSString *msg = [NSString stringWithFormat:@"%@",[response objectForKey:@"alterMsg"]];
+            SVP_SUCCESS_STATUS(msg);
             strongSelf.model.page = 1;
             [strongSelf getGroupUsersData];
         } else {
-            SVP_ERROR_STATUS([response objectForKey:@"msg"]);
+            [[FunctionManager sharedInstance] handleFailResponse:response];
         }
     } failureBlock:^(NSError *error) {
         [[FunctionManager sharedInstance] handleFailResponse:error];

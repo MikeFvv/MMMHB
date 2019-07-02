@@ -24,13 +24,20 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setRedEnvelopeMessage:(NSString *)messageId redEnvelopeMessage:(EnvelopeMessage *)redEnvelopeMessage;
 
 
-- (void)updateGroup:(NSString *)groupId number:(NSInteger)number lastMessage:(NSString *)last messageCount:(NSInteger)messageCount left:(NSInteger)left;
+- (void)updateGroup:(NSString *)sessionId number:(NSInteger)number lastMessage:(NSString *)last messageCount:(NSInteger)messageCount left:(NSInteger)left chatType:(FYChatConversationType)chatType;
 
+
+/**
+ 通知服务器 登录了
+ */
+- (void)notificationLogin;
 
 /**
  用户主动退出登录
  */
 - (void)userSignout;
+
+
 
 @end
 

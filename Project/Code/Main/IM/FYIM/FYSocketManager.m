@@ -119,13 +119,13 @@ dispatch_async(dispatch_get_main_queue(), block);\
     if (self.isViewLoad) {
         if (self.webSocket.readyState == SR_CONNECTING) {
             // 正在连接
-            NSLog(@"🍏🍏🍏正在连接0");
+            NSLog(@"====== 🌕🌕🌕正在连接0 ======");
             dispatch_async(dispatch_get_main_queue(), ^{
                 [FYStatusBarHUD showLoading:@"正在尝试连接服务..."];
             });
         } else if (self.webSocket.readyState == SR_OPEN) {
             // 已连接
-            NSLog(@"✅已连接1");
+            NSLog(@"====== ✅已连接1 ======");
             //                [FYStatusBarHUD showSuccess:@"已连接"];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [FYStatusBarHUD hide];
@@ -136,7 +136,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
             //                [FYStatusBarHUD showError:@"正在断开中..."];
         } else if (self.webSocket.readyState == SR_CLOSED) {
             // 已断开
-            NSLog(@"❌已断开3");
+            NSLog(@"====== ❌已断开3 ======");
             //                [FYStatusBarHUD showError:@"连接已断开"];
         } else {
             NSLog(@"未知状态");
@@ -150,6 +150,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
     self.webSocket = nil;
     [self.timer invalidate];
     self.timer = nil;
+    self.isInvalidToken = NO;
     //断开连接时销毁心跳
     [self destoryHeartBeat];
 }
@@ -226,7 +227,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
     dispatch_main_async_safe(^{
         [self destoryHeartBeat];
         //心跳设置为3分钟，NAT超时一般为5分钟
-        self.heartBeat = [NSTimer timerWithTimeInterval:30 target:self selector:@selector(sentheart) userInfo:nil repeats:YES];
+        self.heartBeat = [NSTimer timerWithTimeInterval:120 target:self selector:@selector(sentheart) userInfo:nil repeats:YES];
         [[NSRunLoop currentRunLoop] addTimer:self.heartBeat forMode:NSRunLoopCommonModes];
     })
 }
@@ -273,6 +274,9 @@ dispatch_async(dispatch_get_main_queue(), block);\
 - (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error{
     [self connectionStatus];
     if (webSocket == self.webSocket) {
+        if (self.isInvalidToken) {
+            return;  // 不再重连
+        }
         NSLog(@"************************** 🔴socket 连接失败************************** ");
         _webSocket = nil;
         //    NSLog(@":( Websocket Failed With Error %@", error);
@@ -285,6 +289,9 @@ dispatch_async(dispatch_get_main_queue(), block);\
 - (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean{
     [self connectionStatus];
     if (webSocket == self.webSocket) {   // nil 主动
+        if (self.isInvalidToken) {
+            return;  // 不再重连
+        }
         NSLog(@"************************** 🔴socket连接断开************************** ");
         NSLog(@"被关闭连接，code:%ld,reason:%@,wasClean:%d",(long)code,reason,wasClean);
         [FYSocketManager shareManager].close ? [FYSocketManager shareManager].close(code,reason,wasClean) : nil;

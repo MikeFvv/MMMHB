@@ -340,8 +340,8 @@
 }
 
 - (void)responseNull:(id)response {
-    
-    NSString *msg = [response objectForKey:@"msg"];
+    NSString *msg = [NSString stringWithFormat:@"%@",[response objectForKey:@"alterMsg"]];
+//    SVP_SUCCESS_STATUS(msg);
     _redDescLabel.hidden = YES;
     _contentLabel.text = msg;
     _openBtn.hidden = YES;

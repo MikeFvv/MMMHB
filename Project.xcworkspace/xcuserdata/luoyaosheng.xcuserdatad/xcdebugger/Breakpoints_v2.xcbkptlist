@@ -19,13 +19,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Main/Activity/ActivityDetail2ViewController.m"
-            timestampString = "579940340.415899"
+            filePath = "Project/Code/Main/IM/SSChatView/SSImageGroupView/SSImageGroupView.m"
+            timestampString = "582717074.826853"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "259"
-            endingLineNumber = "259"
-            landmarkName = "-getRewardAction"
+            startingLineNumber = "398"
+            endingLineNumber = "398"
+            landmarkName = "-setScrollerViewLandscape"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -35,13 +35,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Main/Login&amp;Register&amp;PassWord/Model/UserInfo.m"
-            timestampString = "579940340.4160219"
+            filePath = "Project/Code/Main/IM/SSChatView/SSImageGroupView/SSImageGroupView.m"
+            timestampString = "582717074.827213"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "28"
-            endingLineNumber = "28"
-            landmarkName = "-copyWithZone:"
+            startingLineNumber = "417"
+            endingLineNumber = "417"
+            landmarkName = "-setScrollerViewRestore"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -51,13 +51,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Expand/Category/NSString+RegexCategory.m"
-            timestampString = "581154949.446609"
+            filePath = "Project/Code/Main/Group/Controller/AllUserViewController.m"
+            timestampString = "582687174.012525"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "119"
-            endingLineNumber = "119"
-            landmarkName = "-isValidChinese"
+            startingLineNumber = "106"
+            endingLineNumber = "106"
+            landmarkName = "-getGroupUsersData"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -67,13 +67,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Main/IM/FYIM/NetworkStatus.m"
-            timestampString = "580534517.505291"
+            filePath = "Project/Code/Main/Group/Controller/AllUserViewController.m"
+            timestampString = "582687174.012996"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "33"
-            endingLineNumber = "33"
-            landmarkName = "+netWorkState:"
+            startingLineNumber = "100"
+            endingLineNumber = "100"
+            landmarkName = "-getGroupUsersData"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -83,13 +83,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Main/IM/FYIM/FYSocketManager.m"
-            timestampString = "581135839.2232651"
+            filePath = "Project/Code/Main/Group/Controller/AllUserViewController.m"
+            timestampString = "582687174.013212"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "301"
-            endingLineNumber = "301"
-            landmarkName = "-webSocket:didReceivePong:"
+            startingLineNumber = "84"
+            endingLineNumber = "84"
+            landmarkName = "-initSubviews"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -99,13 +99,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Main/IM/FYIM/FYSocketManager.m"
-            timestampString = "581135839.2235349"
+            filePath = "Project/Code/Main/IM/FYIM/FYIMSessionViewController.m"
+            timestampString = "583553814.5195661"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "275"
-            endingLineNumber = "275"
-            landmarkName = "-webSocket:didFailWithError:"
+            startingLineNumber = "1184"
+            endingLineNumber = "1184"
+            landmarkName = "-uploadImage:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -115,13 +115,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Main/Message/Controller/ChatViewController.m"
-            timestampString = "581161590.206615"
+            filePath = "Project/Code/Expand/Category/SVProgressHUD+CDHUD.m"
+            timestampString = "582981498.950334"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "373"
-            endingLineNumber = "373"
-            landmarkName = "-vsViewGetRedPacketDetailsData:"
+            startingLineNumber = "46"
+            endingLineNumber = "46"
+            landmarkName = "+showError:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -131,13 +131,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Main/Message/Controller/ChatViewController.m"
-            timestampString = "581161590.206892"
+            filePath = "Project/Code/Main/Me/Recharge/New/Recharge2ViewController.m"
+            timestampString = "583154285.022213"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "367"
-            endingLineNumber = "367"
-            landmarkName = "-vsViewGetRedPacketDetailsData:"
+            startingLineNumber = "602"
+            endingLineNumber = "602"
+            landmarkName = "-keFu2"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -147,13 +147,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Main/Message/Controller/ChatViewController.m"
-            timestampString = "581161590.206944"
+            filePath = "Project/Code/Main/Message/Model/MessageNet.m"
+            timestampString = "583413633.0126179"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "154"
-            endingLineNumber = "154"
-            landmarkName = "-dealloc"
+            startingLineNumber = "294"
+            endingLineNumber = "294"
+            landmarkName = "-handleGroupListData:andIsMyJoined:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -164,12 +164,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Project/Code/Main/IM/FYIM/FYIMMessageManager.m"
-            timestampString = "581137190.473377"
+            timestampString = "583730587.7554179"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "92"
-            endingLineNumber = "92"
-            landmarkName = "-startConnecting:"
+            startingLineNumber = "288"
+            endingLineNumber = "288"
+            landmarkName = "-sendGetOfflineMessages"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -179,13 +179,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Main/IM/FYIM/FYSocketManager.m"
-            timestampString = "581135839.224179"
+            filePath = "Project/Code/Main/IM/FYIM/FYIMSessionViewController.m"
+            timestampString = "583553814.5197819"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "170"
-            endingLineNumber = "170"
-            landmarkName = "-fy_sendData:"
+            startingLineNumber = "442"
+            endingLineNumber = "442"
+            landmarkName = "-onNewMessageBtnClick"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -195,13 +195,173 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Project/Code/Main/IM/FYIM/FYSocketManager.m"
-            timestampString = "581135839.224225"
+            filePath = "Project/Code/Main/IM/Contacts/FYContactsTableView.m"
+            timestampString = "583581640.279497"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "318"
-            endingLineNumber = "318"
-            landmarkName = "-dealloc"
+            startingLineNumber = "69"
+            endingLineNumber = "69"
+            landmarkName = "-tableViewIndex:didSelectSectionAtIndex:withTitle:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Project/Code/Main/IM/Contacts/ResultFuzzyViewController.m"
+            timestampString = "583574956.592907"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "22"
+            endingLineNumber = "22"
+            landmarkName = "-viewDidLoad"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Project/Code/Main/IM/Friend/MyFriendMessageListController.m"
+            timestampString = "583730587.755517"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "117"
+            endingLineNumber = "117"
+            landmarkName = "-getMyFriendList"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Project/Code/Main/IM/Contacts/FYContactsController.m"
+            timestampString = "583730587.755568"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "544"
+            endingLineNumber = "544"
+            landmarkName = "-searchBarShouldEndEditing:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Project/Code/Main/IM/FYIM/FYIMManager.m"
+            timestampString = "583730587.755614"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "117"
+            endingLineNumber = "117"
+            landmarkName = "-onFYIMReceiveMessage:messageCount:left:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Project/Code/Main/IM/FYIM/FYIMManager.m"
+            timestampString = "583730587.755926"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "172"
+            endingLineNumber = "172"
+            landmarkName = "-insertFYContacts:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Project/Code/Main/IM/Friend/MyFriendMessageListController.m"
+            timestampString = "583730587.75614"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "116"
+            endingLineNumber = "116"
+            landmarkName = "-getMyFriendList"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Project/Code/Main/IM/FYIM/FYIMManager.m"
+            timestampString = "583730587.756183"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "190"
+            endingLineNumber = "190"
+            landmarkName = "-updateGroup:number:lastMessage:messageCount:left:chatType:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Project/Code/Main/IM/FYIM/FYIMMessageManager.m"
+            timestampString = "583730587.75639"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "433"
+            endingLineNumber = "433"
+            landmarkName = "-receiveMessage:isOfflineMsg:messageCount:left:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Project/Code/Main/IM/FYIM/FYIMMessageManager.m"
+            timestampString = "583730587.756433"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "432"
+            endingLineNumber = "432"
+            landmarkName = "-receiveMessage:isOfflineMsg:messageCount:left:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Project/Code/Main/IM/Friend/MyFriendMessageListController.m"
+            timestampString = "583730587.756476"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "237"
+            endingLineNumber = "237"
+            landmarkName = "-loadLocalData:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

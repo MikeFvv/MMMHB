@@ -330,7 +330,7 @@ forHTTPHeaderField:(NSString *)field
 {
     NSData *basicAuthCredentials = [[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding];
     NSString *base64AuthCredentials = [basicAuthCredentials base64EncodedStringWithOptions:(NSDataBase64EncodingOptions)0];
-    [self setValue:[NSString stringWithFormat:@"Basic %@", base64AuthCredentials] forHTTPHeaderField:@"Authorization"];
+    [self setValue:[NSString stringWithFormat:@"%@", base64AuthCredentials] forHTTPHeaderField:@"Authorization"];
 }
 
 - (void)clearAuthorizationHeader {

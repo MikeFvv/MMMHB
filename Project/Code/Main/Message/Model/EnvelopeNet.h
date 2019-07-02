@@ -30,6 +30,15 @@
 
 + (EnvelopeNet *)shareInstance;
 /**
+ 从bill 列表 bizId获取发包详情
+ 
+ @param packetId 抢包ID
+ @param successBlock 成功block
+ @param failureBlock 失败block
+ */
+-(void)getUnityRedpDetail:(id)packetId successBlock:(void (^)(NSDictionary *))successBlock
+             failureBlock:(void (^)(NSError *))failureBlock;
+/**
  获取红包详情
  
  @param packetId ID
@@ -38,18 +47,4 @@
  */
 -(void)getRedpDetSendId:(id)packetId successBlock:(void (^)(NSDictionary *))successBlock
            failureBlock:(void (^)(NSError *))failureBlock;
-
-
-
-/**
- 抢包id获取发包详情
- 
- @param packetId 抢包ID
- @param successBlock 成功block
- @param failureBlock 失败block
- */
--(void)getRedpDetGrabId:(id)packetId successBlock:(void (^)(NSDictionary *))successBlock
-           failureBlock:(void (^)(NSError *))failureBlock;
-
-
 @end

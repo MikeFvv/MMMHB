@@ -540,7 +540,7 @@ static __strong NSData *CRLFCRLF;
             userAndPasswordBase64Encoded = [userAndPassword base64Encoding];
 #pragma clang diagnostic pop
         }
-        _basicAuthorizationString = [NSString stringWithFormat:@"Basic %@", userAndPasswordBase64Encoded];
+        _basicAuthorizationString = [NSString stringWithFormat:@"%@", userAndPasswordBase64Encoded];
         CFHTTPMessageSetHeaderFieldValue(request, CFSTR("Authorization"), (__bridge CFStringRef)_basicAuthorizationString);
     }
 

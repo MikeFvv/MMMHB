@@ -15,7 +15,7 @@
 @property (nonatomic,strong) UILabel *name;
 @property (nonatomic,strong) UIImageView *sex;
 @property (nonatomic,strong) UILabel *date;
-@property (nonatomic,strong) UILabel *money;
+@property (nonatomic,strong) UILabel *moneyLable;
 @property (nonatomic,strong) UIImageView *maxImg;
 @property (nonatomic,strong) UIImageView *mineImageView;
 //
@@ -124,12 +124,12 @@
         make.size.mas_equalTo(CGSizeMake(15, 14.5));
     }];
     
-    _money = [UILabel new];
-    [self.contentView addSubview:_money];
-    _money.textColor = Color_3;
-    _money.font = [UIFont boldSystemFontOfSize:16];
+    _moneyLable = [UILabel new];
+    [self.contentView addSubview:_moneyLable];
+    _moneyLable.textColor = Color_3;
+    _moneyLable.font = [UIFont boldSystemFontOfSize:16];
     
-    [_money mas_makeConstraints:^(MASConstraintMaker *make) {
+    [_moneyLable mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(self.contentView.mas_right).offset(-15);
         make.top.equalTo(self.contentView).offset(15);
     }];
@@ -160,12 +160,12 @@
     }
     
     _name.text = (![nickname isKindOfClass:[NSNull class]])?nickname:@"";
-    _money.text = (![money isKindOfClass:[NSNull class]]) ? money : @"";
+    _moneyLable.text = (![money isKindOfClass:[NSNull class]]) ? money : @"";
     
     if ([[obj objectForKey:@"redpType"] integerValue] == 2) { // 牛牛红包
         self.pointsNumImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"cow_%@", [obj objectForKey:@"score"]]];
         
-        [_money mas_updateConstraints:^(MASConstraintMaker *make) {
+        [_moneyLable mas_updateConstraints:^(MASConstraintMaker *make) {
             make.right.equalTo(self.pointsNumImageView.mas_left).offset(-5);
             make.centerY.equalTo(self.pointsNumImageView.mas_centerY);
         }];
@@ -175,7 +175,7 @@
         _mineImageView.hidden = YES;
         _maxImg.hidden = YES;
     } else {
-        [_money mas_updateConstraints:^(MASConstraintMaker *make) {
+        [_moneyLable mas_updateConstraints:^(MASConstraintMaker *make) {
             make.right.equalTo(self.contentView.mas_right).offset(-15);
             make.top.equalTo(self.contentView).offset(15);
         }];
@@ -183,9 +183,34 @@
         self.pointsNumImageView.hidden = YES;
         _maxImg.hidden = [[obj objectForKey:@"isLuck"] boolValue] ? NO : YES;
         _mineImageView.hidden = [[obj objectForKey:@"isMine"] boolValue] ? NO : YES;
+        if ([[obj objectForKey:@"redpType"] integerValue] == 3) {
+            if (GetUserDefaultWithKey(kBombList)) {
+                NSArray *bombNumArray = GetUserDefaultWithKey(kBombList);
+                NSInteger lastNum = [[money substringWithRange:NSMakeRange(money.length-1, 1)]integerValue];
+                if (bombNumArray.count>0) {
+                    for (NSNumber* i in bombNumArray) {
+                        if ([i integerValue] == lastNum) {
+                            if ([GetUserDefaultWithKey(kBombHitCnt)integerValue]>0) {
+                                _mineImageView.hidden = NO;
+                            }
+//                            if ([GetUserDefaultWithKey(kBombHandicap)integerValue]>0) {
+                                [self redXingWithLabel:_moneyLable atIndex:_moneyLable.text.length-1];
+//                            }
+                            
+                        }
+                    }
+                }
+            }
+            
+            
+        }
     }
     
     
 }
-
+- (void)redXingWithLabel:(UILabel *)tempLabel atIndex:(NSInteger)tempIndex {
+    NSMutableAttributedString * tempString = [[NSMutableAttributedString alloc] initWithString: tempLabel.text];
+    [tempString addAttribute:NSForegroundColorAttributeName value:[UIColor redColor] range:NSMakeRange(tempIndex, 1)];
+    tempLabel.attributedText = tempString;
+}
 @end

@@ -95,21 +95,22 @@
     label.textColor = COLOR_X(255, 177, 2);
 //    label.shadowColor = Color_9;
 //    label.shadowOffset = CGSizeMake(0, 1);
+    NSString* amout= STR_TO_AmountFloatSTR(self.moneyDic[@"first"]);
     if(type == RewardType_czjl)
-        label.text = [NSString stringWithFormat:@"已领取%@元",self.moneyDic[@"first"]];
+        label.text = [NSString stringWithFormat:@"已领取%@元",amout];
     else if(type == RewardType_ztlsyj || type == RewardType_bzsz)
-        label.text = [NSString stringWithFormat:@"%@元",self.moneyDic[@"first"]];
+        label.text = [NSString stringWithFormat:@"%@元",amout];
     else
-        label.text = [NSString stringWithFormat:@"累计%@元",self.moneyDic[@"first"]];
+        label.text = [NSString stringWithFormat:@"累计%@元",amout];
     label.frame = CGRectMake(0, 0, 200, 30);
     CGPoint center = CGPointMake(0, 0);
     
     NSInteger imgWidth = self.imageView.frame.size.width;
     if(type == RewardType_czjl){
         center = CGPointMake(imgWidth * 0.32, imgWidth * 0.9683);//0.32
-#ifdef QQHB
-        center = CGPointMake(imgWidth * 0.5, imgWidth * 0.9683);//0.32
-#endif
+//#ifdef QQHB
+//        center = CGPointMake(imgWidth * 0.5, imgWidth * 0.9683);//0.32
+//#endif
     }
     else if(type == RewardType_yqhycz)
         center = CGPointMake(imgWidth * 0.33, imgWidth * 0.9287);
@@ -122,9 +123,9 @@
     [self.imageView addSubview:label];
     
     BOOL va = (type == RewardType_yqhycz || type == RewardType_czjl);
-#ifdef QQHB
-    va = (type == RewardType_yqhycz);
-#endif
+//#ifdef QQHB
+//    va = (type == RewardType_yqhycz);
+//#endif
     if(va){
         label = [[UILabel alloc] init];
         label.font = [UIFont boldSystemFontOfSize2:17];
@@ -132,10 +133,11 @@
         label.textColor = COLOR_X(255, 177, 2);
 //        label.shadowColor = Color_9;
 //        label.shadowOffset = CGSizeMake(0, 1);
+        NSString* amout= STR_TO_AmountFloatSTR(self.moneyDic[@"two"]);
         if(type == RewardType_czjl)
-            label.text = [NSString stringWithFormat:@"已领取%@元",self.moneyDic[@"two"]];
+            label.text = [NSString stringWithFormat:@"已领取%@元",amout];
         else
-            label.text = [NSString stringWithFormat:@"累计%@元",self.moneyDic[@"two"]];
+            label.text = [NSString stringWithFormat:@"累计%@元",amout];
         label.frame = CGRectMake(0, 0, 200, 30);
         CGPoint center = CGPointMake(0, 0);
         NSInteger type = [self.infoDic[@"type"] integerValue];
@@ -155,9 +157,9 @@
     center = CGPointMake(0, 0);
     if(type == RewardType_czjl){
         center = CGPointMake(imgWidth * 0.32, imgWidth * 0.78);
-#ifdef QQHB
-        center = CGPointMake(imgWidth * 0.5, imgWidth * 0.78);
-#endif
+//#ifdef QQHB
+//        center = CGPointMake(imgWidth * 0.5, imgWidth * 0.78);
+//#endif
     }
     else if(type == RewardType_yqhycz)
         center = CGPointMake(imgWidth * 0.33, imgWidth * 0.7553);

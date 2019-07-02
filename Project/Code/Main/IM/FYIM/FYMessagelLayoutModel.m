@@ -27,6 +27,11 @@
 -(void)setMessage:(FYMessage *)message {
     _message = message;
     
+    if (message.messageType == FYMessageTypeImage && message.messageFrom == FYChatMessageFromSystem) {
+        [self setSystemMessage];
+        return;
+    }
+    
     switch (message.messageType) {
         case FYMessageTypeText:
         case FYMessageTypeReportAwardInfo:
@@ -37,9 +42,6 @@
             break;
         case FYMessageTypeNoticeRewardInfo:
             [self setCowCowRewardInfo];
-            return;
-        case FYSystemMessage:
-            [self setSystemMessage];
             return;
         case FYMessageTypeImage:
             [self setImage];
@@ -187,16 +189,35 @@
     
 }
 
--(void)setImage{
+#pragma mark - 图片消息
+-(void)setImage {
     
-    //    UIImage *image = _message.image;
-    //    CGFloat imgWidth  = CGImageGetWidth(image.CGImage);
-    //    CGFloat imgHeight = CGImageGetHeight(image.CGImage);
+    CGFloat imgWidth = 0.0;
+    CGFloat imgHeight = 0.0;
+    if (_message.isReceivedMsg) {
+         NSDictionary *imageDict = (NSDictionary *)[_message.text mj_JSONObject];
+        imgWidth  = [imageDict[@"width"] floatValue];
+        imgHeight = [imageDict[@"height"] floatValue];
+    } else {
+       imgWidth = [_message.selectPhoto[@"width"] floatValue];
+       imgHeight = [_message.selectPhoto[@"height"] floatValue];
+    }
+    
+    CGSize realImageSize = CGSizeMake(imgWidth, imgHeight);
+    
+    
+    if (imgWidth == 0) {
+        imgWidth = 100;
+    }
+    if (imgHeight == 0) {
+        imgHeight = 100;
+    }
+    CGSize imageSize = [self contentSize:SCREEN_WIDTH size:realImageSize];
+    
+    
     //    CGFloat imgActualHeight = SSChatImageMaxSize;
     //    CGFloat imgActualWidth =  SSChatImageMaxSize * imgWidth/imgHeight;
-    //
-    //    _message.contentMode =  UIViewContentModeScaleAspectFit;
-    //
+    //    //        _message.contentMode =  UIViewContentModeScaleAspectFit;
     //    if(imgActualWidth>SSChatImageMaxSize){
     //        imgActualWidth = SSChatImageMaxSize;
     //        imgActualHeight = imgActualWidth * imgHeight/imgWidth;
@@ -204,42 +225,113 @@
     //    if(imgActualWidth<SSChatImageMaxSize*0.25){
     //        imgActualWidth = SSChatImageMaxSize * 0.25;
     //        imgActualHeight = SSChatImageMaxSize * 0.8;
-    //        _message.contentMode =  UIViewContentModeScaleAspectFill;
+    //        //            _message.contentMode =  UIViewContentModeScaleAspectFill;
     //    }
-    //
-    //    if(_message.messageFrom == FYMessageDirection_RECEIVE){
-    //        _headerImgRect = CGRectMake(FYChatIconLeftOrRight,SSChatCellTopOrBottom, SSChatIconWH, SSChatIconWH);
-    //
-    //        _bubbleBackViewRect = CGRectMake(FYChatIconLeftOrRight+SSChatIconWH+FYChatIconLeftOrRight, self.headerImgRect.origin.y, imgActualWidth, imgActualHeight);
-    //
-    //        _imageInsets = UIEdgeInsetsMake(SSChatAirTop, SSChatAirLRB, SSChatAirBottom, SSChatAirLRS);
-    //
-    //    }else{
-    //        _headerImgRect = CGRectMake(SSChatIcon_RX, SSChatCellTopOrBottom, SSChatIconWH, SSChatIconWH);
-    //
-    //        _bubbleBackViewRect = CGRectMake(SSChatIcon_RX-SSChatDetailRight-imgActualWidth, self.headerImgRect.origin.y, imgActualWidth, imgActualHeight);
-    //
-    //        _imageInsets = UIEdgeInsetsMake(SSChatAirTop, SSChatAirLRS, SSChatAirBottom, SSChatAirLRB);
-    //    }
-    //
-    //    //判断时间是否显示
-    //    _timeLabRect = CGRectMake(0, 0, 0, 0);
-    //
-    //    if(_message.showTime==YES){
-    //
-    //        _timeLabRect = CGRectMake(FYSCREEN_Width/2-100, SSChatTimeTopOrBottom, 200, SSChatTimeHeight);
-    //
-    //        CGRect hRect = self.headerImgRect;
-    //        hRect.origin.y = SSChatTimeTopOrBottom+SSChatTimeTopOrBottom+SSChatTimeHeight;
-    //        self.headerImgRect = hRect;
-    //
-    //        _bubbleBackViewRect = CGRectMake(_bubbleBackViewRect.origin.x, _headerImgRect.origin.y, _bubbleBackViewRect.size.width, _bubbleBackViewRect.size.height);
-    //    }
-    //
-    //    _cellHeight = _bubbleBackViewRect.size.height + _bubbleBackViewRect.origin.y + SSChatCellTopOrBottom;
+    
+    
+    if(_message.messageFrom == FYMessageDirection_RECEIVE){
+        _headerImgRect = CGRectMake(FYChatIconLeftOrRight,SSChatCellTopOrBottom, SSChatIconWH, SSChatIconWH);
+        
+        _bubbleBackViewRect = CGRectMake(FYChatIconLeftOrRight+SSChatIconWH+FYChatIconLeftOrRight, SSChatCellTopOrBottom + FYChatNameSpacingHeight, imageSize.width, imageSize.height);
+        
+        _imageInsets = UIEdgeInsetsMake(SSChatAirTop, SSChatAirLRB, SSChatAirBottom, SSChatAirLRS);
+        
+    }else{
+        _headerImgRect = CGRectMake(SSChatIcon_RX, SSChatCellTopOrBottom, SSChatIconWH, SSChatIconWH);
+        
+        _bubbleBackViewRect = CGRectMake(SSChatIcon_RX-SSChatDetailRight- imageSize.width, self.headerImgRect.origin.y, imageSize.width, imageSize.height);
+        
+        _imageInsets = UIEdgeInsetsMake(SSChatAirTop, SSChatAirLRS, SSChatAirBottom, SSChatAirLRB);
+    }
+    
+    //判断时间是否显示
+    _timeLabRect = CGRectMake(0, 0, 0, 0);
+    
+    if(_message.showTime==YES){
+        
+        _timeLabRect = CGRectMake(FYSCREEN_Width/2-100, SSChatTimeTopOrBottom, 200, SSChatTimeHeight);
+        
+        CGRect hRect = self.headerImgRect;
+        hRect.origin.y = SSChatTimeTopOrBottom+SSChatTimeTopOrBottom+SSChatTimeHeight;
+        self.headerImgRect = hRect;
+        
+        _bubbleBackViewRect = CGRectMake(_bubbleBackViewRect.origin.x, _headerImgRect.origin.y, _bubbleBackViewRect.size.width, _bubbleBackViewRect.size.height);
+    }
+    
+    _cellHeight = _bubbleBackViewRect.size.height + _bubbleBackViewRect.origin.y + SSChatCellTopOrBottom;
     
 }
 
+- (CGSize)contentSize:(CGFloat)cellWidth size:(CGSize)size
+{
+    CGFloat attachmentImageMinWidth  = (cellWidth / 4.0);
+    CGFloat attachmentImageMinHeight = (cellWidth / 4.0);
+    CGFloat attachmemtImageMaxWidth  = (cellWidth - 184);
+    CGFloat attachmentImageMaxHeight = (cellWidth - 184);
+    
+    
+    CGSize imageSize;
+    if (!CGSizeEqualToSize(size, CGSizeZero)) {
+        imageSize = size;
+    }
+    else
+    {
+        UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:_message.imageUrl]]];
+        //        UIImage *image = [UIImage imageWithContentsOfFile:_message.imageUrl];
+        imageSize = image ? image.size : CGSizeZero;
+    }
+    CGSize contentSize = [self sizeWithImageOriginSize:imageSize
+                                               minSize:CGSizeMake(attachmentImageMinWidth, attachmentImageMinHeight)
+                                               maxSize:CGSizeMake(attachmemtImageMaxWidth, attachmentImageMaxHeight )];
+    return contentSize;
+}
+
+
+- (CGSize)sizeWithImageOriginSize:(CGSize)originSize
+                          minSize:(CGSize)imageMinSize
+                          maxSize:(CGSize)imageMaxSiz{
+    CGSize size;
+    NSInteger imageWidth = originSize.width ,imageHeight = originSize.height;
+    NSInteger imageMinWidth = imageMinSize.width, imageMinHeight = imageMinSize.height;
+    NSInteger imageMaxWidth = imageMaxSiz.width,  imageMaxHeight = imageMaxSiz.height;
+    if (imageWidth > imageHeight) //宽图
+    {
+        size.height = imageMinHeight;  //高度取最小高度
+        size.width = imageWidth * imageMinHeight / imageHeight;
+        if (size.width > imageMaxWidth)
+        {
+            size.width = imageMaxWidth;
+        }
+    }
+    else if(imageWidth < imageHeight)//高图
+    {
+        size.width = imageMinWidth;
+        size.height = imageHeight *imageMinWidth / imageWidth;
+        if (size.height > imageMaxHeight)
+        {
+            size.height = imageMaxHeight;
+        }
+    }
+    else//方图
+    {
+        if (imageWidth > imageMaxWidth)
+        {
+            size.width = imageMaxWidth;
+            size.height = imageMaxHeight;
+        }
+        else if(imageWidth > imageMinWidth)
+        {
+            size.width = imageWidth;
+            size.height = imageHeight;
+        }
+        else
+        {
+            size.width = imageMinWidth;
+            size.height = imageMinHeight;
+        }
+    }
+    return size;
+}
 
 -(void)setVoice{
     

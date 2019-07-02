@@ -26,9 +26,10 @@
 #include <mach/machine.h>
 #include <mach/host_info.h>
 #include <mach/mach_time.h>
-
+#import "GTMBase64.h"
+#import "NSData+AES.h"
 @interface FunctionManager()
-
+@property (nonatomic, copy) ActionBlock block;
 @end
 @implementation FunctionManager
 
@@ -36,9 +37,9 @@
     static dispatch_once_t onceFun;
     static FunctionManager *instance = nil;
     dispatch_once(&onceFun, ^{
-    if(instance == nil){
-        instance = [[FunctionManager alloc] init];
-    }});
+        if(instance == nil){
+            instance = [[FunctionManager alloc] init];
+        }});
     return instance;
 }
 
@@ -111,17 +112,71 @@
     }
     return false;
 }
+#pragma mark -限高计算AttributeString与String的宽度
++(CGFloat)getTextWidth:(NSString *)string withFontSize:(UIFont *)font withHeight:(CGFloat)height
+{
+    float width = 0;
+    CGSize lableSize = CGSizeZero;
+    if([string respondsToSelector:@selector(boundingRectWithSize:options:attributes:context:)]){
+        NSDictionary *stringAttributes = [NSDictionary dictionaryWithObject:font forKey: NSFontAttributeName];
+        CGSize sizeTemp = [string boundingRectWithSize: CGSizeMake(MAXFLOAT, height)
+                                               options: NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
+                                            attributes: stringAttributes
+                                               context: nil].size;
+        lableSize = CGSizeMake(ceilf(sizeTemp.width), ceilf(sizeTemp.height));
+    }
+    width = lableSize.width;
+    return width;
+}
++(NSMutableArray*)findGamesGrids{
+    NSArray* gridSectionNames = @[@{@"红包游戏":@""},
+                                  @{@"电子游戏":@""},
+                                  @{@"棋牌游戏":@""},
+                                  @{@"休闲游戏":@""}
+                                  ];
+    NSMutableArray* gridParams = [NSMutableArray array];
+    NSArray* gridTypes = @[@(EnumActionTag0),@(EnumActionTag1),@(EnumActionTag2),@(EnumActionTag4)];
+    for (int i=0; i<gridSectionNames.count; i++) {
+        NSDictionary* dic = gridSectionNames[i];
+        NSDictionary * param = @{kTit:dic.allKeys[0],
+                                 kImg:[NSString stringWithFormat:@"gameGrid_%i",i],
+                                 kType:gridTypes[i]
+                                 };
+        [gridParams addObject:param];
+    }
+    return gridParams;
+}
++(NSDictionary*)encryMethod:(NSDictionary*)dict{
+    NSDictionary* encryDic = @{
+                               };
+    if (![FunctionManager isEmpty:[AppModel shareInstance].encRSAPubKey]) {
+        NSData *data = [[dict mj_JSONString] dataUsingEncoding:NSUTF8StringEncoding];
+        data = [data AES128EncryptWithKey:[AppModel shareInstance].randomly16Key gIv:[AppModel shareInstance].randomly16Key];
+        data = [GTMBase64 encodeData:data];
+        NSString *s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        encryDic = @{
+                     @"encryptKey":[AppModel shareInstance].encRSAPubKey,
+                     @"encryptData":s,
+                     @"timestamp":[FunctionManager getNowTime]
+                     };
+        //                encryptKey =  rsa （（publickey+16aes-key）base64 encode）
+        //                encryptData  =  res (16aes-key  + data)
+    }else{
+        encryDic = dict;
+    }
+    return encryDic;
+}
 
 +(id)isValueNSStringWith:(NSString *)str{
     NSString *resultStr = nil;
-//    str =[str stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    //    str =[str stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if ([str isEqual:[NSNull null]]
         ||[NSString stringWithFormat:@"%@",str]==nil
         ||[NSString stringWithFormat:@"%@",str].length==0
         ||[[NSString stringWithFormat:@"%@",str] isEqual:@"(null)"]
         ||[[NSString stringWithFormat:@"%@",str] isEqual:@"<null>"]
         ||[[NSString stringWithFormat:@"%@",str] isEqual:@"null"]
-//        ||[str stringByReplacingOccurrencesOfString:@" " withString:@""].length == 0
+        //        ||[str stringByReplacingOccurrencesOfString:@" " withString:@""].length == 0
         ) {
         resultStr = @"";
     }else{
@@ -253,10 +308,10 @@
 }
 
 -(BOOL)validatePhone:(NSString *)phone{
-//    NSString *phoneRegex = @"^((1[0-9]))\\d{9}$";
-//    NSPredicate *phoneTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",phoneRegex];
-//    //    NSLog(@"phoneTest is %@",phoneTest);
-//    return [phoneTest evaluateWithObject:phone];
+    //    NSString *phoneRegex = @"^((1[0-9]))\\d{9}$";
+    //    NSPredicate *phoneTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",phoneRegex];
+    //    //    NSLog(@"phoneTest is %@",phoneTest);
+    //    return [phoneTest evaluateWithObject:phone];
     if(phone.length < 6)
         return NO;
     NSString *s = [phone substringToIndex:1];
@@ -518,25 +573,108 @@
     titleSize.width += 1;
     return titleSize;
 }
++ (NSString *)getNowTime{//13位
+    
+    //获取当前时间戳
+    NSDate* date = [NSDate dateWithTimeIntervalSinceNow:0];//获取当前时间0秒后的时间
+    NSTimeInterval time=[date timeIntervalSince1970]*1000;// *1000 是精确到毫秒，不乘就是精确到秒
+    NSString *timeSp = [NSString stringWithFormat:@"%.0f", time];
+    
+    return timeSp;
+}
+//-(void)handleFailResponse:(id)object actionBlock:(ActionBlock)block{
+//    self.block = block;
+//    if([object isKindOfClass:[NSError class]]){
+//        NSError *error = (NSError *)object;
+//        SVP_ERROR(error);
+//    }else if([object isKindOfClass:[NSDictionary class]]){
+//        NSDictionary *dd = (NSDictionary *)object;
+//        if ([FunctionManager isEmpty:dd[@"errorcode"]]) {
+//            if ([FunctionManager isEmpty:dd[@"alterMsg"]]) {
+//                SVP_ERROR_STATUS(@"登录超时 请退出重新登录");
+//            }else{
+//                SVP_ERROR_STATUS(dd[@"alterMsg"]);
+//            }
+//        }else{
+//            //errorcode 枚举
+//            switch ([dd[@"errorcode"] integerValue]) {
+//                case 10000000:
+//                {
+//                    [[AppModel shareInstance] logout];
+//                }
+//                    break;
+//                case 19:
+//                {
+//                    if (self.block) {
+//                        self.block(@(19));
+//                    }
+//                }
+//                    break;
+//
+//                default:
+//                    break;
+//            }
+//
+//        }
+//    }else if([object isKindOfClass:[NSString class]])
+//        SVP_ERROR_STATUS(object);
+//    else
+//        SVP_DISMISS;
+//}
 
--(void)handleFailResponse:(id)object{
+
+-(void)handleFailResponse:(id)object {
     if([object isKindOfClass:[NSError class]]){
         NSError *error = (NSError *)object;
-        SVP_ERROR(error);
+        NSDictionary *errdict = [error.userInfo objectForKey:@"com.alamofire.serialization.response.error.data"];
+        if (errdict) {
+            NSDictionary *errorData = [NSJSONSerialization JSONObjectWithData: (NSData *)errdict options:kNilOptions error:nil];
+            if (errorData) {
+                [self errorDataDict:errorData];
+            } else {
+                SVP_ERROR(error);
+            }
+        } else {
+            SVP_ERROR(error);
+        }
     }else if([object isKindOfClass:[NSDictionary class]]){
         NSDictionary *dd = (NSDictionary *)object;
-        if(dd[@"msg"])
-            SVP_ERROR_STATUS(dd[@"msg"]);
-        else if(dd[@"error"]){
-            if([dd[@"error"] isEqualToString:@"unauthorized"]){
-                SVP_ERROR_STATUS(kAccountOrPasswordErrorMessage);
-            }else
-                SVP_ERROR_STATUS(dd[@"error"]);
-        }
+        [self errorDataDict:dd];
     }else if([object isKindOfClass:[NSString class]])
         SVP_ERROR_STATUS(object);
     else
         SVP_DISMISS;
+}
+
+- (void)errorDataDict:(NSDictionary *)dict {
+    if ([FunctionManager isEmpty:dict[@"errorcode"]]) {
+        if ([FunctionManager isEmpty:dict[@"alterMsg"]]) {
+            SVP_ERROR_STATUS(@"登录超时 请退出重新登录");
+        }else{
+            SVP_ERROR_STATUS(dict[@"alterMsg"]);
+        }
+    }else{
+        //errorcode 枚举
+        switch ([dict[@"errorcode"] integerValue]) {
+            case 10000000:
+            {
+                if([AppModel shareInstance].userInfo.isLogined == YES) {
+                    [[AppModel shareInstance] logout];
+                }
+            }
+                break;
+                
+            default:{
+                if ([FunctionManager isEmpty:dict[@"alterMsg"]]) {
+                    SVP_ERROR_STATUS(@"登录超时 请退出重新登录");
+                }else{
+                    SVP_ERROR_STATUS(dict[@"alterMsg"]);
+                }
+            }
+                break;
+        }
+        
+    }
 }
 
 -(void)checkVersion:(BOOL)showAlert{
@@ -559,7 +697,7 @@
     if([appVersion compare:newestVersion] == NSOrderedAscending){
         NSInteger forceUpate = [dict[@"ios.force.update.flag"] integerValue];
         NSString *desc = dict[@"ios.version.update.content"];
-      
+        
         AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
         view.textLabel.font = [UIFont systemFontOfSize2:16];
         if(forceUpate == 0){
@@ -580,23 +718,23 @@
                 [weakObj performSelector:@selector(exitApp) withObject:nil afterDelay:0.5];
             }];
         }
-//
-//        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"版本更新" message:desc preferredStyle:UIAlertControllerStyleAlert];
-//        [alertController modifyColor];
-//        UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"更新" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-//            NSURL *url = [NSURL URLWithString:[AppModel shareInstance].commonInfo[@"ios.download.path"]];
-//            if([[UIApplication sharedApplication] canOpenURL:url])
-//                [[UIApplication sharedApplication] openURL:url];
-//            [weakObj performSelector:@selector(exitApp) withObject:nil afterDelay:0.5];
-//        }];
-//        [okAction setValue:Color_0 forKey:@"_titleTextColor"];
-//        [alertController addAction:okAction];
-//        if(forceUpate == 0){
-//            UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil];
-//            [cancelAction setValue:Color_0 forKey:@"_titleTextColor"];
-//            [alertController addAction:cancelAction];
-//        }
-//        [[[FunctionManager sharedInstance] currentViewController] presentViewController:alertController animated:YES completion:nil];
+        //
+        //        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"版本更新" message:desc preferredStyle:UIAlertControllerStyleAlert];
+        //        [alertController modifyColor];
+        //        UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"更新" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        //            NSURL *url = [NSURL URLWithString:[AppModel shareInstance].commonInfo[@"ios.download.path"]];
+        //            if([[UIApplication sharedApplication] canOpenURL:url])
+        //                [[UIApplication sharedApplication] openURL:url];
+        //            [weakObj performSelector:@selector(exitApp) withObject:nil afterDelay:0.5];
+        //        }];
+        //        [okAction setValue:Color_0 forKey:@"_titleTextColor"];
+        //        [alertController addAction:okAction];
+        //        if(forceUpate == 0){
+        //            UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil];
+        //            [cancelAction setValue:Color_0 forKey:@"_titleTextColor"];
+        //            [alertController addAction:cancelAction];
+        //        }
+        //        [[[FunctionManager sharedInstance] currentViewController] presentViewController:alertController animated:YES completion:nil];
     }else{
         if(showAlert){
             SVP_SUCCESS_STATUS(@"已是最新版本");
@@ -624,8 +762,8 @@
         NSString *ss = num;
         if([num isKindOfClass:[NSNumber class]])
             ss = [((NSNumber *)num) stringValue];
-//        if(s.length > 1)
-//            [s appendString:@","];
+        //        if(s.length > 1)
+        //            [s appendString:@","];
         [s appendString:ss];
     }
     [s appendString:@"]"];

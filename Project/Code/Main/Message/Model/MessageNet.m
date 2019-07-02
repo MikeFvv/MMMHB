@@ -56,8 +56,17 @@
     service_model.notice = @"有问题，找客服";
     service.obj = service_model;
     
+    CDTableModel *friend = [CDTableModel new];
+    MessageItem *friend_model = [MessageItem new];
+    friend.className = @"MessageTableViewCell";
+    friend_model.localImg = @"roseicon";   // 图片名称
+    friend_model.chatgName = @"我的好友";
+    friend_model.groupId = @"";
+    friend_model.notice = @"";
+    friend.obj = friend_model;
+    
     //    return @[notif,service];
-    return @[service];
+    return @[service,friend];
 }
 
 
@@ -106,12 +115,18 @@
                            failureBlock:(void (^)(NSError *))failureBlock {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@?page=1&limit=100&orderByField=id&isAsc=false",[AppModel shareInstance].serverUrl,@"social/skChatGroup/joinGroupPage"];
-    
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/joinGroupPage"];
+    NSDictionary *parameters = @{
+                                 @"size":@"100",
+                                 @"sort":@"id",
+                                 @"isAsc":@"false",
+                                 @"current":@"1"
+                                 };
+    entity.parameters = parameters;
     entity.needCache = NO;
     
     __weak __typeof(self)weakSelf = self;
-    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         //        NSLog(@"get 请求数据结果： *** %@", response);
         
@@ -138,27 +153,78 @@
  @param failureBlock 失败block
  */
 -(void)getGroupListWithSuccessBlock:(void (^)(NSDictionary *))successBlock
-                       failureBlock:(void (^)(NSError *))failureBlock {
+                       failureBlock:(void (^)(id))failureBlock {
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@?page=1&limit=100&orderByField=id&isAsc=false",[AppModel shareInstance].serverUrl,@"social/skChatGroup/page"];;
-    
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/page"];
+    NSDictionary *parameters = @{
+                                 @"size":@"100",
+                                 @"sort":@"id",
+                                 @"isAsc":@"false",
+                                 @"current":@"1"
+                                 };
+    entity.parameters = parameters;
     entity.needCache = NO;
     
     __weak __typeof(self)weakSelf = self;
-    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
-        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        //        NSLog(@"get 请求数据结果： *** %@", response);
-        [strongSelf handleGroupListData:response[@"data"] andIsMyJoined:NO];
-        successBlock(response);
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
+        if ([response[@"code"]integerValue]==0) {
+            __strong __typeof(weakSelf)strongSelf = weakSelf;
+            //        NSLog(@"get 请求数据结果： *** %@", response);
+            [strongSelf handleGroupListData:response[@"data"] andIsMyJoined:NO];
+            successBlock(response);
+        }else{
+            self.isNetError = YES;
+            self.isEmpty = NO;
+            [[FunctionManager sharedInstance] handleFailResponse:response];
+            failureBlock(response);
+        }
         
-    } failureBlock:^(NSError *error) {
-        failureBlock(error);
+        
+    } failureBlock:^(id object) {
+        self.isNetError = YES;
+        self.isEmpty = NO;
+        [[FunctionManager sharedInstance] handleFailResponse:object];
+        failureBlock(object);
     } progressBlock:nil];
+}
+
+/**
+ 获取game banner
+ 
+ @param successBlock 成功block
+ @param failureBlock 失败block
+ */
+-(void)getGameListWithRequestParams:(id)requestParams successBlock:(void (^)(NSArray *))successBlock
+                       failureBlock:(void (^)(id))failureBlock {
+//    WEAK_OBJ(weakSelf, self);
+    [NET_REQUEST_MANAGER requestMsgBannerWithId:[requestParams integerValue] WithPictureSpe:OccurBannerAdsPictureTypeNormal success:^(id object) {
+        self.dataList = [[NSMutableArray alloc] init];
+        BannerModel* model = [BannerModel mj_objectWithKeyValues:object];
+        if (model.data.skAdvDetailList.count>0) {
+            [self.dataList addObjectsFromArray: model.data.skAdvDetailList];
+            self.isEmpty = NO;
+            self.isNetError = NO;
+            successBlock(self.dataList);
+            
+        }else{
+            self.isEmpty = YES;
+            self.isNetError = NO;
+            [[FunctionManager sharedInstance] handleFailResponse:object];
+            failureBlock(object);
+            
+        }
+    } fail:^(id object) {
+        self.isNetError = YES;
+        self.isEmpty = NO;
+        [[FunctionManager sharedInstance] handleFailResponse:object];
+        failureBlock(object);
+    }];
 }
 
 -(void)handleGroupListData:(NSDictionary *)data andIsMyJoined:(BOOL)isMyJoined {
     if (data != NULL && [data isKindOfClass:[NSDictionary class]]) {
+        self.isNetError = NO;
         self.page = [[data objectForKey:@"current"] integerValue];
         if (self.page == 1) {
             if(isMyJoined) {
@@ -177,7 +243,7 @@
             for (id item in list) {
                 
                 NSString *queryId = [NSString stringWithFormat:@"%@-%@",[item objectForKey:@"id"],[AppModel shareInstance].userInfo.userId];
-                PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].myJoinGroupMessage[queryId];
+                PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].allUnreadMessagesDict[queryId];
                 [AppModel shareInstance].unReadCount += pmModel.number;
                 
                 
@@ -198,7 +264,7 @@
                 self.isOnce = NO;
                 [[NSNotificationCenter defaultCenter] postNotificationName:kDoneGetMyJoinedGroupsNotification object:nil];
             }
-            [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:@"GroupListNotification"];
             
             self.isEmptyMyJoin = (self.myJoinDataList.count == 0)?YES:NO;
             self.isMostMyJoin = ((self.myJoinDataList.count % self.pageSize == 0)&(list.count>0))?NO:YES;
@@ -215,9 +281,17 @@
         
     } else {
         // 没有数据
+        self.isNetError = YES;
+        self.isEmpty = NO;
+//        {
+//            alterMsg = "每页显示行数不能为空";
+//            code = 1;
+//            errorcode = 10000001;
+//            msg = "PageRequestBody(queryParam=null, current=null, size=null, sort=id, isAsc=false)";
+//        }
         if ([AppModel shareInstance].unReadCount > 0) {
             [AppModel shareInstance].unReadCount = 0;
-            [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:@"GroupListNotification"];
         }
         
     }
@@ -276,38 +350,6 @@
     [self getMyJoinedGroupListSuccessBlock:^(NSDictionary *dict) {
     } failureBlock:^(NSError *error) {
     }];
-    
-}
-
-
-
-/**********************************暂无使用到***********************************/
-
-/**
- 查询群组详情
- 
- @param groupId 群ID
- @param successBlock 成功block
- @param failureBlock 失败block
- */
-- (void)queryGroupDetails:(NSString *)groupId
-             successBlock:(void (^)(NSDictionary *))successBlock
-             failureBlock:(void (^)(NSError *))failureBlock {
-    
-    BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup", groupId];
-    
-    entity.needCache = NO;
-    __weak __typeof(self)weakSelf = self;
-    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
-        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        //        NSLog(@"get 请求数据结果： *** %@", response);
-        [strongSelf handleGroupListData:response[@"data"] andIsMyJoined:NO];
-        successBlock(response);
-        
-    } failureBlock:^(NSError *error) {
-        failureBlock(error);
-    } progressBlock:nil];
     
 }
 

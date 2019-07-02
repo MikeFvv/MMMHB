@@ -90,7 +90,7 @@ static const CGFloat   SSChatImageMaxSize             = 150;
 #define SSChatVoiceImgSize      20
 
 // 消息分页数量
-#define kMessagePageNumber     15
+#define kMessagePageNumber     20
 
 //地图位置宽度 高度
 static const CGFloat   SSChatMapWidth             = 240;
@@ -103,8 +103,8 @@ static const CGFloat   SSChatVideoHeight             = 150;
 
 
 // ***************** 通知 *****************
-// 刷新聊天列表
-static NSString * const kChatListReloadDataNotification = @"kChatListReloadDataNotification";
+// 刷新聊天内容
+static NSString * const kRefreshChatContentNotification = @"kRefreshChatContentNotification";
 
 
 

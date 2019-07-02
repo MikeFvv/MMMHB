@@ -552,8 +552,16 @@
 
 -(void)openByWeb{
     NSDictionary *dic = [self currentPayInfo];
-    NSString *url = [NSString stringWithFormat:@"%@%@?userId=%@&amount=%@&id=%@&typeCode=%zd",[AppModel shareInstance].serverUrl,dic[@"url"],[AppModel shareInstance].userInfo.userId,self.moneyTextField.text,dic[@"id"],[dic[@"typeCode"] integerValue]];
-    WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+    NSString *url = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,dic[@"url"]];
+    NSDictionary* bodyDictionary = @{
+                          @"userId":[AppModel shareInstance].userInfo.userId,
+                          @"amount":self.moneyTextField.text,
+                          @"id":dic[@"id"],
+                          @"typeCode":dic[@"typeCode"]
+                          };
+    NSDictionary* encryDic =  [FunctionManager encryMethod:bodyDictionary];
+    WebViewController *vc = [[WebViewController alloc] initWithUrl:url withBodyDictionary:encryDic];
+    vc.isForceEscapeWebVC = YES;
     vc.navigationItem.title = @"充值";
     [self.navigationController pushViewController:vc animated:YES];
 }

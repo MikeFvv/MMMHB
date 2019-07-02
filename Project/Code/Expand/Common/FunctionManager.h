@@ -38,6 +38,9 @@ typedef NS_ENUM(NSInteger, FixTypes)
 -(void)setCacheDataWithKey:(NSString*)key data:(id)data;
 + (BOOL)isPureInt:(NSString*)string;
 +(BOOL)isEmpty:(NSString *)text;
++(CGFloat)getTextWidth:(NSString *)string withFontSize:(UIFont *)font withHeight:(CGFloat)height;
++ (NSMutableArray*)findGamesGrids;
++(NSDictionary*)encryMethod:(NSDictionary*)dict;
 +(BOOL)getDataSuccessed:(NSDictionary *)dic;
 + (CGFloat)getContentHeightWithParagraphStyleLineSpacing:(CGFloat)lineSpacing fontWithString:(NSString*)fontWithString fontOfSize:(CGFloat)fontOfSize boundingRectWithWidth:(CGFloat)width;
 +(NSString *)getAppSource;
@@ -99,10 +102,9 @@ typedef NS_ENUM(NSInteger, FixTypes)
 -(UIWindow *)getMainView;
 
 -(CGSize)getFitSizeWithStr:(NSString *)str andFont:(UIFont *)font andMaxSize:(CGSize)maxSize;
-
++ (NSString *)getNowTime;
 -(void)checkVersion:(BOOL)showAlert;
 -(void)handleFailResponse:(id)object;
-
 - (void)exitApp;
 
 -(NSArray *)orderBombArray:(NSArray *)bombArray;//给禁抢的雷数排序

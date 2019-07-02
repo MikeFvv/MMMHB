@@ -9,9 +9,8 @@
 #import "MessageViewController.h"
 #import "MessageNet.h"
 //#import <RongIMKit/RongIMKit.h>
-
+#import "ChatViewController.h"
 #import "MessageItem.h"
-#import "ScrollBarView.h"
 #import "EasyOperater.h"
 #import "SystemAlertViewController.h"
 #import "CustomerServiceAlertView.h"
@@ -34,6 +33,8 @@
 #import "UIImageView+WebCache.h"
 #import "NetworkIndicatorView.h"
 
+#import "MyFriendMessageListController.h"
+#import "SLMarqueeControl.h"
 #define kViewTag 666
 
 @interface MessageViewController ()<UITableViewDelegate,UITableViewDataSource,CWCarouselDatasource, CWCarouselDelegate>
@@ -42,7 +43,7 @@
 @property (nonatomic, strong) UIView *animationView;
 @property(nonatomic,strong) UITableView *tableView;
 @property(nonatomic,strong) MessageNet *model;
-@property(nonatomic,strong) ScrollBarView *scrollBarView;
+@property(nonatomic,strong) SLMarqueeControl *scrollBarView;
 
 @property(nonatomic, strong) NSMutableArray *menuItems;
 //
@@ -79,11 +80,6 @@
                                                object:nil];
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(noNetwork) name:kNoNetworkNotification object:nil];
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(yesNetwork) name:kYesNetworkNotification object:nil];
-    
-    if (self.model.myJoinDataList.count > 0) {
-        [_tableView reloadData];
-        [self calculateUnreadMessages];
-    }
     [[NSNotificationCenter defaultCenter] postNotificationName:kMessageViewControllerDisplayNotification object: nil];
 }
 
@@ -121,21 +117,18 @@
 -(void)enterFore {
     [self performSelector:@selector(getData) withObject:nil afterDelay:1.0];
     NSLog(@"进入前台");
-    if(self.scrollBarView) {
-        [self.scrollBarView start];
-    }
-    
 }
 
 #pragma mark 收到消息重新刷新
 - (void)updateValue:(NSNotification *)noti {
     if (self.isCurrentController) {
         NSString *info = [noti object];
-        if (![info isEqualToString:@"updateBadeValue"]) {
+        if ([info isEqualToString:@"GroupListNotification"]) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [UIView performWithoutAnimation:^{
-                    [self.tableView reloadSections:[[NSIndexSet alloc]initWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
-                }];
+                [self.tableView reloadData];
+                //                [UIView performWithoutAnimation:^{
+                //                    [self.tableView reloadSections:[[NSIndexSet alloc]initWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
+                //                }];
             });
         }
     }
@@ -145,17 +138,39 @@
     _model = [MessageNet shareInstance];
 }
 
-
+#pragma mark ----- Layout
+- (void)finishedPostBannerLayout:(CGFloat)changeY{
+    if (self.scrollBarView) {
+        [self.scrollBarView setSd_y:changeY+3];
+        [self initLayout];
+    }else{
+        [_tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            //            make.edges.equalTo(self.view);
+            make.left.right.bottom.equalTo(self.view);
+            make.top.equalTo(self.view.mas_top).offset(changeY+3);
+        }];
+    }
+}
 - (void)initLayout {
-    [_tableView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.equalTo(self.view);
-    }];
+    if (self.scrollBarView) {
+        [self.tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.bottom.equalTo(self.view);
+            make.top.equalTo(self.scrollBarView.mas_bottom).offset(3);
+        }];
+    }else{
+        [_tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            //            make.edges.equalTo(self.view);
+            make.left.right.bottom.equalTo(self.view);
+            make.top.equalTo(self.view.mas_top).offset(3);
+        }];
+    }
 }
 
 - (void)initSubviews {
-    
     __weak __typeof(self)weakSelf = self;
     __weak MessageNet *weakModel = _model;
+    [self initScrollBarView];
+    
     self.navigationItem.title = @"消息";
     self.view.backgroundColor = BaseColor;
     _tableView = [UITableView normalTable];
@@ -167,8 +182,8 @@
     _tableView.dataSource = self;
     _tableView.rowHeight = 70;
     [_tableView YBGeneral_configuration];
-//    _tableView.separatorColor = TBSeparaColor;
-//    _tableView.separatorInset = UIEdgeInsetsMake(0, 80, 0, 0);
+    //    _tableView.separatorColor = TBSeparaColor;
+    //    _tableView.separatorInset = UIEdgeInsetsMake(0, 80, 0, 0);
     
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
         __strong __typeof(weakSelf)strongSelf = weakSelf;
@@ -192,9 +207,8 @@
     
     //SVP_SHOW;
     [NET_REQUEST_MANAGER requestSystemNoticeWithSuccess:^(id object) {
-//        [self announcementBar];
+        //        [self announcementBar];
         [self.tableView reloadData];
-        [self calculateUnreadMessages];
     } fail:^(id object) {
         
     }];
@@ -202,14 +216,14 @@
     [self getData];
 }
 
-#pragma mark - 计算未读消息
+#pragma mark - 计算验证未读消息
 - (void)calculateUnreadMessages {
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         
         [AppModel shareInstance].unReadCount = 0;
         
-        for (NSInteger index = 1; index < _model.myJoinDataList.count; index++) {
-            CDTableModel *tableModel =  _model.myJoinDataList[index];
+        for (NSInteger index = 1; index < self.model.myJoinDataList.count; index++) {
+            CDTableModel *tableModel = self.model.myJoinDataList[index];
             MessageItem *item = nil;
             if ([tableModel.obj isKindOfClass:[MessageItem class]]) {
                 item = (MessageItem *)tableModel.obj;
@@ -218,26 +232,49 @@
             }
             
             NSString *queryId = [NSString stringWithFormat:@"%@-%@",item.groupId,[AppModel shareInstance].userInfo.userId];
-            PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].myJoinGroupMessage[queryId];
+            PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].allUnreadMessagesDict[queryId];
             
             [AppModel shareInstance].unReadCount += pmModel.number;
-            [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:@"updateBadeValue"];
         }
+        
+        [AppModel shareInstance].friendUnReadTotal = 0;
+        NSString *query = [NSString stringWithFormat:@"select * from FYContacts where contactsType = 2 and accountUserId='%@' order by isTopTime desc,lastTimestamp desc,lastCreate_time desc limit 999999",[AppModel shareInstance].userInfo.userId];
+        NSArray *whereMyFriendByArray = [WHC_ModelSqlite query:[FYContacts class] sql:query];
+        for (NSInteger index = 0; index < whereMyFriendByArray.count; index++) {
+            FYContacts *model = (FYContacts *)whereMyFriendByArray[index];
+            NSString *queryId = [NSString stringWithFormat:@"%@-%@",model.sessionId,[AppModel shareInstance].userInfo.userId];
+            PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].allUnreadMessagesDict[queryId];
+            if (pmModel) {
+                [AppModel shareInstance].friendUnReadTotal += pmModel.number;
+            }
+        }
+        
+        [AppModel shareInstance].customerServiceUnReadTotal = 0;
+        NSArray *myCustomerServiceListArray = [[AppModel shareInstance].myCustomerServiceListDict allValues];
+        for (NSInteger index = 0; index < myCustomerServiceListArray.count; index++) {
+            FYContacts *model = (FYContacts *)myCustomerServiceListArray[index];
+            NSString *queryId = [NSString stringWithFormat:@"%@-%@",model.sessionId,[AppModel shareInstance].userInfo.userId];
+            PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].allUnreadMessagesDict[queryId];
+            if (pmModel) {
+                [AppModel shareInstance].customerServiceUnReadTotal += pmModel.number;
+            }
+        }
+        
+        [AppModel shareInstance].unReadCount += [AppModel shareInstance].friendUnReadTotal;
+        [AppModel shareInstance].unReadCount += [AppModel shareInstance].customerServiceUnReadTotal;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:@"updateBadeValue"];
+        
     });
 }
 
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     SVP_DISMISS;
-//    [self reload];//s1
-    
-    if(self.scrollBarView) {
-        [self.scrollBarView start];
-    }
-    [self calculateUnreadMessages];
     [self.carousel controllerWillAppear];
     self.isCurrentController = YES;
-    [self.tableView reloadData];
+    
+    [_tableView reloadData];
+    [self calculateUnreadMessages];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -247,51 +284,21 @@
     self.isCurrentController = NO;
 }
 
--(UIView*)updateScrollBarView{
-    if(self.scrollBarView) {
-        [self.scrollBarView stop];
-        [self.scrollBarView removeFromSuperview];
-        self.scrollBarView = nil;
+-(void)initScrollBarView{
+    if([AppModel shareInstance].noticeArray.count > 0&&
+       [AppModel shareInstance].noticeAttributedString.length>0){
+        
+        
+        SLMarqueeControl *control = [[SLMarqueeControl alloc] initWithFrame:CGRectMake(0.f, 0.f, SCREEN_WIDTH, 40.f)];
+        [control richElementsInViewWithModel:[AppModel shareInstance].noticeAttributedString actionBlock:^(id data) {
+            [self scrollBarViewAction];
+        }];
+        control.backgroundColor = [UIColor whiteColor];
+        [self.view addSubview:control];
+        
+        _scrollBarView = control;
+        
     }
-    if([AppModel shareInstance].noticeArray.count > 0){
-        ScrollBarView *view = [ScrollBarView createWithFrame:CGRectMake(0, 0, SCREEN_WIDTH-10, 40)];
-        
-        UITapGestureRecognizer *tapGesturRecognizer = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(scrollBarViewAction)];
-        [view addGestureRecognizer:tapGesturRecognizer];
-        
-        
-        [self.view addSubview:view];
-        NSMutableArray *arr = [[NSMutableArray alloc] init];
-        NSInteger nu = 0;
-        for (NSDictionary *dic in [AppModel shareInstance].noticeArray) {
-            NSString *title = dic[@"title"];
-            NSString *content = dic[@"content"];
-            NSMutableString *s = [[NSMutableString alloc] initWithString:@""];
-            if(title.length > 0)
-                [s appendString:title];
-            if(content.length > 0){
-                if(s.length > 0)
-                    [s appendString:@"："];
-                [s appendString:content];
-            }
-            [arr addObject:s];
-            nu += 1;
-            if(nu == 2)
-                break;
-        }
-        view.textArray = arr;
-        [view start];
-        self.scrollBarView = view;
-        //        [_tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
-        //            make.left.right.bottom.equalTo(self.view);
-        //            make.top.equalTo(self.scrollBarView.mas_bottom).offset(3);
-        //        }];
-    }else{
-        //        [_tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
-        //            make.edges.equalTo(self.view);
-        //        }];
-    }
-    return self.scrollBarView;
 }
 
 - (void)action_reload {
@@ -314,7 +321,7 @@
         }
     } failureBlock:^(NSError *err) {
         [[FunctionManager sharedInstance] handleFailResponse:err];
-        [weakSelf reload];
+        [weakSelf reloadTableState];
     }];
     
     [NET_REQUEST_MANAGER requestMsgBannerWithId:OccurBannerAdsTypeMsg WithPictureSpe:OccurBannerAdsPictureTypeNormal success:^(id object) {
@@ -372,48 +379,25 @@
             [carousel freshCarousel];
             self.carousel = carousel;
             
-            //            MsgHeaderView* uploadImageHV = [[MsgHeaderView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, kGETVALUE_HEIGHT(1080, 372, SCREEN_WIDTH)+6) WithModel:model.data];
-            ////            weakSelf.tableView.tableHeaderView = uploadImageHV;
-            //            uploadImageHV.tag = 200;
-            //            [self.view addSubview:uploadImageHV];
-            //            [uploadImageHV actionBlock:^(id data) {
-            //                BannerItem* item = data;
-            //                WebViewController *vc = [[WebViewController alloc] initWithUrl:item.advLinkUrl];
-            //                vc.navigationItem.title = item.name;
-            //                vc.hidesBottomBarWhenPushed = YES;
-            //                //[vc loadWithURL:url];
-            //                [self.navigationController pushViewController:vc animated:YES];
-            //            }];
-            
-            [self.tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
-                make.left.right.bottom.equalTo(self.view);
-                make.top.equalTo(self.animationView.mas_bottom).offset(3);
-            }];
+            [self finishedPostBannerLayout:CGRectGetMaxY(self.animationView.frame)];
             
         }else{
-            //            UIView* view = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 0.1)];
-            //            weakSelf.tableView.tableHeaderView = view;
             for (UIView* view in [self.view subviews]) {
                 if (view.tag == 200) {
                     [view removeFromSuperview];
                 }
             }
-            [weakSelf.tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
-                make.edges.equalTo(self.view);
-            }];
+            [self finishedPostBannerLayout:0];
             
         }
     } fail:^(id object) {
-        //        UIView* view = [[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 0.1)];
-        //        weakSelf.tableView.tableHeaderView = view;
+        
         for (UIView* view in [self.view subviews]) {
             if (view.tag == 200) {
                 [view removeFromSuperview];
             }
         }
-        [weakSelf.tableView mas_remakeConstraints:^(MASConstraintMaker *make) {
-            make.edges.equalTo(self.view);
-        }];
+        [self finishedPostBannerLayout:0];
         
     }];
     
@@ -464,10 +448,10 @@
 
 - (void)delayReload {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
-    [self performSelector:@selector(reload) withObject:nil afterDelay:0.2];
+    [self performSelector:@selector(reloadTableState) withObject:nil afterDelay:0.2];
 }
 
-- (void)reload {
+- (void)reloadTableState {
     [_tableView.mj_footer endRefreshing];
     [_tableView.mj_header endRefreshing];
     if(_model.isNetError){
@@ -479,10 +463,10 @@
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{
-//        [self.tableView reloadData];
-        [UIView performWithoutAnimation:^{
-            [self.tableView reloadSections:[[NSIndexSet alloc]initWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
-        }];
+        [self.tableView reloadData];
+        //        [UIView performWithoutAnimation:^{
+        //            [self.tableView reloadSections:[[NSIndexSet alloc]initWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
+        //        }];
     });
 }
 
@@ -490,90 +474,77 @@
 
 #pragma mark - SectonHeader
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
-    return 2;
-}
-- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    
-    return section==0? 43.1f:0.1f;
-}
-
-- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-    return section==0?[self updateScrollBarView]:[UIView new];
+    return 1;
 }
 
 #pragma mark UITableViewDataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return section==0?0:_model.myJoinDataList.count;
+    return _model.myJoinDataList.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    switch (indexPath.section) {
-        case 0:
-            return Nil;
-            break;
-        case 1:
-            return [tableView CDdequeueReusableCellWithIdentifier:_model.myJoinDataList[indexPath.row]];
-        default:
-            return Nil;
-            break;
-    }
+    return [tableView CDdequeueReusableCellWithIdentifier:_model.myJoinDataList[indexPath.row]];
     
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section==1) {
-        
-        
-        CDTableModel *model = _model.myJoinDataList[indexPath.row];
-        
-        MessageItem *item = [model.obj isKindOfClass:[NSDictionary class]] ? [MessageItem mj_objectWithKeyValues:model.obj] : (MessageItem *)model.obj;
-        if ([item.chatgName isEqualToString:@"通知消息"]) {
-            CDPush(self.navigationController, CDVC(@"NotifViewController"), YES);
-            return;
-        }
-        if ([item.chatgName isEqualToString:@"在线客服"]) {
-            
-            [self actionShowCustomerServiceAlertView:nil];
-            return;
-        }
-        
-        SVP_SHOW;
-        __weak __typeof(self)weakSelf = self;
-        
-        [[MessageNet shareInstance] checkGroupId:item.groupId Completed:^(BOOL complete) {
-            __strong __typeof(weakSelf)strongSelf = weakSelf;
-            if (complete) {
-                SVP_DISMISS;
-                [strongSelf goto_groupChat:item];
-            }
-            else{
-                //            [MessageNet joinGroup:@{@"groupId":item.groupId,@"uid":[AppModel shareInstance].user.userId} Success:^(NSDictionary *info) {
-                //                SVP_DISMISS;
-                //                [self groupChat:item];
-                //            } Failure:^(NSError *error) {
-                //                SVP_ERROR(error);
-                //            }];
-            }
-        }];
+    
+    CDTableModel *model = _model.myJoinDataList[indexPath.row];
+    
+    MessageItem *item = [model.obj isKindOfClass:[NSDictionary class]] ? [MessageItem mj_objectWithKeyValues:model.obj] : (MessageItem *)model.obj;
+    if ([item.chatgName isEqualToString:@"通知消息"]) {
+        CDPush(self.navigationController, CDVC(@"NotifViewController"), YES);
+        return;
     }
+    if ([item.chatgName isEqualToString:@"在线客服"]) {
+        [self actionShowCustomerServiceAlertView:nil];
+        return;
+    } else if ([item.chatgName isEqualToString:@"我的好友"]) {
+        [self goto_MyFriendMessage:2];
+        return;
+    }
+    
+    SVP_SHOW;
+    __weak __typeof(self)weakSelf = self;
+    
+    [[MessageNet shareInstance] checkGroupId:item.groupId Completed:^(BOOL complete) {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        if (complete) {
+            SVP_DISMISS;
+            [strongSelf goto_groupChat:item];
+        }
+        else{
+            //            [MessageNet joinGroup:@{@"chatId":item.groupId,@"uid":[AppModel shareInstance].user.userId} Success:^(NSDictionary *info) {
+            //                SVP_DISMISS;
+            //                [self groupChat:item];
+            //            } Failure:^(NSError *error) {
+            //                SVP_ERROR(error);
+            //            }];
+        }
+    }];
+    
 }
 
-//- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
-//    return 0.1f;
-//}
-//
-//- (nullable UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
-//    UIView *view = [[UIView alloc] init];
-//    view.backgroundColor = BaseColor;
-//    return view;
-//}
 
 -(void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
     [EasyOperater remove];
 }
 
+
+#pragma mark - goto我的好友或客服消息界面
+/**
+ goto我的好友或客服消息界面
+ 
+ @param type 3 客服  2 我的好友
+ */
+- (void)goto_MyFriendMessage:(NSInteger)type {
+    MyFriendMessageListController *vc = [[MyFriendMessageListController alloc] init];
+    vc.friendType = type;
+    vc.hidesBottomBarWhenPushed = YES;
+    [self.navigationController pushViewController:vc animated:YES];
+}
 
 #pragma mark - goto群组聊天界面
 - (void)goto_groupChat:(id)obj {
@@ -582,12 +553,6 @@
     vc.hidesBottomBarWhenPushed = YES;
     [self.navigationController pushViewController:vc animated:YES];
 }
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 
 -(void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -610,7 +575,6 @@
     }
     CustomerServiceAlertView *view = [[CustomerServiceAlertView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)];
     
-    
     [view updateView:@"常见问题" imageUrl:imageUrl];
     
     __weak __typeof(self)weakSelf = self;
@@ -622,10 +586,12 @@
     [view showInView:self.view];
 }
 - (void)webCustomerService {
-    WebViewController *vc = [[WebViewController alloc] initWithUrl:[AppModel shareInstance].commonInfo[@"pop"]];
-    vc.title = @"在线客服";
-    vc.hidesBottomBarWhenPushed = YES;
-    [self.navigationController pushViewController:vc animated:YES];
+    //    WebViewController *vc = [[WebViewController alloc] initWithUrl:[AppModel shareInstance].commonInfo[@"pop"]];
+    //    vc.title = @"在线客服";
+    //    vc.hidesBottomBarWhenPushed = YES;
+    //    [self.navigationController pushViewController:vc animated:YES];
+    
+    [self goto_MyFriendMessage:3];
 }
 
 
@@ -644,13 +610,13 @@
                                              vc.hidesBottomBarWhenPushed = YES;
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
                                          }],
-//                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_share"]
-//                                          title:@"分享赚钱"
-//                                         action:^(FYMenuItem *item) {
-//                                             ShareViewController *vc = [[ShareViewController alloc] init];
-//                                             vc.hidesBottomBarWhenPushed = YES;
-//                                             [weakSelf.navigationController pushViewController:vc animated:YES];
-//                                         }],
+                      //                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_share"]
+                      //                                          title:@"分享赚钱"
+                      //                                         action:^(FYMenuItem *item) {
+                      //                                             ShareViewController *vc = [[ShareViewController alloc] init];
+                      //                                             vc.hidesBottomBarWhenPushed = YES;
+                      //                                             [weakSelf.navigationController pushViewController:vc animated:YES];
+                      //                                         }],
                       [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_agent"]
                                           title:@"代理中心"
                                          action:^(FYMenuItem *item) {
@@ -667,16 +633,16 @@
                                              [weakSelf.navigationController pushViewController:vc animated:YES];
                                              
                                          }],
-                    [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_redp_play"]
-                                        title:@"玩法规则"
-                                       action:^(FYMenuItem *item) {
-                                           NSString *url = [NSString stringWithFormat:@"%@/dist/#/mainRules", [AppModel shareInstance].commonInfo[@"website.address"]];
-                                           WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
-                                           vc.navigationItem.title = @"玩法规则";
-                                           vc.hidesBottomBarWhenPushed = YES;
-                                           //[vc loadWithURL:url];
-                                           [self.navigationController pushViewController:vc animated:YES];
-                                                               }],
+                      [FYMenuItem itemWithImage:[UIImage imageNamed:@"nav_redp_play"]
+                                          title:@"玩法规则"
+                                         action:^(FYMenuItem *item) {
+                                             NSString *url = [NSString stringWithFormat:@"%@/dist/#/mainRules", [AppModel shareInstance].commonInfo[@"website.address"]];
+                                             WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+                                             vc.navigationItem.title = @"玩法规则";
+                                             vc.hidesBottomBarWhenPushed = YES;
+                                             //[vc loadWithURL:url];
+                                             [self.navigationController pushViewController:vc animated:YES];
+                                         }],
                       
                       nil];
     }

@@ -383,14 +383,14 @@ static const void *CDSTATE = "CDSTATE";
 @implementation UIView (CDCategory)
 
 - (void)setStateView:(StateView *)StateView{
-    if(self.StateView != StateView){
+//    if(self.StateView != StateView){
         [self.StateView removeFromSuperview];
         [self addSubview:StateView];
         StateView.hidden = YES;
 //        self.StateView = StateView;
         objc_setAssociatedObject(self, &CDSTATE,
                                  StateView, OBJC_ASSOCIATION_RETAIN);
-    }
+//    }
 }
 
 - (StateView *)StateView{

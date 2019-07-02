@@ -7,7 +7,6 @@
 //
 
 #import "NoRobSendRPController.h"
-#import "ChatViewController.h"
 #import "EnvelopeMessage.h"
 #import "EnvelopeNet.h"
 #import "MessageItem.h"
@@ -355,7 +354,7 @@
                                  };
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/redpacket/send"];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"redpacket/redpacket/send"];
     
     entity.needCache = NO;
     entity.parameters = parameters;
@@ -368,22 +367,15 @@
         
         if ([response objectForKey:@"code"] != nil && [[response objectForKey:@"code"] integerValue] == 0) {
             [strongSelf action_cancle];
-        } else if ([response objectForKey:@"code"] != nil){
-            SVP_ERROR_STATUS([response objectForKey:@"msg"]);
         } else {
-            if ([[response objectForKey:@"status"] integerValue] == 500) {
-                SVP_ERROR_STATUS(@"服务器内部错误");
-            } else {
-                SVP_ERROR_STATUS(@"网络连接错误");
-            }
+            [[FunctionManager sharedInstance] handleFailResponse:response];
         }
         strongSelf.submit.enabled = YES;
     } failureBlock:^(NSError *error) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         strongSelf.submit.enabled = YES;
         SVP_DISMISS;
-        SVP_ERROR_STATUS(kSystemBusyMessage);
-        //        [[FunctionManager sharedInstance] handleFailResponse:error];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     } progressBlock:nil];
 }
 

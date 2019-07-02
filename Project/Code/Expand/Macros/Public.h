@@ -9,7 +9,7 @@
 #define DEGREES_TO_RADIANS(angle) ((angle) / 180.0 * M_PI)
 
 #define INT_TO_STR(x) [NSString stringWithFormat:@"%ld",(long)x]
-
+#define STR_TO_AmountFloatSTR(x) [NSString stringWithFormat:@"%.2f",[x doubleValue]]
 #define NUMBER_TO_STR(a) [a isKindOfClass:[NSString class]]?a:[a stringValue]
 
 #define MERGE_String(x,y)[NSString stringWithFormat:@"%@%@",x,y]
@@ -36,8 +36,10 @@ typedef NS_ENUM(NSInteger, RewardType){
     RewardType_ztlsyj = 5000,//直推流水佣金
     RewardType_yqhycz = 1110,//邀请好友充值
     RewardType_czjl = 1100,//充值奖励
+    RewardType_ecjl = 1200,//二充奖励 未知类处理
     RewardType_fbjl = 3000,//发包奖励
     RewardType_qbjl = 4000,//抢包奖励
+    RewardType_jjj = 7000,//救济金
     RewardType_zcdljl = 2100,//注册登录奖励
 };
 
@@ -103,7 +105,7 @@ static NSString * const kJSPatchURL = @"https://www.520qun.com";
 #define NSLog(FORMAT, ...) nil
 #endif
 
-
+#import "AABlock.h"
 
 #import "NSObject+CDCategory.h"
 #import "NSObject+CDExtension.h"
@@ -136,9 +138,10 @@ static NSString * const kJSPatchURL = @"https://www.520qun.com";
 #import "UIView+AZGradient.h"
 #import "AlertViewCus.h"
 #import "FYSDK.h"
-#import "AABlock.h"
+
 #import "YBNotificationManager.h"
 #import "BannerModel.h"
+#import "UIView+SDExtension.h"
 #import "SDCycleScrollView.h"
 #import "AlertTipPopUpView.h"
 #import "BaseVC.h"

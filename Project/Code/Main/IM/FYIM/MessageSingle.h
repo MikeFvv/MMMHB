@@ -13,8 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MessageSingle : NSObject
 
 + (MessageSingle *)shareInstance;
-// 
-@property (nonatomic ,strong) NSMutableDictionary *myJoinGroupMessage; // 所有群的ID
+//
+@property (nonatomic ,strong) NSMutableDictionary *allUnreadMessagesDict; // 所有群的ID
 
 @end
 

@@ -8,7 +8,7 @@
 
 #import "AddBankCardViewController.h"
 
-@interface AddBankCardViewController ()<UITextFieldDelegate,UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate,ActionSheetDelegate>{
+@interface AddBankCardViewController ()<UITextFieldDelegate,UITableViewDelegate,UITableViewDataSource,UIActionSheetDelegate>{
     UITextField *_textField[4];
 }
 @property(nonatomic,strong)UITableView *tableView;
@@ -205,19 +205,26 @@
         NSString *bankName = dic[@"title"];
         [arr addObject:bankName];
     }
-    ActionSheetCus *sheet = [[ActionSheetCus alloc] initWithArray:arr];
+    ActionSheetCus *sheet = [[ActionSheetCus alloc] initWithArray:arr isShowFliterTextFiled:YES];
     sheet.titleLabel.text = @"请选择银行";
-    sheet.delegate = self;
+    sheet.selectDataBlock = ^(NSArray* arr , NSInteger indexRow) {
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"title == %@",arr[indexRow]];
+        NSArray *flilterAarr = [self.bankList filteredArrayUsingPredicate:predicate];
+        if (flilterAarr.count>0) {
+            
+        NSDictionary* dic = flilterAarr.firstObject;
+//        for (NSDictionary* dic in self.bankList) {
+            NSString *bankName = dic[@"title"];
+//            if ([bankName isEqualToString:arr[indexRow]]) {
+                NSInteger bankId = [dic[@"id"] integerValue];
+                self.bankId = INT_TO_STR(bankId);
+                self->_textField[2].text = bankName;
+//            }
+//        }
+        }
+    };
+    
     [sheet showWithAnimationWithAni:YES];
 }
 
--(void)actionSheetDelegateWithActionSheet:(ActionSheetCus *)actionSheet index:(NSInteger)index{
-    if(index == self.bankList.count)
-        return;
-    NSDictionary *dic = self.bankList[index];
-    NSString *bankName = dic[@"title"];
-    NSInteger bankId = [dic[@"id"] integerValue];
-    self.bankId = INT_TO_STR(bankId);
-    _textField[2].text = bankName;
-}
 @end

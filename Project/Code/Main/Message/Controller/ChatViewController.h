@@ -9,11 +9,15 @@
 //#import <RongIMKit/RongIMKit.h>
 #import "FYIMSessionViewController.h"
 @class MessageItem;
+@class FYContacts;
 
 @interface ChatViewController : FYIMSessionViewController
 
-
+// 群聊
 + (ChatViewController *)groupChatWithObj:(MessageItem *)obj;
+// 单聊
++ (ChatViewController *)privateChatWithModel:(FYContacts *)model;
+
 //
 + (ChatViewController *)currentChat;
 

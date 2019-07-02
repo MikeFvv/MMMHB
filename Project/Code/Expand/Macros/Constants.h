@@ -43,18 +43,26 @@ static NSString * const RedPacketString = @"~!@#$%^&*()";
 static NSString * const CowCowMessageString = @"~!@#$niuniuPrize%^&*()";
 // 消息类型
 static NSString * const kRCNotificationMessage = @"RC:NotiMessage";
-
-
+// 密码请求token Key
+static NSString * const kAccountPasswordKey = @"1234567887654321";
 
 // ************************ 通知 ************************
-// 刷新token 通知
+// 需要刷新token通知
 static NSString * const kOnConnectSocketNotification = @"kOnConnectSocketNotification";
+// token 失效通知
+static NSString * const kTokenInvalidNotification = @"kTokenInvalidNotification";
+
 // 刷新群信息通知
 static NSString * const kReloadMyMessageGroupList = @"kReloadMyMessageGroupList";
 // 未读消息数有变更
 static NSString * const kUnreadMessageNumberChange = @"kUnreadMessageNumberChange";
+// 更新我的好友或者客服列表
+static NSString * const kUpdateMyFriendOrServiceMembersMessageList = @"kUpdateMyFriendOrServiceMembersMessageList";
 // 已经获取到我加入的群通知
 static NSString * const kDoneGetMyJoinedGroupsNotification = @"kDoneGetMyJoinedGroupsNotification";
+
+// 已登录IM
+static NSString * const kLoggedSuccessNotification = @"kLoggedSuccessNotification";
 
 // 无网络通知
 static NSString * const kNoNetworkNotification = @"kNoNetworkNotification";

@@ -52,11 +52,10 @@ static NSString *Path = @"COM.XMFX.path";
             serverIndex = 0;
         NSDictionary *dic = arr[serverIndex];
         instance.serverUrl = dic[@"url"];
-        instance.rongYunKey = dic[@"rongYunKey"];
         instance.debugMode = [dic[@"isBeta"] boolValue];
         NSString *authKey = instance.commonInfo[@"app_client_id"];
         if(authKey)
-            instance.authKey = [NSString stringWithFormat:@"Basic %@",authKey];
+            instance.authKey = [NSString stringWithFormat:@"%@",authKey];
         else
             instance.authKey = dic[@"baseKey"];
     });
@@ -145,9 +144,6 @@ static NSString *Path = @"COM.XMFX.path";
 }
 
 - (UIViewController *)rootVc{
-    if ([AppModel shareInstance].userInfo.fullToken.length > 0) {
-        [BANetManager initialize];
-    }
 
     if (![[NSUserDefaults standardUserDefaults]objectForKey:[NSString appVersion]]) {
         return [[NSClassFromString(@"GuideViewController") alloc]init];
@@ -221,9 +217,7 @@ static NSString *Path = @"COM.XMFX.path";
 }
 
 -(void)reSetTabBarAsRootAnimation{
-    if ([AppModel shareInstance].userInfo.fullToken.length > 0) {
-        [BANetManager initialize];
-    }
+
     dispatch_async(dispatch_get_main_queue(),^{
         
         UIWindow *window = [UIApplication sharedApplication].keyWindow;
@@ -263,7 +257,6 @@ static NSString *Path = @"COM.XMFX.path";
 -(NSArray *)ipArray{
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSArray *arr = [ud objectForKey:@"ipArray"];
-//    NSDictionary *dic1 = @{@"url":kServerUrl,@"rongYunKey":kRongYunKey, @"isBeta":@(NO),@"baseKey":kBaseKey};
     NSDictionary *dic1 = @{@"url":kServerUrl, @"isBeta":@(NO),@"baseKey":kBaseKey};
     NSMutableArray *array = [NSMutableArray arrayWithObjects:dic1, nil];
     NSArray *testArr = [kServerJson mj_JSONObject];

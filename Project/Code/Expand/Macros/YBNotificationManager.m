@@ -23,7 +23,9 @@ NSString * const kNotify_IsStopTimeRefresh= @"kNotify_IsStopTimeRefresh";
 NSString * const kNotify_IsPayStopTimeRefresh= @"kNotify_IsPayStopTimeRefresh";
 NSString * const kNotify_IsLoginOutRefresh= @"kNotify_IsLoginOutRefresh";
 NSString * const kNotify_NetWorkingStatusRefresh= @"kNotify_NetWorkingStatusRefresh";
-
+NSString* const kBombList = @"kBombList";
+NSString* const kBombHitCnt = @"kBombHitCnt";
+NSString* const kBombHandicap = @"kBombHandicap";
 NSString* const kUserAssert = @"kUserAssert";
 NSString* const kIsBuyTip = @"kIsBuyTip";
 NSString* const kIsScanTip = @"kIsScanTip";

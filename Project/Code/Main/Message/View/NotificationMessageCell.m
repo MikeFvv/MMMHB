@@ -47,7 +47,7 @@
 -(void)setModel:(FYMessagelLayoutModel *)model {
     [super setModel:model];
     
-    if (model.message.messageType == FYSystemMessage) {
+    if (model.message.messageFrom == FYChatMessageFromSystem) {
         self.tipLabel.text = model.message.text;
         
       CGFloat width = [model.message.text widthWithFont:[UIFont systemFontOfSize:12] constrainedToHeight:17] +10*2;

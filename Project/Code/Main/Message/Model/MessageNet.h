@@ -30,24 +30,11 @@
 
 
 + (MessageNet *)shareInstance;
-
+-(void)getGameListWithRequestParams:(id)requestParams successBlock:(void (^)(NSArray *))successBlock
+                       failureBlock:(void (^)(id))failureBlock;
 //- (void)getGroupObj:(id)obj
 //            Success:(void (^)(NSDictionary *))success
 //            Failure:(void (^)(NSError *))failue;
-
-
-
-/**
- 查询群组详情
- 
- @param groupId 群ID
- @param successBlock 成功block
- @param failureBlock 失败block
- */
-- (void)queryGroupDetails:(NSString *)groupId
-          successBlock:(void (^)(NSDictionary *))successBlock
-          failureBlock:(void (^)(NSError *))failureBlock;
-
 
 
 - (void)checkGroupId:(NSString *)groupId
@@ -85,7 +72,7 @@
  @param failureBlock 失败block
  */
 -(void)getGroupListWithSuccessBlock:(void (^)(NSDictionary *))successBlock
-                           failureBlock:(void (^)(NSError *))failureBlock;
+                       failureBlock:(void (^)(id))failureBlock;
 
 
 @end

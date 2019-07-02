@@ -37,11 +37,41 @@
             NSDictionary *serializedData = [NSJSONSerialization JSONObjectWithData: dic[@"com.alamofire.serialization.response.error.data"] options:kNilOptions error:nil];
             
             if([serializedData isKindOfClass:[NSDictionary class]]){
-                if (code == 403 && [[serializedData objectForKey:@"code"] integerValue] == 1) {
+                if (code == 401 && [[serializedData objectForKey:@"error"] isEqualToString:@"invalid_token"]) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kTokenInvalidNotification object:nil];
+                    return;
+                } else if (code == 403 && [[serializedData objectForKey:@"code"] integerValue] == 1) {
                     msg = [serializedData objectForKey:@"msg"];
-                } else if (code == 500) {
-                    msg = @"内部服务器错误，请稍后重试-500";
+                } else if (code == 500 || code == 501) {
+                    msg = @"内部服务器错误，请联系在线客服";
+                } else if (code == 478) {
+                    msg = [serializedData objectForKey:@"msg"];
                 }
+                
+                
+                if ([[serializedData objectForKey:@"error"] isEqualToString:@"unauthorized"]) {
+//                    SVP_ERROR_STATUS(@"用户信息已失效，请重新登录");
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kTokenInvalidNotification object:nil];
+                    return;
+                } else if ([[serializedData objectForKey:@"error"] isEqualToString:@"Unauthorized"]) {
+//                    SVP_ERROR_STATUS(@"用户信息已失效，请重新登录");
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kTokenInvalidNotification object:nil];
+                    return;
+                } else if ([[serializedData objectForKey:@"error"] isEqualToString:@"invalid_grant"]) {
+                    
+                    if([[serializedData objectForKey:@"error_description"] isEqualToString:@"Bad credentials"]){
+                        // 密码错误
+//                        SVP_ERROR_STATUS(@"用户信息已失效，请重新登录");
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kTokenInvalidNotification object:nil];
+                        return;
+                    }else if([[serializedData objectForKey:@"error_description"] isEqualToString:@"User account is locked"]){
+                        // 封号
+//                        SVP_ERROR_STATUS(@"此账号已被封禁，请联系客服");
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kTokenInvalidNotification object:nil];
+                        return;
+                    }
+                }
+
             }
             
         }

@@ -179,17 +179,20 @@
     [[MessageNet shareInstance] joinGroup:item.groupId password:password successBlock:^(NSDictionary *dict) {
         SVP_DISMISS;
         __strong __typeof(weakSelf)strongSelf = weakSelf;
-        
         if ([[dict objectForKey:@"code"] integerValue] == 0) {
             [strongSelf groupChat:item isNew:YES];
-        } else if ([[dict objectForKey:@"code"] integerValue] == 19) {
-            SVP_ERROR_STATUS([dict objectForKey:@"msg"]);
-            [strongSelf groupChat:item isNew:YES];
         } else {
-            SVP_ERROR_STATUS([dict objectForKey:@"msg"]);
+            if ([[dict objectForKey:@"errorcode"] integerValue] == 19) {
+                NSString *msg = [NSString stringWithFormat:@"%@",[dict objectForKey:@"alterMsg"]];
+                SVP_ERROR_STATUS(msg);
+                [strongSelf groupChat:item isNew:YES];
+            }else{
+                [[FunctionManager sharedInstance] handleFailResponse:dict];
+            }
+            
         }
     } failureBlock:^(NSError *error) {
-        SVP_ERROR(error);
+        [[FunctionManager sharedInstance] handleFailResponse:error];
     }];
 }
 
@@ -257,7 +260,7 @@
     }
     
 }
-- (void)locateTabBar:(NSInteger)index{//backHome
+- (void)locateTabBar:(NSInteger)index{
     if (self.navigationController.tabBarController.selectedIndex == index) {
         [self.navigationController popToRootViewControllerAnimated:YES];
     }else{

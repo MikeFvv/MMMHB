@@ -11,6 +11,7 @@
 @interface WebViewController ()<WKUIDelegate,WKNavigationDelegate,UINavigationBarDelegate>{
     WebProgressView *_progress;
     NSString *_htmlString;
+    NSDictionary *_params;
 }
 @property (nonatomic, copy) ActionBlock block;
 @end
@@ -21,18 +22,24 @@
     
 }
 -(void)removeAndBack{
-    if ([_webView canGoBack]) {
-        [_webView goBack];
-    } else {
+    
+    if (self.isForceEscapeWebVC) {
         [self.navigationController popViewControllerAnimated:YES];
         if (self.block) {
             self.block(@1);
         }
     }
-//    [self.navigationController popViewControllerAnimated:YES];
-//    if (self.block) {
-//        self.block(@1);
-//    }
+    else{
+        if ([_webView canGoBack]) {
+            [_webView goBack];
+        } else {
+            [self.navigationController popViewControllerAnimated:YES];
+            if (self.block) {
+                self.block(@1);
+            }
+        }
+    }
+    
 }
 
 - (instancetype)initWithUrl:(NSString *)url{
@@ -51,6 +58,14 @@
     return self;
 }
 
+- (instancetype)initWithUrl:(NSString *)url withBodyDictionary:(NSDictionary*)params{
+    self = [super init];
+    if (self) {
+        _url = url;
+        _params = params;
+    }
+    return self;
+}
 - (void)viewDidDisappear:(BOOL)animated{
     [super viewDidDisappear:animated];
     [_progress removeFromSuperview];
@@ -109,6 +124,11 @@
     if (_htmlString) {
         [self loadHtml];
     }
+    if (_url.length>0&&
+        _params) {
+        [self postUrl];
+    }
+    
 }
 
 - (void)loadUrl{
@@ -118,6 +138,27 @@
 
 - (void)loadHtml{
     [_webView loadHTMLString:_htmlString baseURL:nil];
+}
+
+- (void)postUrl{
+    NSURL *url = [NSURL URLWithString: _url];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc]initWithURL:url];
+    [request setHTTPMethod: @"POST"];
+    NSString *body = @"";
+    for (NSString *key in _params.allKeys) {
+        if ([FunctionManager isEmpty:body]) {
+            body = [NSString stringWithFormat:@"%@=%@",key,_params[key]];
+        }else{
+            body = [NSString stringWithFormat:@"%@&%@=%@",body,key,_params[key]];
+        }
+    }
+    [request setHTTPBody: [body dataUsingEncoding: NSUTF8StringEncoding]];
+    [request setValue:[AppModel shareInstance].userInfo.fullToken forHTTPHeaderField:@"Authorization"];
+    [request setValue:GetUserDefaultWithKey(@"mobile") forHTTPHeaderField:@"userName"];
+    [request setValue:[[FunctionManager sharedInstance] getApplicationVersion] forHTTPHeaderField:@"appVersion"];
+    [request setValue:kTenant forHTTPHeaderField:@"tenant"];
+    [request setValue:@"APP" forHTTPHeaderField:@"type"];
+    [_webView loadRequest: request];
 }
 
 - (BOOL)navigationShouldPopOnBackButton {

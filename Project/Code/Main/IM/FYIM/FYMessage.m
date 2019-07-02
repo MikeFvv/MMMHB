@@ -15,11 +15,12 @@
 
 + (NSDictionary *)mj_replacedKeyFromPropertyName {
     return @{ @"messageId": @"id",
-              @"sessionId": @"groupId",
+              @"sessionId": @"chatId",
               @"messageSendId": @"from",
               @"messageType": @"msgType",
               @"text": @"content",
-              @"timestamp": @"createTime"
+              @"timestamp": @"createTime",
+              @"toUserId": @"to"
               };
 }
 
@@ -38,7 +39,7 @@
     
     NSTimeInterval timeInterval = [NSTimer CompareTwoTime:lastTime time2:currentTime];
     
-    if(timeInterval/60 >= 5){
+    if(timeInterval/60 >= 5 || lastTime == currentTime){
         _showTime = YES;
     } else {
         _showTime = NO;

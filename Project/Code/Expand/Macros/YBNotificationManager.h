@@ -24,7 +24,9 @@ FOUNDATION_EXTERN NSString * const kNotify_NetWorkingStatusRefresh;
 
 extern NSString* const kLaunchBannerModel;
 extern NSString* const kLoginBannerModel;
-
+extern NSString* const kBombList;
+extern NSString* const kBombHitCnt;
+extern NSString* const kBombHandicap;
 extern NSString* const kUserAssert;
 extern NSString* const kIsBuyTip;
 extern NSString* const kIsScanTip;

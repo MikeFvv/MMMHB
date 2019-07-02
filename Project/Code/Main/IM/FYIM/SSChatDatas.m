@@ -17,44 +17,6 @@
 
 @implementation SSChatDatas
 
-//获取单聊的初始会话 数据均该由服务器处理生成 这里demo写死
-+(NSMutableArray *)LoadingMessagesStartWithChat:(NSString *)sessionId{
-    
-    
-    NSDictionary *dic1 = @{@"text":@"测试文字",
-                           @"date":@"2018-10-10 09:20:15",
-                           @"from":@"1",
-                           @"messageId":@"20181010092015",
-                           @"type":@"1",
-                           @"sessionId":sessionId,
-                           @"headerImg":headerImg1
-                           };
-    NSDictionary *dic2 = @{@"text":@"您好",
-                           @"date":@"2018-10-10 09:22:15",
-                           @"from":@"2",
-                           @"messageId":@"20181010092515",
-                           @"type":@"1",
-                           @"sessionId":sessionId,
-                           @"headerImg":headerImg2
-                           };
-    
-    
-    NSMutableArray *messages = [NSMutableArray new];
-    [messages addObjectsFromArray: @[dic1,dic2]];
-    
-    return [SSChatDatas receiveMessages:messages];
-    
-}
-
-
-
-//获取群聊的初始会话
-+(NSMutableArray *)LoadingMessagesStartWithGroupChat:(NSString *)sessionId{
-    
-    return nil;
-}
-
-
 //处理接收的消息数组
 +(NSMutableArray *)receiveMessages:(NSArray *)messages{
     
@@ -82,7 +44,7 @@
     }
     //    FYMessage *message = [FYMessage mj_objectWithKeyValues:dic];
     
-    if (message.messageType != FYSystemMessage) {
+    if (message.messageFrom != FYChatMessageFromSystem) {
         
         if ([message.messageSendId isEqualToString:[AppModel shareInstance].userInfo.userId]) {
             message.messageFrom = FYMessageDirection_SEND;
@@ -111,9 +73,9 @@
             message.backImgString = @"icon_qipao2";
         }
     }
-    //    message.messageType = FYMessageTypeRedEnvelope;
+
     
-    if(message.messageType == FYMessageTypeText || message.messageType == FYMessageTypeReportAwardInfo){
+    if((message.messageType == FYMessageTypeText && message.messageFrom != FYChatMessageFromSystem) || message.messageType == FYMessageTypeReportAwardInfo){
         message.cellString   = SSChatTextCellId;
     } else if(message.messageType == FYMessageTypeRedEnvelope){
         message.cellString   = FYRedEnevlopeCellId;
@@ -125,9 +87,15 @@
         message.cellString   = CowCowVSMessageCellId;
         NSDictionary *dict = [message.text mj_JSONObject];
         message.cowcowRewardInfoDict  = dict;
-    } else if(message.messageType == FYSystemMessage) {
+    } else if(message.messageFrom == FYChatMessageFromSystem) {
         message.cellString   = NotificationMessageCellId;
         message.showTime = NO;
+    } else if(message.messageType == FYMessageTypeImage) {  // 图片
+        message.cellString   = SSChatImageCellId;
+        if (message.isReceivedMsg) {
+            NSDictionary *imageDict = (NSDictionary *)[message.text mj_JSONObject];
+            message.imageUrl  = imageDict[@"url"];
+        }
     }
     
     
@@ -146,7 +114,6 @@
     //
     //
     //    message.sessionId    = dic[@"sessionId"];
-    //    message.sendError    = NO;
     //    message.headerImgurl = dic[@"headerImg"];
     //    message.messageId    = dic[@"messageId"];
     //    message.textColor    = SSChatTextColor;
@@ -227,28 +194,27 @@
     NSMutableDictionary *messageDic = [NSMutableDictionary dictionaryWithDictionary:nil];
     
     long time = [NSTimer getLocationTimeStamp];
-    //    NSString *messageId = [time stringByReplacingOccurrencesOfString:@" " withString:@""];
-    //    messageId = [messageId stringByReplacingOccurrencesOfString:@"-" withString:@""];
-    //    messageId = [messageId stringByReplacingOccurrencesOfString:@":" withString:@""];
-    
     
     switch (message.messageType) {
         case FYMessageTypeText:{
-            message.timestamp = time;
+            message.timestamp = time*1000;
             message.isDeleted = NO;
             message.isRecallMessage = NO;
             message.isReceivedMsg = NO;
             message.deliveryState = FYMessageDeliveryStateDelivering;
             message.messageFrom = FYMessageDirection_SEND;
+            message.messageId = [NSString stringWithFormat:@"%.f", message.timestamp];
         }
             break;
         case FYMessageTypeImage:{
-            [messageDic setObject:@"1" forKey:@"from"];
-            [messageDic setValue:@(time) forKey:@"date"];
-            //            [messageDic setValue:@(messageType) forKey:@"type"];
-            //            [messageDic setValue:messageId forKey:@"messageId"];
-            //            [messageDic setValue:sessionId forKey:@"sessionId"];
-            [messageDic setValue:headerImg1 forKey:@"headerImg"];
+            message.timestamp = time*1000;
+            message.isDeleted = NO;
+            message.isRecallMessage = NO;
+            message.isReceivedMsg = NO;
+            message.deliveryState = FYMessageDeliveryStateDelivering;
+            message.messageFrom = FYMessageDirection_SEND;
+            message.messageId = [NSString stringWithFormat:@"%.f", message.timestamp];
+            
         }
             break;
         case FYMessageTypeVoice:{
@@ -283,7 +249,7 @@
             //            [messageDic setValue:dict[@"chatType"] forKey:@"chatType"];  // 1 群聊   2  p2p
             //            [messageDic setValue:@(messageType) forKey:@"msgType"];
             //            [messageDic setValue:messageId forKey:@"id"];  // 消息ID
-            //            [messageDic setValue:sessionId forKey:@"groupId"];  // 群ID
+            //            [messageDic setValue:sessionId forKey:@"chatId"];  // 群ID
         }
             break;
             

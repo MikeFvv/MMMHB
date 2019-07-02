@@ -34,45 +34,26 @@ static dispatch_once_t predicate;
     return self;
 }
 
-
-
 /**
  获取红包详情
  
+ @param packetId 红包ID
  @param successBlock 成功block
  @param failureBlock 失败block
  */
--(void)getRedPacketDetailsPacketId:(id)packetId successBlock:(void (^)(NSDictionary *))successBlock
-                      failureBlock:(void (^)(NSError *))failureBlock {
-    
-    NSString *urlPath = nil;
-    switch ([packetId integerValue]) {
-        case 3:
-        case 4:
-        case 16:
-        case 17:
-            // 抢包ID
-            urlPath = @"social/redpacket";
-            
-            break;
-        case 5:
-        case 6:
-        case 18:
-            // 发包
-            urlPath = @"social/redpacket/getDetailByGrabId";
-            
-            break;
-        default:
-            break;
-    }
+-(void)getUnityRedpDetail:(id)packetId successBlock:(void (^)(NSDictionary *))successBlock
+           failureBlock:(void (^)(NSError *))failureBlock {
+    NSDictionary *parameters = @{
+                                 @"packetId":(NSString *)packetId
+                                 };
     
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,urlPath, (NSString *)packetId];
-    
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"redpacket/redpacket/getDetailByGrabOrSendId"];
+    entity.parameters = parameters;
     entity.needCache = NO;
     
     __weak __typeof(self)weakSelf = self;
-    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         //        [weakSelf handleGroupListData:response[@"data"] andIsMyJoined:YES];
         //        successBlock(response);
@@ -81,9 +62,7 @@ static dispatch_once_t predicate;
     } failureBlock:^(NSError *error) {
         failureBlock(error);
     } progressBlock:nil];
-    
 }
-
 
 /**
  获取红包详情
@@ -95,13 +74,18 @@ static dispatch_once_t predicate;
 -(void)getRedpDetSendId:(id)packetId successBlock:(void (^)(NSDictionary *))successBlock
            failureBlock:(void (^)(NSError *))failureBlock {
     self.isGrabId = NO;
-    BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"social/redpacket", (NSString *)packetId];
     
+    NSDictionary *parameters = @{
+                                 @"packetId":(NSString *)packetId
+                                 };
+    
+    BADataEntity *entity = [BADataEntity new];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"redpacket/redpacket/detail"];
+    entity.parameters = parameters;
     entity.needCache = NO;
     
     __weak __typeof(self)weakSelf = self;
-    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         //        [weakSelf handleGroupListData:response[@"data"] andIsMyJoined:YES];
         //        successBlock(response);
@@ -110,42 +94,7 @@ static dispatch_once_t predicate;
     } failureBlock:^(NSError *error) {
         failureBlock(error);
     } progressBlock:nil];
-    
 }
-
-
-
-/**
- 抢包id获取发包详情
- 
- @param packetId 抢包ID
- @param successBlock 成功block
- @param failureBlock 失败block
- */
--(void)getRedpDetGrabId:(id)packetId successBlock:(void (^)(NSDictionary *))successBlock
-           failureBlock:(void (^)(NSError *))failureBlock {
-    
-    self.isGrabId = YES;
-    // 抢包ID
-    BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@/%@",[AppModel shareInstance].serverUrl,@"social/redpacket/getDetailByGrabId", (NSString *)packetId];
-    
-    entity.needCache = NO;
-    
-    __weak __typeof(self)weakSelf = self;
-    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
-        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        //        [weakSelf handleGroupListData:response[@"data"] andIsMyJoined:YES];
-        //        successBlock(response);
-        [strongSelf processingData:response];
-        successBlock(response);
-    } failureBlock:^(NSError *error) {
-        failureBlock(error);
-    } progressBlock:nil];
-    
-}
-
-
 
 - (void)processingData:(NSDictionary *)response {
     if ([response objectForKey:@"code"] && ([[response objectForKey:@"code"] integerValue] == 0)) {

@@ -37,10 +37,22 @@
                  failureBlock:(void (^)(NSError *))failureBlock {
 
     BADataEntity *entity = [BADataEntity new];
-    entity.urlString = [NSString stringWithFormat:@"%@%@?page=%zd&limit=%zd&orderByField=id&isAsc=true&groupId=%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/groupUsers", self.page,self.pageSize,groupId];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/skChatGroup/groupUsers"];
+    
+    NSMutableDictionary *queryParamDict = [[NSMutableDictionary alloc] init];
+    [queryParamDict setObject:groupId forKey:@"id"];  
+    
+    NSDictionary *parameters = @{
+                                 @"size":@(self.pageSize),
+                                 @"sort":@"id",
+                                 @"isAsc":@"true",
+                                 @"current":@(self.page),
+                                 @"queryParam":queryParamDict
+                                 };
+    entity.parameters = parameters;
     entity.needCache = NO;
     __weak __typeof(self)weakSelf = self;
-    [BANetManager ba_request_GETWithEntity:entity successBlock:^(id response) {
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
          __strong __typeof(weakSelf)strongSelf = weakSelf;
         [strongSelf processingData:response];
         successBlock(response);
@@ -55,7 +67,7 @@
     if (CD_Success([response objectForKey:@"code"], 0)) {
         NSDictionary *data = [response objectForKey:@"data"];
         if (data != NULL) {
-            self.page = [[data objectForKey:@"current"] integerValue];
+//            self.page = [[data objectForKey:@"current"] integerValue];
             if (self.page == 1) {
                 [self.dataList removeAllObjects];
             }

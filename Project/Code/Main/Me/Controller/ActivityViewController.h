@@ -11,8 +11,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ActivityViewController : SuperViewController
-@property(nonatomic,strong)NSString *userId;
-@property(nonatomic,copy)NSString *vcTitle;
+@property(nonatomic, strong) NSString *userId;
+@property(nonatomic, strong) NSString *vcTitle;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -30,6 +30,7 @@
 //#import "NIMRecentSession.h"
 //#import "NIMMessageSearchOption.h"
 #import "FYMessage.h"
+#import "FYChatManagerProtocol.h"
 
 /**
  *  用户定义

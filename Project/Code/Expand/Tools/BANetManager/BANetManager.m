@@ -14,7 +14,8 @@
 
 #import "BADataEntity.h"
 
-
+#import "GTMBase64.h"
+#import "NSData+AES.h"
 static NSMutableArray *tasks;
 
 //static void *isNeedCacheKey = @"isNeedCacheKey";
@@ -82,7 +83,8 @@ static NSMutableArray *tasks;
     /*! 设置apikey ------类似于自己应用中的tokken---此处仅仅作为测试使用*/
     NSString *token = [AppModel shareInstance].userInfo.fullToken; // 后台Token
     [BANetManagerShare.sessionManager.requestSerializer setValue:token forHTTPHeaderField:@"Authorization"];
-    
+    NSString *mobile = GetUserDefaultWithKey(@"mobile");
+    [BANetManagerShare.sessionManager.requestSerializer setValue:mobile forHTTPHeaderField:@"userName"];
     /*! 复杂的参数类型 需要使用json传值-设置请求内容的类型*/
     //        [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     
@@ -98,7 +100,8 @@ static NSMutableArray *tasks;
         [BANetManagerShare.sessionManager.requestSerializer setValue:model forHTTPHeaderField:@"deviceModel"];
     if(appVersion)
         [BANetManagerShare.sessionManager.requestSerializer setValue:appVersion forHTTPHeaderField:@"appVersion"];
-    
+    [BANetManagerShare.sessionManager.requestSerializer setValue:kTenant forHTTPHeaderField:@"tenant"];
+    [BANetManagerShare.sessionManager.requestSerializer setValue:@"APP" forHTTPHeaderField:@"type"];
     /*! 设置响应数据的基本类型 */
     BANetManagerShare.sessionManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", @"text/css", @"text/xml", @"text/plain", @"application/javascript", @"application/x-www-form-urlencoded", @"image/*", nil];
     
@@ -196,6 +199,21 @@ static NSMutableArray *tasks;
         default:
             break;
     }
+
+    if(![URLString containsString:@"auth/oauth/mobile/token"]) {
+        NSString *token = [AppModel shareInstance].userInfo.fullToken; // 后台Token
+        if (token.length == 0) {
+            NSLog(@"🔴------------------0000000000------------");
+            failureBlock(nil);
+            return nil;
+        }
+        [BANetManagerShare.sessionManager.requestSerializer setValue:token forHTTPHeaderField:@"Authorization"];
+        NSString *mobile = GetUserDefaultWithKey(@"mobile");
+        [BANetManagerShare.sessionManager.requestSerializer setValue:mobile forHTTPHeaderField:@"userName"];
+    }
+//    else {
+//        NSLog(@"auth/oauth/token");
+//    }
     
     AFHTTPSessionManager *scc = BANetManagerShare.sessionManager;
     AFHTTPResponseSerializer *scc2 = scc.responseSerializer;
@@ -204,7 +222,7 @@ static NSMutableArray *tasks;
     
     NSString *isCache = isNeedCache ? @"开启":@"关闭";
     CGFloat allCacheSize = [BANetManagerCache ba_getAllHttpCacheSize];
-    
+
     if (BANetManagerShare.isOpenLog)
     {
         NSLog(@"\n******************** 请求参数 ***************************");
@@ -393,7 +411,17 @@ static NSMutableArray *tasks;
     if (!entity || ![entity isKindOfClass:[BADataEntity class]]) {
         return nil;
     }
-    return [self ba_requestWithType:BAHttpRequestTypePost isNeedCache:entity.isNeedCache urlString:entity.urlString parameters:entity.parameters successBlock:successBlock failureBlock:failureBlock progressBlock:progressBlock];
+    
+    NSLog(@"=================BAnet 接口地址:%@ ===参数:%@",entity.urlString,[entity.parameters mj_JSONString]);
+    NSDictionary* encryDic = @{
+                               };
+    if (entity.parameters) {
+        encryDic = [FunctionManager encryMethod:entity.parameters];
+    }
+    else{
+        NSLog(@"=================BAnet 接口地址:%@ ===参数:nil",entity.urlString);
+    }
+    return [self ba_requestWithType:BAHttpRequestTypePost isNeedCache:entity.isNeedCache urlString:entity.urlString parameters:encryDic successBlock:successBlock failureBlock:failureBlock progressBlock:progressBlock];
 }
 
 /**
@@ -459,7 +487,7 @@ static NSMutableArray *tasks;
     BAWeak;
     /*! 检查地址中是否有中文 */
     NSString *URLString = [NSURL URLWithString:imageEntity.urlString] ? imageEntity.urlString : [self strUTF8Encoding:imageEntity.urlString];
-    
+
     if (BANetManagerShare.isOpenLog)
     {
         NSLog(@"******************** 请求参数 ***************************");
@@ -1023,10 +1051,10 @@ static NSMutableArray *tasks;
         NSString *imageFileName = [NSString stringWithFormat:@"%@%ld.%@",str, index, imageType?:@"jpg"];
         
         [formData appendPartWithFileData:imageData
-                                    name:[NSString stringWithFormat:@"picflie%ld", index]
+                                    name:@"file"
                                 fileName:fileNames ? [NSString stringWithFormat:@"%@.%@",fileNames[index],imageType?:@"jpg"] : imageFileName
                                 mimeType:[NSString stringWithFormat:@"image/%@",imageType ?: @"jpg"]];
-        NSLog(@"上传图片 %lu 成功", (unsigned long)index);
+//        NSLog(@"上传图片 %lu 成功", (unsigned long)index);
     }
 }
 

@@ -600,8 +600,8 @@ typedef NS_ENUM(NSInteger, FYChatMessageFrom) {
  */
 typedef NS_ENUM(NSInteger, FYMessageType) {
     // 0 文本
-    FYMessageTypeText,
-    FYMessageTypeImage,
+    FYMessageTypeText = 0,
+    FYMessageTypeImage = 1,
     FYMessageTypeVoice,
     FYMessageTypeMap,
     FYMessageTypeVideo,
@@ -611,8 +611,6 @@ typedef NS_ENUM(NSInteger, FYMessageType) {
     FYMessageTypeNoticeRewardInfo = 7,
     // 禁抢报奖信息
     FYMessageTypeReportAwardInfo = 8,
-    // 系统消息
-    FYSystemMessage = 9,
     
     FYMessageTypeUndo,
     FYMessageTypeDelete,

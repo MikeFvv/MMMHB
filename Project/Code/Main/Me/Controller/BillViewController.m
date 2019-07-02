@@ -153,7 +153,7 @@
             SVP_DISMISS;
         NSDictionary *extra = info[@"data"][@"extras"];
         NSString *s = extra[@"money_sum"];
-        weakSelf.headView.balanceLabel.text = [NSString stringWithFormat:@"%@：%@元",self.infoDic[@"subTitle"],s];
+        weakSelf.headView.balanceLabel.text = [NSString stringWithFormat:@"%@：%@元",self.infoDic[@"subTitle"],STR_TO_AmountFloatSTR(s)];
         [weakSelf reload];
     } failure:^(NSError *error) {
         [weakSelf reload];
@@ -237,51 +237,22 @@
     
     CDTableModel *model = _model.dataList[indexPath.section];
     self.sendPId = [model.obj[@"userId"] stringValue];
-    if (![FunctionManager isEmpty:model.obj[@"billtId"]]) {
-        switch ([model.obj[@"billtId"] integerValue]) {
-            case 3:
-            case 4:
-            case 16:
-            case 17:
-                [self getRedpDetGrabId:model.obj[@"bizId"]];
-                break;
-            case 5:
-            case 6:
-            case 18:
-                [self getRedpDetSendId:model.obj[@"bizId"]];
-                break;
-            default:
-                break;
-        }
+    if (![FunctionManager isEmpty:model.obj[@"bizId"]]) {
+        [self getRedpDetSendId:model.obj];//支出
     }
     
 }
 
--(void)getRedpDetSendId:(id)packetId {
+-(void)getRedpDetSendId:(id)obj {
     __weak __typeof(self)weakSelf = self;
     SVP_SHOW;
-    [[EnvelopeNet shareInstance] getRedpDetSendId:packetId successBlock:^(NSDictionary *dic) {
+    [[EnvelopeNet shareInstance] getUnityRedpDetail:obj[@"bizId"] successBlock:^(NSDictionary *dic) {
         if (([[dic objectForKey:@"code"] integerValue] == 0)) {
-            SVP_DISMISS;
-            [weakSelf onGotoRedPackedDet];
-        } else {
-            SVP_ERROR_STATUS([dic objectForKey:@"msg"]);
-        }
-        
-    } failureBlock:^(NSError *error) {
-        [[FunctionManager sharedInstance] handleFailResponse:error];
-    }];
-}
-
--(void)getRedpDetGrabId:(id)packetId {
-    __weak __typeof(self)weakSelf = self;
-    SVP_SHOW;
-    [[EnvelopeNet shareInstance] getRedpDetGrabId:packetId successBlock:^(NSDictionary *dic) {
-        if (([[dic objectForKey:@"code"] integerValue] == 0)) {
-            [weakSelf onGotoRedPackedDet];
+            NSDictionary* dcc = dic[@"data"];
+            [weakSelf onGotoRedPackedDet:dcc[@"detail"][@"id"]];
             SVP_DISMISS;
         } else {
-            SVP_ERROR_STATUS([dic objectForKey:@"msg"]);
+            [[FunctionManager sharedInstance] handleFailResponse:dic];
         }
     } failureBlock:^(NSError *error) {
         [[FunctionManager sharedInstance] handleFailResponse:error];
@@ -289,15 +260,12 @@
 }
 
 #pragma mark -  goto红包详情
-- (void)onGotoRedPackedDet {
+- (void)onGotoRedPackedDet:(NSString*)redId {
     [self.view endEditing:YES];
-    //    CDPush(self.navigationController, CDPVC(@"RedPackedDetListController", obj), YES);
-    
     RedEnvelopeDetListController *vc = [[RedEnvelopeDetListController alloc] init];
-    vc.objPar = @(-1);
+    vc.objPar = redId;
     vc.bankerId = self.sendPId;
     [self.navigationController pushViewController:vc animated:YES];
-    
 }
 
 -(void)detailAction:(id)sender{

@@ -11,23 +11,25 @@
 #import "FYIMManager.h"
 #import "SSChatKeyBoardInputView.h"
 #import "FYIMMessageManager.h"
-
+#import "FYContacts.h"
 
 @interface FYIMSessionViewController : UIViewController
 
 //底部输入框 携带表情视图和多功能视图
-@property(nonatomic,strong) SSChatKeyBoardInputView *sessionInputView;
-//单聊 群聊
-@property(nonatomic,assign) FYChatConversationType chatType;
-//会话id   群ID
-@property (nonatomic, strong) NSString    *sessionId;
+@property(nonatomic, strong) SSChatKeyBoardInputView *sessionInputView;
+//单聊 群聊等
+@property(nonatomic, assign) FYChatConversationType chatType;
+// 会话id
+@property (nonatomic, copy) NSString    *sessionId;
+// 单聊 接受者用户信息
+@property (nonatomic, strong) FYContacts    *toContactsModel;
 //名字
-@property (nonatomic, strong) NSString    *titleString;
+@property (nonatomic, copy) NSString    *titleString;
 
 @property(nonatomic,strong) UITableView *tableView;
 @property(nonatomic,strong) NSMutableArray *dataSource;
 
-@property(nonatomic,assign)BOOL reloadFinish;
+@property(nonatomic,assign) BOOL reloadFinish;
 
 - (void)didTapMessageCell:(FYMessage *)model;
 //发送文本 列表滚动至底部
@@ -51,5 +53,16 @@
 
 @property (weak, nonatomic)id <FYChatManagerDelegate> delegate;
 
+#pragma mark -  上传图片
+/**
+ 上传图片
+ */
+- (void)loadImage;
+
+#pragma mark - 更新未读消息
+/**
+ 更新未读消息
+ */
+- (void)updateUnreadMessage;
 
 @end
