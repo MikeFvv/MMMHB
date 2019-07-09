@@ -154,15 +154,17 @@
         }
     } else {
         
-        if ([item.chatgName isEqualToString:@"在线客服"]) {
-            if ([AppModel shareInstance].customerServiceUnReadTotal > 0) {
-                _descLabel.text = ([AppModel shareInstance].customerServiceUnReadTotal>99) ? @"【99+未读】" : [NSString stringWithFormat:@"【%zd条未读】",[AppModel shareInstance].customerServiceUnReadTotal];
-                _dotView.hidden = NO;
-            } else {
-                _descLabel.text = item.notice;
-                _dotView.hidden = YES;
-            }
-        } else if ([item.chatgName isEqualToString:@"我的好友"]) {
+//        if ([item.chatgName isEqualToString:@"在线客服"]) {
+//            if ([AppModel shareInstance].customerServiceUnReadTotal > 0) {
+//                _descLabel.text = ([AppModel shareInstance].customerServiceUnReadTotal>99) ? @"【99+未读】" : [NSString stringWithFormat:@"【%zd条未读】",[AppModel shareInstance].customerServiceUnReadTotal];
+//                _dotView.hidden = NO;
+//            } else {
+//                _descLabel.text = item.notice;
+//                _dotView.hidden = YES;
+//            }
+//        } else
+        
+        if ([item.chatgName isEqualToString:@"我的好友"]) {
             
             if ([AppModel shareInstance].friendUnReadTotal > 0) {
                 _descLabel.text = ([AppModel shareInstance].friendUnReadTotal>99) ? @"【99+未读】" : [NSString stringWithFormat:@"【%zd条未读】",[AppModel shareInstance].friendUnReadTotal];

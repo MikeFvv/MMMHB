@@ -9,6 +9,7 @@
 #import "ChannelView.h"
 
 @interface ChannelView ()<UITableViewDelegate,UITableViewDataSource>
+
 @property(nonatomic,strong)UITableView *tableView;;
 @property(nonatomic,assign)NSInteger selectIndex;
 @end

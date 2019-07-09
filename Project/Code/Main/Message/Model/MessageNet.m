@@ -18,9 +18,9 @@
 
 @implementation MessageNet
 
+static MessageNet *instance = nil;
+static dispatch_once_t predicate;
 + (MessageNet *)shareInstance {
-    static MessageNet *instance = nil;
-    static dispatch_once_t predicate;
     dispatch_once(&predicate, ^{
         instance = [[[self class] alloc] init];
     });
@@ -353,5 +353,12 @@
     
 }
 
+
+- (void)destroyData {
+    [self.dataList removeAllObjects];
+    [self.myJoinDataList removeAllObjects];
+    instance = nil;
+    predicate = 0;
+}
 
 @end

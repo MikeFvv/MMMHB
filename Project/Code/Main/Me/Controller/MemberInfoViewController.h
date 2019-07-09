@@ -9,5 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface MemberInfoViewController : SuperViewController
-
+@property(nonatomic,strong)NSString *shareUrl;
 @end

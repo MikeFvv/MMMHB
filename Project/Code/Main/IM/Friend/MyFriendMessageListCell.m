@@ -128,8 +128,12 @@
     _model = model;
      _titleLabel.text = model.nick;
     
-    if ([model.name isEqualToString:@"在线客服"]) {
-        _headIcon.image = [UIImage imageNamed:model.avatar];
+    if ([model.name isEqualToString:@"在线客服"] || model.contactsType == 3) {
+        if (model.contactsType == 3) {
+            [_headIcon cd_setImageWithURL:[NSURL URLWithString:model.avatar] placeholderImage:[UIImage imageNamed:@"msg3"]];
+        } else {
+            _headIcon.image = [UIImage imageNamed:model.avatar];
+        }
         _descLabel.text = @"有问题，找客服";
         _dotView.hidden = YES;
         return;

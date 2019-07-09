@@ -31,19 +31,31 @@
 //    self.contentView.backgroundColor = kTableViewBackgroundColor;
     self.backgroundView = [[UIView alloc] init];
     
-    UIButton *btn = [[UIButton alloc] init];
-    btn.adjustsImageWhenHighlighted = NO;
-    btn.userInteractionEnabled = YES;
-    [self.contentView addSubview:btn];
-    [btn mas_makeConstraints:^(MASConstraintMaker *make) {
+    UIButton *imageBtn = [[UIButton alloc] init];
+    imageBtn.adjustsImageWhenHighlighted = NO;
+    imageBtn.userInteractionEnabled = YES;
+    [self.contentView addSubview:imageBtn];
+    [imageBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.contentView.mas_left).offset(18);
         make.right.equalTo(self.contentView.mas_right).offset(-18);
         make.top.equalTo(self.contentView.mas_top).offset(14);
-        make.bottom.equalTo(self.contentView.mas_bottom);
+        make.bottom.equalTo(self.contentView.mas_bottom).offset(-2);
     }];
-    [btn addTarget:self action:@selector(clickItem:) forControlEvents:UIControlEventTouchUpInside];
-    _zIV = btn;
+    [imageBtn addTarget:self action:@selector(clickItem:) forControlEvents:UIControlEventTouchUpInside];
+    _zIV = imageBtn;
     
+    
+    UIButton *btn = [[UIButton alloc] init];
+    btn.adjustsImageWhenHighlighted = NO;
+    btn.userInteractionEnabled = YES;
+    [btn setImage:[UIImage imageNamed:@"YY2"] forState:UIControlStateNormal];
+    [self.contentView addSubview:btn];
+    [btn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(imageBtn.mas_left).offset(0);
+        make.right.equalTo(imageBtn.mas_right).offset(0);
+        make.top.equalTo(imageBtn.mas_bottom).offset(-2);
+        make.height.equalTo(@4);
+    }];
 }
 
 - (void)clickItem:(UIButton*)button{
@@ -76,7 +88,7 @@
 }
 
 + (CGFloat)cellHeightWithModel{
-    return 125;
+    return 127;
 }
 
 - (void)richElementsInCellWithModel:(BannerItem*)item{

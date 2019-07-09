@@ -24,18 +24,8 @@
               };
 }
 
-//- (void)setText:(NSString *)text {
-//    _text = text;
-//    if (self.messageType == FYMessageTypeRedEnvelope) {
-//
-//    }
-//}
-
 //判断当前时间是否展示
 -(void)showTimeWithLastShowTime:(NSTimeInterval)lastTime currentTime:(NSTimeInterval)currentTime{
-    
-    //    long long lastTimeStamp = [lastTime isKindOfClass:[NSString class]] ? [NSTimer getStampWithTime:lastTime] : [lastTime integerValue];
-    //    long long currentTimeStamp = [currentTime isKindOfClass:[NSString class]] ? [NSTimer getStampWithTime:currentTime] : [currentTime integerValue];
     
     NSTimeInterval timeInterval = [NSTimer CompareTwoTime:lastTime time2:currentTime];
     

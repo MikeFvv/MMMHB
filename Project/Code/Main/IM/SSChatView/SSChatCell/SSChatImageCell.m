@@ -7,17 +7,15 @@
 //
 
 #import "SSChatImageCell.h"
-#import "FYChatManagerProtocol.h"
-
-@interface SSChatImageCell ()
-
-@end
 
 @implementation SSChatImageCell
 
--(void)initChatCellUI{
-    
+-(void)initChatCellUI {
     [super initChatCellUI];
+    [self initSubviews];
+}
+
+-(void)initSubviews {
 //    [self addMenuItemView];
     
     self.mImgView = [UIImageView new];

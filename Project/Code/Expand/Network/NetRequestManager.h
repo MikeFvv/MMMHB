@@ -307,20 +307,9 @@ typedef enum{
                             success:(CallbackBlock)successBlock
                                fail:(CallbackBlock)failBlock;
 
--(void)submitRechargeInfoWithId:(NSString *)tId
-                          money:(NSString *)money
-                           name:(NSString *)name
-                           type:(NSInteger)type
-                       typeCode:(NSInteger)typeCode
-                         userId:(NSString *)userId
-                        success:(CallbackBlock)successBlock
-                           fail:(CallbackBlock)failBlock;
-
-#pragma mark 重新下订单
--(void)reOrderRechargeInfoWithId:(NSString *)orderId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
-
 #pragma mark 提交订单
--(void)submitOrderRechargeInfoWithId:(NSString *)orderId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
+-(void)submitOrderRechargeInfoWithId:(NSString *)orderId money:(NSString *)money
+                                name:(NSString *)name success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;
 
 #pragma mark 获取分享url
 -(void)getShareUrlWithCode:(NSString *)code success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock;

@@ -10,11 +10,13 @@
 
 @interface RedEnvelopeDetListController : UIViewController
 
-@property (nonatomic,assign) BOOL isRightBarButton;
+
+@property (nonatomic, assign) BOOL isCowCow;
+@property (nonatomic, assign) BOOL isRightBarButton;
 //
-@property (nonatomic,strong) id objPar;
-@property (nonatomic,copy) NSString *bankerId;
+@property (nonatomic, copy) NSString *redPackedId;
+@property (nonatomic, copy) NSString *bankerId;
 // 退包时间
-@property (nonatomic,assign) CGFloat returnPackageTime;
+@property (nonatomic, assign) CGFloat returnPackageTime;
 
 @end

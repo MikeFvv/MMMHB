@@ -12,8 +12,6 @@
 @interface SSChatImageCell : FYChatBaseCell
 
 
-
-
 @end
 
 

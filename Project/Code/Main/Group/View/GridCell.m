@@ -133,11 +133,19 @@
     [icon setImage:[UIImage imageNamed:fourPalaceData[kImg]]];
     
     UILabel *title =(UILabel *)[cell.contentView viewWithTag:7003];
-    if ([self.selectedIndexPath isEqual:indexPath]){
-        title.textColor = [UIColor redColor];
+    if (self.selectedIndexPath) {
+        if ([self.selectedIndexPath isEqual:indexPath]){
+            title.textColor = [UIColor redColor];
+        }else{
+            title.textColor = HEXCOLOR(0x202020);
+        }
     }else{
-        title.textColor = HEXCOLOR(0x202020);
+        if (cell.tag == 0) {
+            title.textColor = [UIColor redColor];
+        }
     }
+    
+    
     [title setText:fourPalaceData[kTit]];
     return cell;
 }
@@ -160,12 +168,16 @@
     }
     UICollectionViewCell* cell = [collectionView  cellForItemAtIndexPath:indexPath];
     UILabel *title =(UILabel *)[cell.contentView viewWithTag:7003];
-    
     title.textColor = [UIColor redColor];
+    
+    if (indexPath.row != 0) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem: 0 inSection:0];
+        UICollectionViewCell *cell0 = (UICollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+        UILabel *titleLab = (UILabel *)[cell0.contentView viewWithTag:7003];
+        titleLab.textColor = HEXCOLOR(0x202020);
+    }
+    
     self.selectedIndexPath = indexPath;
-    
-    
-    
     
     if (self.block) {
         self.block(object);

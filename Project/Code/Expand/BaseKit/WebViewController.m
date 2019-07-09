@@ -143,16 +143,25 @@
 - (void)postUrl{
     NSURL *url = [NSURL URLWithString: _url];
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc]initWithURL:url];
-    [request setHTTPMethod: @"POST"];
-    NSString *body = @"";
-    for (NSString *key in _params.allKeys) {
-        if ([FunctionManager isEmpty:body]) {
-            body = [NSString stringWithFormat:@"%@=%@",key,_params[key]];
-        }else{
-            body = [NSString stringWithFormat:@"%@&%@=%@",body,key,_params[key]];
-        }
-    }
-    [request setHTTPBody: [body dataUsingEncoding: NSUTF8StringEncoding]];
+    [request setHTTPMethod:@"POST"];
+//    NSString *body = @"";
+//    for (NSString *key in _params.allKeys) {
+//        if ([FunctionManager isEmpty:body]) {
+//            body = [NSString stringWithFormat:@"%@=%@",key,_params[key]];
+//        }else{
+//            body = [NSString stringWithFormat:@"%@&%@=%@",body,key,_params[key]];
+//        }
+//    }
+    request.timeoutInterval = 30;
+//    NSData * bodyData   = [NSJSONSerialization dataWithJSONObject:_params options:NSJSONWritingPrettyPrinted error:nil];
+//    NSString *body = [[NSString alloc] initWithData:bodyData encoding:NSUTF8StringEncoding];
+//    [request setHTTPBody: [body dataUsingEncoding: NSUTF8StringEncoding]];
+    
+    NSData * bodyData = [NSJSONSerialization dataWithJSONObject:_params options:NSJSONWritingPrettyPrinted error:nil];
+    [request setHTTPBody:bodyData];
+    
+    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    
     [request setValue:[AppModel shareInstance].userInfo.fullToken forHTTPHeaderField:@"Authorization"];
     [request setValue:GetUserDefaultWithKey(@"mobile") forHTTPHeaderField:@"userName"];
     [request setValue:[[FunctionManager sharedInstance] getApplicationVersion] forHTTPHeaderField:@"appVersion"];

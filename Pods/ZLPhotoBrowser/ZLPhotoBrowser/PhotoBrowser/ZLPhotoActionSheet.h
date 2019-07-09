@@ -102,6 +102,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)previewPhotos:(NSArray<NSDictionary *> *)photos index:(NSInteger)index hideToolBar:(BOOL)hideToolBar complete:(void (^)(NSArray *photos))complete;
 
+
+- (void)saveImage:(UIImage *)image videoUrl:(NSURL *)videoUrl;
+
 NS_ASSUME_NONNULL_END
 
 @end

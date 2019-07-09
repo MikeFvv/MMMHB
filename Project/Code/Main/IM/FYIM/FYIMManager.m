@@ -33,11 +33,9 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        //        self.isConnectFY = NO;
         [self onConnectSocket];
         [FYIMMessageManager shareInstance].receiveMessageDelegate = self;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onConnectSocket) name:kOnConnectSocketNotification object:nil];
-        //        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onTokenInvalid) name:kTokenInvalidNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onLoggedSuccess) name:kLoggedSuccessNotification object:nil];
         
     }
@@ -192,9 +190,11 @@
             [AppModel shareInstance].unReadCount -= oldModel.number;
             if (chatType == FYConversationType_PRIVATE) {
                 [AppModel shareInstance].friendUnReadTotal -= oldModel.number;
-            } else if (chatType == FYConversationType_CUSTOMERSERVICE) {
-                [AppModel shareInstance].customerServiceUnReadTotal -= oldModel.number;
             }
+            
+//            else if (chatType == FYConversationType_CUSTOMERSERVICE) {
+//                [AppModel shareInstance].customerServiceUnReadTotal -= oldModel.number;
+//            }
             oldModel.number = 0;
         } else {
             if (oldModel.number > 99) {
@@ -204,9 +204,11 @@
             [AppModel shareInstance].unReadCount += 1;
             if (chatType == FYConversationType_PRIVATE) {
                 [AppModel shareInstance].friendUnReadTotal += 1;
-            } else if (chatType == FYConversationType_CUSTOMERSERVICE) {
-                [AppModel shareInstance].customerServiceUnReadTotal += 1;
             }
+            
+//            else if (chatType == FYConversationType_CUSTOMERSERVICE) {
+//                [AppModel shareInstance].customerServiceUnReadTotal += 1;
+//            }
             oldModel.messageCountLeft = messageCount;
         }
         
@@ -222,9 +224,11 @@
         [AppModel shareInstance].unReadCount += 1;
         if (chatType == FYConversationType_PRIVATE) {
             [AppModel shareInstance].friendUnReadTotal += 1;
-        } else if (chatType == FYConversationType_CUSTOMERSERVICE) {
-            [AppModel shareInstance].customerServiceUnReadTotal += 1;
         }
+        
+//        else if (chatType == FYConversationType_CUSTOMERSERVICE) {
+//            [AppModel shareInstance].customerServiceUnReadTotal += 1;
+//        }
         PushMessageModel *newModel = [PushMessageModel new];
         newModel.userId = [AppModel shareInstance].userInfo.userId;
         newModel.number = 1;
@@ -238,6 +242,9 @@
     
     if ((left == 0 && oldModel.number <= 99) || (messageCount > 0 && left == 0)) {
         [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:@"GroupListNotification"];
+    }
+    if (oldModel.number == 0 || [AppModel shareInstance].unReadCount == 1) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:@"updateBadeValue"];
     }
 }
 

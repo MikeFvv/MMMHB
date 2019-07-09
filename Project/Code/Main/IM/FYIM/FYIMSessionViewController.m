@@ -16,8 +16,6 @@
 #import "SSChatMapController.h"
 
 #import "SSChatDatas.h"
-// 后面添加
-#import "FYChatManagerProtocol.h"
 
 #import "FYSocketManager.h"
 #import "WHC_ModelSqlite.h"
@@ -30,6 +28,7 @@
 #import "BANetManager_OC.h"
 
 #import "JJPhotoManeger.h"
+#import "ZLAlbumListController.h"
 
 @interface FYIMSessionViewController ()<SSChatKeyBoardInputViewDelegate,UITableViewDelegate,UITableViewDataSource,FYChatBaseCellDelegate, FYChatManagerDelegate,FYSystemBaseCellDelegate, JJPhotoDelegate>
 
@@ -61,6 +60,8 @@
 @property (nonatomic, strong) NSArray *arrDataSources;
 @property (nonatomic, strong) NSMutableArray *imagesSizeArr;
 
+
+@property (nonatomic, strong) ZLPhotoActionSheet *photoActionSheet;
 
 @end
 
@@ -136,9 +137,9 @@ static FYIMSessionViewController *_chatVC;
     NSInteger topNumIndex = num;
     _topNumIndex = topNumIndex;
     
-    if (self.unreadMessageNum > kMessagePageNumber) {
-        self.page = numCount / kMessagePageNumber;
-    }
+//    if (self.unreadMessageNum > kMessagePageNumber) {
+//        self.page = numCount / kMessagePageNumber;
+//    }
     
     [self scrollToBottom];
     
@@ -212,9 +213,10 @@ static FYIMSessionViewController *_chatVC;
                 return;
             }
         }
+        
         [self controllerLoadData:messageArray];
+        
     });
-
 }
 
 - (void)controllerLoadData:(NSArray *)messageArray {
@@ -519,7 +521,7 @@ static FYIMSessionViewController *_chatVC;
     FYMessagelLayoutModel *message = [self.dataSource lastObject];
     [self.tableView reloadData];
     if ([message.message.messageSendId isEqualToString:[AppModel shareInstance].userInfo.userId] || self.isTableViewBottom) {
-        [self scrollToBottom];
+        [self performSelector:@selector(scrollToBottom) withObject:nil afterDelay:0.1];
     }
     
     // 未读新消息
@@ -757,6 +759,9 @@ static FYIMSessionViewController *_chatVC;
         cell.model = model;
         return cell;
     } else {
+        if ([model.message.cellString isEqualToString:@""]) {
+            
+        }
         FYChatBaseCell *cell = [tableView dequeueReusableCellWithIdentifier:model.message.cellString];
         if (cell == nil) {
             cell = [[FYChatBaseCell alloc]initWithStyle:0 reuseIdentifier:model.message.cellString];
@@ -850,25 +855,33 @@ static FYIMSessionViewController *_chatVC;
     if(tag==10 || tag==11){
         if(!_mAddImage) _mAddImage = [[SSAddImage alloc]init];
         
-        [self loadImage];
+//        [self loadImage];
         
-        //        [_mAddImage getImagePickerWithAlertController:self modelType:SSImagePickerModelImage + tag-10 pickerBlock:^(SSImagePickerWayStyle wayStyle, SSImagePickerModelType modelType, id object) {
-        //
-        //            if(tag==10){
-        //                UIImage *image = (UIImage *)object;
-        //                NSLog(@"%@",image);
-        //                NSDictionary *dic = @{@"image":image};
-        ////                [self sendMessage:dic messageType:FYMessageTypeImage];
-        //                [self loadImage];
-        //            }
-        //
-        //            else{
-        //                NSString *localPath = (NSString *)object;
-        //                NSLog(@"%@",localPath);
-        //                NSDictionary *dic = @{@"videoLocalPath":localPath};
-        //                [self sendMessage:dic messageType:FYMessageTypeVideo];
-        //            }
-        //        }];
+        if (tag==10) {
+            [self loadImage];
+        } else if (tag==11) {
+            [self takePhoto];
+        }
+        
+        
+        
+//                [_mAddImage getImagePickerWithAlertController:self modelType:SSImagePickerModelImage + tag-10 pickerBlock:^(SSImagePickerWayStyle wayStyle, SSImagePickerModelType modelType, id object) {
+//
+//                    if(tag==10){
+//                        UIImage *image = (UIImage *)object;
+//                        NSLog(@"%@",image);
+//                        NSDictionary *dic = @{@"image":image};
+//        //                [self sendMessage:dic messageType:FYMessageTypeImage];
+//                        [self loadImage];
+//                    }
+//
+//                    else{
+//                        NSString *localPath = (NSString *)object;
+//                        NSLog(@"%@",localPath);
+//                        NSDictionary *dic = @{@"videoLocalPath":localPath};
+////                        [self sendMessage:dic messageType:FYMessageTypeVideo];
+//                    }
+//                }];
         
     } else {
         SSChatLocationController *vc = [SSChatLocationController new];
@@ -880,7 +893,40 @@ static FYIMSessionViewController *_chatVC;
     }
 }
 
-
+- (void)takePhoto
+{
+    ZLPhotoActionSheet *photoActionSheet = [self getPas];
+    if (![ZLPhotoManager haveCameraAuthority]) {
+        NSString *message = [NSString stringWithFormat:GetLocalLanguageTextValue(ZLPhotoBrowserNoCameraAuthorityText), kAPPName];
+        ShowAlert(message, self);
+        return;
+    }
+    if (![ZLPhotoManager haveMicrophoneAuthority]) {
+        NSString *message = [NSString stringWithFormat:GetLocalLanguageTextValue(ZLPhotoBrowserNoMicrophoneAuthorityText), kAPPName];
+        ShowAlert(message, self);
+        return;
+    }
+    
+    ZLCustomCamera *camera = [[ZLCustomCamera alloc] init];
+    camera.allowTakePhoto = YES;
+    camera.allowRecordVideo = NO;
+    camera.sessionPreset = ZLCaptureSessionPreset1280x720;
+    camera.videoType = ZLExportVideoTypeMov;
+    camera.circleProgressColor = kRGB(80, 180, 234);;
+    camera.maxRecordDuration = 10;
+    @zl_weakify(self);
+    
+    
+    camera.doneBlock = ^(UIImage *image, NSURL *videoUrl) {
+        @zl_strongify(self);
+        [photoActionSheet saveImage:image videoUrl:videoUrl];
+        if (image) {
+            [self sendSelectImage:@[image]];
+        }
+        
+    };
+    [self showDetailViewController:camera sender:nil];
+}
 
 
 #pragma - FYChatBaseCellDelegate
@@ -1001,7 +1047,7 @@ static FYIMSessionViewController *_chatVC;
 - (void)showWithPreview:(BOOL)preview
 {
     ZLPhotoActionSheet *a = [self getPas];
-    
+    _photoActionSheet = a;
     if (preview) {
         [a showPreviewAnimated:YES];
     } else {
@@ -1028,40 +1074,7 @@ static FYIMSessionViewController *_chatVC;
     @zl_weakify(self);
     [actionSheet setSelectImageBlock:^(NSArray<UIImage *> * _Nonnull images, NSArray<PHAsset *> * _Nonnull assets, BOOL isOriginal) {
         @zl_strongify(self);
-        self.arrDataSources = images;
-        //        self.isOriginal = isOriginal;
-        //        self.lastSelectAssets = assets.mutableCopy;
-        //        self.lastSelectPhotos = images.mutableCopy;
-        //        [self.collectionView reloadData];
-        
-        
-        //        UIImage *image = (UIImage *)object;
-        //        NSLog(@"%@",image);
-        //        NSDictionary *dic = @{@"image":image};
-        //        [self sendMessage:dic messageType:SSChatMessageTypeImage];
-        
-        NSLog(@"image:%@", images);
-        //解析图片
-        //        if (!self.allowAnialysisAssetSwitch.isOn) {
-        //            [self anialysisAssets:assets original:isOriginal];
-        //        }
-        
-        FYMessage *modelMessage = [[FYMessage alloc] init];
-        modelMessage.messageType = FYMessageTypeImage;
-        modelMessage.sessionId = self.sessionId;
-        modelMessage.messageSendId = [AppModel shareInstance].userInfo.userId;
-        modelMessage.user = [AppModel shareInstance].userInfo;
-        modelMessage.create_time = [NSDate date];
-        
-        UIImage *image = (UIImage *)images.firstObject;
-        NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-        [dict setObject:@(image.size.width) forKey:@"width"];
-        [dict setObject:@(image.size.height) forKey:@"height"];
-        [dict setObject:image forKey:@"image"];
-        modelMessage.selectPhoto = dict;
-        
-        [self sendMessage:modelMessage];
-        [self uploadImage:modelMessage];
+        [self sendSelectImage:images];
     }];
     
     actionSheet.selectImageRequestErrorBlock = ^(NSArray<PHAsset *> * _Nonnull errorAssets, NSArray<NSNumber *> * _Nonnull errorIndex) {
@@ -1075,6 +1088,25 @@ static FYIMSessionViewController *_chatVC;
     return actionSheet;
 }
 
+- (void)sendSelectImage:(NSArray *)images {
+    self.arrDataSources = images;
+    FYMessage *modelMessage = [[FYMessage alloc] init];
+    modelMessage.messageType = FYMessageTypeImage;
+    modelMessage.sessionId = self.sessionId;
+    modelMessage.messageSendId = [AppModel shareInstance].userInfo.userId;
+    modelMessage.user = [AppModel shareInstance].userInfo;
+    modelMessage.create_time = [NSDate date];
+    
+    UIImage *image = (UIImage *)images.firstObject;
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    [dict setObject:@(image.size.width) forKey:@"width"];
+    [dict setObject:@(image.size.height) forKey:@"height"];
+    [dict setObject:image forKey:@"image"];
+    modelMessage.selectPhoto = dict;
+    
+    [self sendMessage:modelMessage];
+    [self uploadImage:modelMessage];
+}
 
 /**
  点击重发
@@ -1194,3 +1226,4 @@ static FYIMSessionViewController *_chatVC;
 
 
 @end
+

@@ -80,13 +80,13 @@
     
     ReportFormsItem *item = [[ReportFormsItem alloc] init];
     item.icon = @"Firstrecharge";
-    item.title = NUMBER_TO_STR(dict[@"first"]);
+    item.title = STR_TO_AmountFloatSTR(NUMBER_TO_STR(dict[@"first"]));
     item.desc = @"首充奖励赠送";
     [arr addObject:item];
     
     item = [[ReportFormsItem alloc] init];
     item.icon = @"Recharge";
-    item.title = NUMBER_TO_STR(dict[@"two"]);
+    item.title = STR_TO_AmountFloatSTR(NUMBER_TO_STR(dict[@"two"]));
     item.desc = @"二充奖励赠送";
     [arr addObject:item];
     
@@ -98,13 +98,13 @@
     
     item = [[ReportFormsItem alloc] init];
     item.icon = @"Firstrecharge";
-    item.title = NUMBER_TO_STR(dict[@"friendFirst"]);
+    item.title = STR_TO_AmountFloatSTR(NUMBER_TO_STR(dict[@"friendFirst"]));
     item.desc = @"首充奖励赠送";
     [arr addObject:item];
     
     item = [[ReportFormsItem alloc] init];
     item.icon = @"Recharge";
-    item.title = NUMBER_TO_STR(dict[@"friendTwo"]);
+    item.title = STR_TO_AmountFloatSTR(NUMBER_TO_STR(dict[@"friendTwo"]));
     item.desc = @"二充奖励赠送";
     [arr addObject:item];
     
@@ -116,13 +116,13 @@
     
     item = [[ReportFormsItem alloc] init];
     item.icon = @"Hairbag";
-    item.title = NUMBER_TO_STR(dict[@"send"]);
+    item.title = STR_TO_AmountFloatSTR(NUMBER_TO_STR(dict[@"send"]));
     item.desc = @"发包奖励";
     [arr addObject:item];
     
     item = [[ReportFormsItem alloc] init];
     item.icon = @"snatch";
-    item.title = NUMBER_TO_STR(dict[@"rob"]);
+    item.title = STR_TO_AmountFloatSTR(NUMBER_TO_STR(dict[@"rob"]));
     item.desc = @"抢包奖励";
     [arr addObject:item];
     
@@ -134,13 +134,13 @@
     
     item = [[ReportFormsItem alloc] init];
     item.icon = @"yjfc";
-    item.title = NUMBER_TO_STR(dict[@"bzsz"]);
+    item.title = STR_TO_AmountFloatSTR(NUMBER_TO_STR(dict[@"bzsz"]));
     item.desc = @"豹子顺子奖励";
     [arr addObject:item];
     
     item = [[ReportFormsItem alloc] init];
     item.icon = @"esjj";
-    item.title = NUMBER_TO_STR(dict[@"commission"]);
+    item.title = STR_TO_AmountFloatSTR(NUMBER_TO_STR(dict[@"commission"]));
     item.desc = @"直推佣金奖励";
     [arr addObject:item];
 }

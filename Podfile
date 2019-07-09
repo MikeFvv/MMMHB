@@ -126,6 +126,25 @@ target 'ProjectQWHB' do
   
 end
 
+target 'ProjectRRHB' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  # use_frameworks!
+  pod 'SVProgressHUD'
+  pod 'MJExtension'
+  pod 'MJRefresh'
+  pod 'AFNetworking'
+  pod 'SDWebImage'
+  pod 'Masonry'
+  pod 'WHC_ModelSqliteKit'
+  pod 'WechatOpenSDK'
+  pod 'IQKeyboardManager'
+  pod 'YYCache'
+  pod 'JSPatch'
+  pod 'Bugtags'
+  pod 'SocketRocket'
+  pod 'SSKeychain'
+  
+end
 target 'ProjectTTHB' do
     # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
     # use_frameworks!

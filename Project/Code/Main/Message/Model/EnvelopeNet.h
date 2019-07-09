@@ -47,4 +47,7 @@
  */
 -(void)getRedpDetSendId:(id)packetId successBlock:(void (^)(NSDictionary *))successBlock
            failureBlock:(void (^)(NSError *))failureBlock;
+
+- (void)destroyData;
+
 @end

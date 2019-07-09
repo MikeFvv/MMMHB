@@ -17,6 +17,8 @@
 #import "FYIMManager.h"
 #import "PreLoginVC.h"
 #import "PreRootVC.h"
+#import "MessageNet.h"
+
 static NSString *Path = @"COM.XMFX.path";
 
 @implementation AppModel
@@ -90,7 +92,7 @@ static NSString *Path = @"COM.XMFX.path";
 
     [[FYIMManager shareInstance] userSignout];
     [AppModel shareInstance].unReadCount = 0;
-    
+    [[MessageNet shareInstance] destroyData];
     [[AppModel shareInstance] saveAppModel];
 //    [self reSetRootAnimation:YES];
     [self reSetTabBarAsRootAnimation];

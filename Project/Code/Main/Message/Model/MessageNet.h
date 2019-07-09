@@ -74,5 +74,6 @@
 -(void)getGroupListWithSuccessBlock:(void (^)(NSDictionary *))successBlock
                        failureBlock:(void (^)(id))failureBlock;
 
+- (void)destroyData;
 
 @end

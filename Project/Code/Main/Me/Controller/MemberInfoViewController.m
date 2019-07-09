@@ -16,10 +16,10 @@
     NSInteger _sexType;
     NSString *_headUrl;
 }
-@property(atomic,strong)NSString *shareUrl;
+
 @property(atomic,strong)UIImageView *qrCodeImageView;
-    @property(nonatomic,assign)NSInteger rowNum;
-    @property(atomic,strong)UITableView *tableView;
+@property(nonatomic,assign)NSInteger rowNum;
+@property(atomic,strong)UITableView *tableView;
 @end
 
 @implementation MemberInfoViewController
@@ -30,8 +30,15 @@
     [self initSubviews];
     [self initLayout];
     [self addObserver];
-    self.rowNum = 4;
-    [self requestShareInfo];
+    
+//    [self requestShareInfo];
+    if (self.shareUrl) {
+        self.rowNum = 5;
+    }else{
+        self.rowNum = 4;
+    }
+    
+    
 }
 
 #pragma mark ----- Data
@@ -342,6 +349,7 @@
         weakSelf.rowNum = 5;
         [weakSelf.tableView reloadData];
     } fail:^(id object) {
+        
     }];
 }
 @end

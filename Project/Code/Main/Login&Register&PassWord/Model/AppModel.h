@@ -19,7 +19,7 @@
 
 @property (nonatomic ,assign) NSInteger unReadCount;  ///< 未读总消息
 @property (nonatomic ,assign) NSInteger friendUnReadTotal;  // 好友未读总消息
-@property (nonatomic ,assign) NSInteger customerServiceUnReadTotal;  // 客服未读总消息
+//@property (nonatomic ,assign) NSInteger customerServiceUnReadTotal;  // 客服未读总消息
 @property (nonatomic ,strong) NSDictionary *commonInfo;
 @property (nonatomic ,copy) NSString *appClientIdInCommonInfo;
 @property (nonatomic ,copy) NSString *encRSAPubKey;

@@ -263,7 +263,7 @@
 - (void)onGotoRedPackedDet:(NSString*)redId {
     [self.view endEditing:YES];
     RedEnvelopeDetListController *vc = [[RedEnvelopeDetListController alloc] init];
-    vc.objPar = redId;
+    vc.redPackedId = redId;
     vc.bankerId = self.sendPId;
     [self.navigationController pushViewController:vc animated:YES];
 }

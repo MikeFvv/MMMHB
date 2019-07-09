@@ -41,8 +41,6 @@ typedef NS_ENUM(NSInteger, FYUserGender) {
 @property(nonatomic, copy) NSString *invitecode;
 // 用户电话
 @property(nonatomic, copy) NSString *mobile;
-// 冻结金额
-@property(nonatomic, copy) NSString *frozenMoney;
 // 用户性别
 @property (nonatomic, assign) FYUserGender gender;
 // 余额

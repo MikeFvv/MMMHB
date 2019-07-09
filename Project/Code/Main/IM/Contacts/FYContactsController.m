@@ -38,8 +38,6 @@
 @property (nonatomic, strong) NSMutableArray *indexTitles;
 
 @property(nonatomic, strong) NSMutableArray *menuItems;
-//
-@property (nonatomic,assign) BOOL isSearching;
 
 @end
 
@@ -58,7 +56,7 @@
 - (void)createTableView {
     self.contactTableView = [[FYContactsTableView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height-Height_NavBar-Height_TabBar)];
     self.contactTableView.delegate = self;
-    self.contactTableView.tableView.tableHeaderView = self.contactsSearchBar;
+//    self.contactTableView.tableView.tableHeaderView = self.contactsSearchBar;
     [self.view addSubview:self.contactTableView];
     
     __weak __typeof(self)weakSelf = self;
@@ -71,7 +69,7 @@
 - (void)reloadTableView {
     self.contactTableView = [[FYContactsTableView alloc] initWithFrame:CGRectMake(0, 64, self.view.bounds.size.width, self.view.bounds.size.height-64)];
     self.contactTableView.delegate = self;
-    self.contactTableView.tableView.tableHeaderView = self.contactsSearchBar;
+//    self.contactTableView.tableView.tableHeaderView = self.contactsSearchBar;
     [self.view addSubview:self.contactTableView];
 }
 - (void)viewDidLoad {
@@ -101,11 +99,12 @@
     self.navigationItem.rightBarButtonItems = @[infoItem,exItem];
     
     
-    self.contactsSearchBar = [[UISearchBar alloc]initWithFrame:CGRectMake(0, 64, self.view.bounds.size.width, 40)];
+    self.contactsSearchBar = [[UISearchBar alloc]initWithFrame:CGRectMake(0, Height_TabBar, self.view.bounds.size.width, 40)];
     self.contactsSearchBar.delegate = self;
     [self.contactsSearchBar setPlaceholder:@"搜索联系人"];
     self.contactsSearchBar.keyboardType = UIKeyboardTypeDefault;
     self.searchDisplayController = [[UISearchDisplayController alloc]initWithSearchBar:self.contactsSearchBar contentsController:self];
+    
     self.searchDisplayController.active = NO;
     self.searchDisplayController.searchResultsDataSource = self;
     self.searchDisplayController.searchResultsDelegate = self;
@@ -209,43 +208,6 @@
     
 }
 
-- (void)parsingLocalData {
-    if ([AppModel shareInstance].myFriendListDict.count > 0) {
-        
-        NSMutableArray *serviceMembersArray = [[NSMutableArray alloc] init];
-        NSMutableArray *superiorArray = [[NSMutableArray alloc] init];
-        NSMutableArray *subordinateArray = [[NSMutableArray alloc] init];
-        
-        NSArray *myFriendListArray = [[AppModel shareInstance].myFriendListDict allValues];
-        for (NSInteger index = 0; index < myFriendListArray.count; index++) {
-            FYContacts *model = (FYContacts *)myFriendListArray[index];
-            if (model.contactsType == 2) {
-                [subordinateArray addObject:model];
-            } else if (model.contactsType == 3) {
-                [serviceMembersArray addObject:model];
-            } else if (model.contactsType == 4) {
-                [superiorArray addObject:model];
-            } else {
-                NSLog(@"未知类型");
-            }
-        }
-        
-        [self.dataSource addObject:serviceMembersArray];
-        [self.dataSource addObject:superiorArray];
-        [self.dataSource addObject:[NSArray array]];
-        [self.dataSource addObject:subordinateArray];
-        
-        [self.indexTitles addObject:@"官"];
-        [self.indexTitles addObject:@"上"];
-        if (subordinateArray.count > 0) {
-            [self.indexTitles addObject:@"下"];
-        }
-        
-        [self subordinateDataArray:subordinateArray];
-    }
-}
-
-
 - (void)loadLocalData:(NSDictionary *)dataDict
 {
     [self initData];
@@ -295,9 +257,48 @@
     if (subordinateArray.count > 0) {
         [self.indexTitles addObject:@"下"];
     }
- 
+    
     [self subordinateDataArray:subordinateArraytemp];
 }
+
+- (void)parsingLocalData {
+    if ([AppModel shareInstance].myFriendListDict.count > 0) {
+        
+        NSMutableArray *serviceMembersArray = [[NSMutableArray alloc] init];
+        NSMutableArray *superiorArray = [[NSMutableArray alloc] init];
+        NSMutableArray *subordinateArray = [[NSMutableArray alloc] init];
+        
+        NSArray *myFriendListArray = [[AppModel shareInstance].myFriendListDict allValues];
+        for (NSInteger index = 0; index < myFriendListArray.count; index++) {
+            FYContacts *model = (FYContacts *)myFriendListArray[index];
+            if (model.contactsType == 2) {
+                [subordinateArray addObject:model];
+            } else if (model.contactsType == 3) {
+                [serviceMembersArray addObject:model];
+            } else if (model.contactsType == 4) {
+                [superiorArray addObject:model];
+            } else {
+                NSLog(@"未知类型");
+            }
+        }
+        
+        [self.dataSource addObject:serviceMembersArray];
+        [self.dataSource addObject:superiorArray];
+        [self.dataSource addObject:[NSArray array]];
+        [self.dataSource addObject:subordinateArray];
+        
+        [self.indexTitles addObject:@"官"];
+        [self.indexTitles addObject:@"上"];
+        if (subordinateArray.count > 0) {
+            [self.indexTitles addObject:@"下"];
+        }
+        
+        [self subordinateDataArray:subordinateArray];
+    }
+}
+
+
+
 
 
 - (void)subordinateDataArray:(NSMutableArray *)subArray {
@@ -363,9 +364,9 @@
         if (section == 0) {
             return @"官方指定客服";
         } else if (section == 1) {
-            return @"你的上级好友";
+            return @"我的上级好友";
         } if (section == 2 && [[self.indexTitles objectAtIndex:section] isEqualToString:@"下"]) {
-            return @"你的下级好友";
+            return @"我的下级好友";
         }
         return [self.indexTitles objectAtIndex:section];
     }
@@ -455,7 +456,6 @@
 // 输入联系人名称，进行搜索， 返回搜索结果searchResults
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
 {
-    self.isSearching = YES;
     self.searchResults = [[NSMutableArray alloc]init];
     if (self.contactsSearchBar.text.length>0&&![ChineseInclude isIncludeChineseInString:self.contactsSearchBar.text]) {
         for (NSArray *section in self.dataSource) {
@@ -522,10 +522,12 @@
 //    [self.contactsSearchBar becomeFirstResponder];
 //}
 // 搜索
-- (void)goto_searchBar:(UIBarButtonItem *)sender{
-    [self.contactsSearchBar becomeFirstResponder];
+- (void)goto_searchBar:(UIBarButtonItem *)sender {
+ 
     self.contactTableView.tableView.tableHeaderView = self.contactsSearchBar;
     self.searchDisplayController.active = YES;
+    [self.contactsSearchBar becomeFirstResponder];
+    
     //准备搜索前，把上面调整的TableView调整回全屏幕的状态
 //    [UIView animateWithDuration:1.0 animations:^{
 //        self.contactTableView.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height);
@@ -541,16 +543,18 @@
 //        self.contactTableView.tableView.tableHeaderView = nil;
 //        self.contactTableView.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height);
 //    }];
-    if (self.isSearching) {
-        return YES;
+    
+    if (self.contactsSearchBar.text.length == 0) {
+        self.contactTableView.tableView.tableHeaderView = nil;
     }
-    self.isSearching = YES;
-    self.contactTableView.tableView.tableHeaderView = nil;
-    self.contactTableView.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height);
     
     return YES;
 }
 
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar {
+    self.contactTableView.tableView.tableHeaderView = nil;
+    self.contactTableView.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height);
+}
 
 @end
 

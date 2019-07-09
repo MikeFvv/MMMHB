@@ -239,13 +239,13 @@
     if(self.rewardDic){
         BOOL isGet = [self.rewardDic[@"isTodayGet"] boolValue];
         if(!isGet){
-            [self.getButton setTitle:[NSString stringWithFormat:@"奖励¥%@ 领取",self.rewardDic[@"canGetMoney"]] forState:UIControlStateNormal];
+            [self.getButton setTitle:[NSString stringWithFormat:@"奖励¥%@ 领取",STR_TO_AmountFloatSTR(self.rewardDic[@"canGetMoney"])] forState:UIControlStateNormal];
             [btn setTitleColor:COLOR_X(255, 60, 60) forState:UIControlStateNormal];
             [btn setBackgroundImage:[UIImage imageNamed:@"getRewardBtn"] forState:UIControlStateNormal];
             [self.aniObjArray addObject:btn];
         }
         else{
-            [self.getButton setTitle:[NSString stringWithFormat:@"奖励¥%@ 已领取",self.rewardDic[@"canGetMoney"]] forState:UIControlStateNormal];
+            [self.getButton setTitle:[NSString stringWithFormat:@"奖励¥%@ 已领取",STR_TO_AmountFloatSTR(self.rewardDic[@"canGetMoney"])] forState:UIControlStateNormal];
             [btn setTitleColor:COLOR_X(255, 255, 255) forState:UIControlStateNormal];
             [btn setBackgroundImage:[UIImage imageNamed:@"getRewardBtn2"] forState:UIControlStateNormal];
             self.getButton.userInteractionEnabled = NO;

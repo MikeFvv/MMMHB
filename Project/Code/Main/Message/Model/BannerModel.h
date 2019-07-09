@@ -29,14 +29,9 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface BannerData : NSObject
-@property (nonatomic, copy) NSString * advName;
 @property (nonatomic, copy) NSString * carouselSecTime;
 @property (nonatomic, copy) NSString * carouselTime;
 @property (nonatomic, copy) NSString * createTime;
-@property (nonatomic, copy) NSString * displayFlag;
-@property (nonatomic, copy) NSString * displayWay;
-@property (nonatomic, copy) NSString * picUrl;
-@property (nonatomic, copy) NSString * reference;
 @property (nonatomic, copy) NSString * ID;
 
 @property (nonatomic, copy) NSArray * skAdvDetailList;

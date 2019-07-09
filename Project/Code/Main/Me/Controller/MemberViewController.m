@@ -52,7 +52,7 @@
 }
 @property(nonatomic,strong)NSMutableArray *dataArray;
 @property(nonatomic,strong)UIImageView *imageBgView;
-
+@property(nonatomic,strong)NSString *shareUrl;
 @end
 
 @implementation MemberViewController
@@ -175,6 +175,7 @@
     [NET_REQUEST_MANAGER requestUserInfoWithSuccess:^(id object) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         [strongSelf update];
+        strongSelf.shareUrl = [NSString stringWithFormat:@"%@",[object[@"data"] objectForKey:@"domainUrl"]];
     } fail:^(id object) {
         [[FunctionManager sharedInstance] handleFailResponse:object];
     }];
@@ -351,7 +352,13 @@
 }
 #pragma mark action
 - (void)action_info{
-    PUSH_C(self, MemberInfoViewController, YES);
+    MemberInfoViewController* miVC = [[MemberInfoViewController alloc]init];
+    if (![FunctionManager isEmpty:self.shareUrl]) {
+        miVC.shareUrl = self.shareUrl;
+    }
+    miVC.hidesBottomBarWhenPushed = YES;
+    [self.navigationController pushViewController:miVC animated:YES];
+//    PUSH_C(self, MemberInfoViewController, YES);
 }
 
 - (void)didReceiveMemoryWarning {

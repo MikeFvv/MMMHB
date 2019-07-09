@@ -149,6 +149,7 @@
                                  @"createTime":@(message.timestamp),
                                  @"from":message.messageSendId,
                                  @"to":message.toUserId,
+                                 @"chatType":@(message.chatType),
                                  @"chatId":message.sessionId
                                  };
     [self sendMessageServer:parameters];
@@ -432,12 +433,16 @@
     FYMessage *message = [FYMessage mj_objectWithKeyValues:dict];
     if (message.chatType == FYConversationType_PRIVATE || message.chatType == FYConversationType_CUSTOMERSERVICE) {
         [self receiveMessageSendReceiptMessage:message];
-        
-        if ([AppModel shareInstance].myCustomerServiceListDict[message.messageSendId]) {
-            message.chatType = FYConversationType_CUSTOMERSERVICE;
-        } else {
-            message.chatType = FYConversationType_PRIVATE;
-        }
+        message.chatType = FYConversationType_PRIVATE;
+//        if ([AppModel shareInstance].myCustomerServiceListDict[message.messageSendId]) {
+//            if ([message.messageSendId isEqualToString:[AppModel shareInstance].userInfo.userId]) {
+//                message.chatType = FYConversationType_PRIVATE;
+//            } else {
+//                message.chatType = FYConversationType_CUSTOMERSERVICE;
+//            }
+//        } else {
+//            message.chatType = FYConversationType_PRIVATE;
+//        }
     }
     
     if(message.messageType == FYMessageTypeRedEnvelope){

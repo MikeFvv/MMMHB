@@ -24,8 +24,6 @@
         NSMutableDictionary *dic9 = [NSMutableDictionary dictionary];
         dic9 = obj;
         self.content = dic9.mj_JSONString;
-//        NSDictionary *dic = @{@"content":self.content};
-//        NSLog(@"%@",[dic mj_JSONString]);
     }
     return self;
 }

@@ -8,14 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-typedef NS_ENUM(NSInteger, RechargeType){
-    RechargeType_nil = 0,//默认
-    RechargeType_gf = 1,//官方
-    RechargeType_weiXin = 2,//微信
-    RechargeType_zhiFuBao = 3,//支付宝
-    RechargeType_yinLian = 4,//银联
-};
-
+#import "RechargeModel.h"
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ChannelView : UIView

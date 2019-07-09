@@ -19,6 +19,8 @@
 #import "MessageSingle.h"
 #import "PushMessageModel.h"
 #import "WHC_ModelSqlite.h"
+#import "BANetManager_OC.h"
+#import "FYContacts.h"
 
 
 @interface AppDelegate ()
@@ -73,9 +75,65 @@
     [self AFNReachability];
     [[AppModel shareInstance] initSetUp];
     
-    if([AppModel shareInstance].userInfo.isLogined)
+    if([AppModel shareInstance].userInfo.isLogined) {
         [[NetRequestManager sharedInstance] requestSystemNoticeWithSuccess:nil fail:nil];
+        [self queryContactsData];
+    }
 }
+
+
+- (void)queryContactsData {
+    
+    BADataEntity *entity = [BADataEntity new];
+    entity.urlString = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,@"social/friend/getContact"];
+    entity.needCache = NO;
+    __weak __typeof(self)weakSelf = self;
+    [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        if ([response objectForKey:@"code"] != nil && [[response objectForKey:@"code"] integerValue] == 0) {
+            [strongSelf loadLocalData:[response objectForKey:@"data"]];
+        } else {
+            [[FunctionManager sharedInstance] handleFailResponse:response];
+        }
+    } failureBlock:^(NSError *error) {
+        [[FunctionManager sharedInstance] handleFailResponse:error];
+    } progressBlock:nil];
+    
+}
+
+- (void)loadLocalData:(NSDictionary *)dataDict
+{
+    NSArray *serviceMembersArray = (NSArray *)[dataDict objectForKey:@"serviceMembers"];
+    NSArray *superiorArray = (NSArray *)[dataDict objectForKey:@"superior"];
+    NSArray *subordinateArray = (NSArray *)[dataDict objectForKey:@"subordinate"];
+    
+    NSMutableDictionary *myFriendListDictTemp = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary *myServiceListDictTemp = [[NSMutableDictionary alloc] init];
+    
+    for (int i = 0; i < serviceMembersArray.count; i++) {
+        FYContacts *contact = [[FYContacts alloc] initWithPropertiesDictionary:serviceMembersArray[i]];
+        contact.contactsType = 3;
+        [myFriendListDictTemp setObject:contact forKey:contact.sessionId];
+        [myServiceListDictTemp setObject:contact forKey:contact.userId];
+    }
+    [AppModel shareInstance].myCustomerServiceListDict = [myServiceListDictTemp copy];
+
+    for (int i = 0; i < superiorArray.count; i++) {
+        FYContacts *contact = [[FYContacts alloc] initWithPropertiesDictionary:superiorArray[i]];
+        contact.contactsType = 4;
+        [myFriendListDictTemp setObject:contact forKey:contact.sessionId];
+    }
+
+    for (int i = 0; i < subordinateArray.count; i++) {
+        FYContacts *contact = [[FYContacts alloc] initWithPropertiesDictionary:subordinateArray[i]];
+        contact.contactsType = 2;
+        [myFriendListDictTemp setObject:contact forKey:contact.sessionId];
+    }
+    
+    [AppModel shareInstance].myFriendListDict = myFriendListDictTemp;
+}
+
+
 
 /**
  * 推送处理3

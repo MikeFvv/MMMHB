@@ -37,9 +37,14 @@
             images = @[@"csb_welfare",@"csb_join",@"csb_tuo_redpocket",@"csb_refill",@"csb_wanfa",@"csb_rule",@"csb_help",@"csb_tuo_customer_service",@"csb_photo_album",@"csb_camera",@"csb_make_money",@"",@"",@"",@""];
             viewTag = @[@(2000),@(2001),@(2002),@(2003),@(2004),@(2005),@(2006),@(2007),@(2008),@(2009),@(2010),@(0),@(0),@(0),@(0)];
         } else {
-            titles = @[@"加盟",@"充值",@"玩法",@"帮助",@"客服",@"照片",@"拍照",@"赚钱"];
-            images = @[@"csb_join",@"csb_refill",@"csb_wanfa",@"csb_help",@"csb_tuo_customer_service",@"csb_photo_album",@"csb_camera",@"csb_make_money"];
-            viewTag = @[@(2001),@(2003),@(2004),@(2006),@(2007),@(2008),@(2009),@(2010)];
+//            titles = @[@"加盟",@"充值",@"玩法",@"帮助",@"客服",@"照片",@"拍照",@"赚钱"];
+//            images = @[@"csb_join",@"csb_refill",@"csb_wanfa",@"csb_help",@"csb_tuo_customer_service",@"csb_photo_album",@"csb_camera",@"csb_make_money"];
+//            viewTag = @[@(2001),@(2003),@(2004),@(2006),@(2007),@(2008),@(2009),@(2010)];
+            
+            
+            titles = @[@"玩法",@"帮助",@"加盟",@"客服",@"充值",@"赚钱",@"照片",@"拍照"];
+            images = @[@"csb_wanfa",@"csb_help",@"csb_join",@"csb_tuo_customer_service",@"csb_refill",@"csb_make_money",@"csb_photo_album",@"csb_camera"];
+            viewTag = @[@(2020),@(2006),@(2001),@(2007),@(2003),@(2010),@(2008),@(2009)];
         }
         
         

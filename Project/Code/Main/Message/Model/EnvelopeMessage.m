@@ -13,12 +13,6 @@
 
 MJCodingImplementation
 
-///消息是否存储，是否计入未读数
-//+ (RCMessagePersistent)persistentFlag {
-//
-//
-//    return MessagePersistent_ISCOUNTED;
-//}
 
 ///消息的类型名
 + (NSString *)getObjectName {

@@ -8,8 +8,6 @@
 
 #import "ChatViewController.h"
 #import <AVFoundation/AVFoundation.h>
-
-#import "FYRedEnevlopeCell.h"
 #import "EnvelopeMessage.h"
 #import "MessageNet.h"
 #import "EnvelopeTipCell.h"
@@ -110,13 +108,7 @@ static ChatViewController *_chatVC;
 
 // 单聊
 + (ChatViewController *)privateChatWithModel:(FYContacts *)model {
-    FYChatConversationType chatConversationType;
-    if (model.contactsType == 3) {
-        chatConversationType = FYConversationType_CUSTOMERSERVICE;
-    } else {
-        chatConversationType = FYConversationType_PRIVATE;
-    }
-    _chatVC = [[ChatViewController alloc] initWithConversationType:chatConversationType
+    _chatVC = [[ChatViewController alloc] initWithConversationType:FYConversationType_PRIVATE
                                                           targetId:model.sessionId];
     //设置聊天会话界面要显示的标题
     NSString *title = model.nick;
@@ -227,7 +219,7 @@ static ChatViewController *_chatVC;
     self.bankerId = [[model.cowcowRewardInfoDict objectForKey:@"userId"] stringValue];
     //    [self vsViewGetRedPacketDetailsData:[model.cowcowRewardInfoDict objectForKey:@"id"]];
     NSString *redId = [[model.cowcowRewardInfoDict objectForKey:@"id"] stringValue];
-    [self goto_RedPackedDetail:redId];
+    [self goto_RedPackedDetail:redId isCowCow:NO];
 }
 
 
@@ -315,10 +307,18 @@ static ChatViewController *_chatVC;
         //        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
         //        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
     } else if (tag == 2009){ // 拍照
-        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
-        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
+        [super fyChatFunctionBoardClickedItemWithTag:11];
+//        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+//        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
     } else if(tag == 2010){  // 赚钱
         PUSH_C(self, ShareViewController, YES);
+    } else if(tag == 2020){  // 玩法规则
+        NSString *url = [NSString stringWithFormat:@"%@/dist/#/mainRules", [AppModel shareInstance].commonInfo[@"website.address"]];
+        WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+        vc.navigationItem.title = @"玩法规则";
+        vc.hidesBottomBarWhenPushed = YES;
+        //[vc loadWithURL:url];
+        [self.navigationController pushViewController:vc animated:YES];
     } else {
         //        [super pluginBoardView:pluginBoardView clickedItemWithTag:tag];
         
@@ -368,7 +368,7 @@ static ChatViewController *_chatVC;
         SVP_DISMISS;
         if ([[success objectForKey:@"code"] integerValue] == 0) {
             if ([messageModel.redEnvelopeMessage.cellStatus integerValue] == 1) {
-                [strongSelf goto_RedPackedDetail:strongSelf.enveModel];
+                [strongSelf goto_RedPackedDetail:strongSelf.enveModel isCowCow:YES];
             } else {
                 [strongSelf actionShowRedPackedView:messageModel];
             }
@@ -388,26 +388,26 @@ static ChatViewController *_chatVC;
     
 }
 
-- (void)vsViewGetRedPacketDetailsData:(NSString *)redpId {
-    
-    SVP_SHOW;
-    __weak __typeof(self)weakSelf = self;
-    [_enveModel getRedpDetSendId:redpId successBlock:^(NSDictionary *success) {
-        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        SVP_DISMISS;
-        if ([[success objectForKey:@"code"] integerValue] == 0) {
-            [strongSelf goto_RedPackedDetail:strongSelf.enveModel];
-        } else {
-            [[FunctionManager sharedInstance] handleFailResponse:success];
-        }
-    } failureBlock:^(NSError *error) {
-        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        SVP_DISMISS;
-        strongSelf.isVSViewClick = NO;
-        //        __strong __typeof(weakSelf)strongSelf = weakSelf;
-        [[FunctionManager sharedInstance] handleFailResponse:error];
-    }];
-}
+//- (void)vsViewGetRedPacketDetailsData:(NSString *)redpId {
+//
+//    SVP_SHOW;
+//    __weak __typeof(self)weakSelf = self;
+//    [_enveModel getRedpDetSendId:redpId successBlock:^(NSDictionary *success) {
+//        __strong __typeof(weakSelf)strongSelf = weakSelf;
+//        SVP_DISMISS;
+//        if ([[success objectForKey:@"code"] integerValue] == 0) {
+//            [strongSelf goto_RedPackedDetail:strongSelf.enveModel];
+//        } else {
+//            [[FunctionManager sharedInstance] handleFailResponse:success];
+//        }
+//    } failureBlock:^(NSError *error) {
+//        __strong __typeof(weakSelf)strongSelf = weakSelf;
+//        SVP_DISMISS;
+//        strongSelf.isVSViewClick = NO;
+//        //        __strong __typeof(weakSelf)strongSelf = weakSelf;
+//        [[FunctionManager sharedInstance] handleFailResponse:error];
+//    }];
+//}
 
 #pragma mark - 好友聊天信息页
 - (void)goto_FriendChatInfo:(FYContacts *)contacts {
@@ -556,7 +556,7 @@ static ChatViewController *_chatVC;
     if ([response objectForKey:@"code"] && code == 0) {
         // 正常
         [self.redpView disMissRedView];
-        [self goto_RedPackedDetail:self.enveModel];
+        [self goto_RedPackedDetail:self.enveModel isCowCow:YES];
         [self updateRedPackedStatus:self.messageId cellStatus:@"1"];
         
 #pragma mark - 声音
@@ -619,7 +619,7 @@ static ChatViewController *_chatVC;
     // 查看详情
     view.detailBlock = ^{
         __strong __typeof(weakSelf)strongSelf = weakSelf;
-        [strongSelf goto_RedPackedDetail:strongSelf.enveModel];
+        [strongSelf goto_RedPackedDetail:strongSelf.enveModel isCowCow:YES];
     };
     // 视图消失
     view.animationBlock = ^{
@@ -672,13 +672,21 @@ static ChatViewController *_chatVC;
 }
 
 #pragma mark -  goto红包详情
-- (void)goto_RedPackedDetail:(id)obj{
+- (void)goto_RedPackedDetail:(id)obj isCowCow:(BOOL)isCowCow {
     [self.view endEditing:YES];
-    //    CDPush(self.navigationController, CDPVC(@"RedPackedDetListController", obj), YES);
     self.isVSViewClick = NO;
     RedEnvelopeDetListController *vc = [[RedEnvelopeDetListController alloc] init];
+    vc.isCowCow = isCowCow;
     vc.isRightBarButton = YES;
-    vc.objPar = obj;
+    
+    NSString *redPackedId;
+    if ([obj isKindOfClass:[EnvelopeNet class]]) {
+        EnvelopeNet *model = (EnvelopeNet *)obj;
+        redPackedId = [model.redPackedInfoDetail[@"id"] stringValue];
+    } else {
+        redPackedId = (NSString *)obj;
+    }
+    vc.redPackedId = redPackedId;
     vc.bankerId = self.bankerId;
     vc.returnPackageTime = [_messageItem.rpOverdueTime floatValue];
     [self.navigationController pushViewController:vc animated:YES];

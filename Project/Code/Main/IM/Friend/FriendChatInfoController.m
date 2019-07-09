@@ -96,10 +96,10 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
                                 action:@selector(onSwitchTop:)
                       forControlEvents:UIControlEventValueChanged];
         
+    } else if (indexPath.section == 100) {
+//        [cellee setCellStyle:DefaultStyle];
+//        cellee.leftLabel.text = @"查找聊天记录";
     } else if (indexPath.section == 3) {
-        [cellee setCellStyle:DefaultStyle];
-        cellee.leftLabel.text = @"查找聊天记录";
-    } else if (indexPath.section == 4) {
         [cellee setCellStyle:DefaultStyle];
         cellee.leftLabel.text = @"清空聊天记录";
     }
@@ -123,7 +123,7 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 #pragma mark - UITableViewDelegate
 // 设置组数
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 5;
+    return 4;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -146,9 +146,9 @@ static NSString *CellIdentifier = @"RCDBaseSettingTableViewCell";
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == 3) {
+    if (indexPath.section == 100) {
         
-    } else if (indexPath.section == 4) {
+    } else if (indexPath.section == 3) {
         AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
         view.textLabel.font = [UIFont systemFontOfSize2:16];
         [view showWithText:@"清空聊天记录！" button1:@"取消" button2:@"确认" callBack:^(id object) {

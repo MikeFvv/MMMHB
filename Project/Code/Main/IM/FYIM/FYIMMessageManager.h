@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "FYChatManagerProtocol.h"
 
 
 NS_ASSUME_NONNULL_BEGIN

@@ -37,7 +37,6 @@
 @property (nonatomic ,copy) NSString *img; // 群图片
 
 @property (nonatomic ,assign) NSInteger talkTime; // 说话时间
-@property (nonatomic ,assign) NSInteger chatWord; // 信息的长度
 @property (nonatomic ,copy) NSString *password; // 加群密码
 
 @property (nonatomic ,copy)NSString *howplay;//玩法
@@ -45,11 +44,6 @@
 
 @property (nonatomic,assign)NSInteger groupNum;//成员数量基数
 
-
-// 是否正常
-@property (nonatomic ,copy) NSString *activeFlag;
-// 是否禁言
-@property (nonatomic ,copy) NSString *shutupFlag;
 
 // 红包过期时间
 @property (nonatomic,copy) NSString *rpOverdueTime;

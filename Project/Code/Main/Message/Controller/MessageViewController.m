@@ -249,19 +249,19 @@
             }
         }
         
-        [AppModel shareInstance].customerServiceUnReadTotal = 0;
-        NSArray *myCustomerServiceListArray = [[AppModel shareInstance].myCustomerServiceListDict allValues];
-        for (NSInteger index = 0; index < myCustomerServiceListArray.count; index++) {
-            FYContacts *model = (FYContacts *)myCustomerServiceListArray[index];
-            NSString *queryId = [NSString stringWithFormat:@"%@-%@",model.sessionId,[AppModel shareInstance].userInfo.userId];
-            PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].allUnreadMessagesDict[queryId];
-            if (pmModel) {
-                [AppModel shareInstance].customerServiceUnReadTotal += pmModel.number;
-            }
-        }
+//        [AppModel shareInstance].customerServiceUnReadTotal = 0;
+//        NSArray *myCustomerServiceListArray = [[AppModel shareInstance].myCustomerServiceListDict allValues];
+//        for (NSInteger index = 0; index < myCustomerServiceListArray.count; index++) {
+//            FYContacts *model = (FYContacts *)myCustomerServiceListArray[index];
+//            NSString *queryId = [NSString stringWithFormat:@"%@-%@",model.sessionId,[AppModel shareInstance].userInfo.userId];
+//            PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].allUnreadMessagesDict[queryId];
+//            if (pmModel) {
+//                [AppModel shareInstance].customerServiceUnReadTotal += pmModel.number;
+//            }
+//        }
         
         [AppModel shareInstance].unReadCount += [AppModel shareInstance].friendUnReadTotal;
-        [AppModel shareInstance].unReadCount += [AppModel shareInstance].customerServiceUnReadTotal;
+//        [AppModel shareInstance].unReadCount += [AppModel shareInstance].customerServiceUnReadTotal;
         [[NSNotificationCenter defaultCenter] postNotificationName:kUnreadMessageNumberChange object:@"updateBadeValue"];
         
     });

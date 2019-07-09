@@ -126,18 +126,15 @@ dispatch_async(dispatch_get_main_queue(), block);\
         } else if (self.webSocket.readyState == SR_OPEN) {
             // 已连接
             NSLog(@"====== ✅已连接1 ======");
-            //                [FYStatusBarHUD showSuccess:@"已连接"];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [FYStatusBarHUD hide];
             });
         } else if (self.webSocket.readyState == SR_CLOSING) {
             // 正在断开
             NSLog(@"⭕️正在断开2");
-            //                [FYStatusBarHUD showError:@"正在断开中..."];
         } else if (self.webSocket.readyState == SR_CLOSED) {
             // 已断开
             NSLog(@"====== ❌已断开3 ======");
-            //                [FYStatusBarHUD showError:@"连接已断开"];
         } else {
             NSLog(@"未知状态");
         }

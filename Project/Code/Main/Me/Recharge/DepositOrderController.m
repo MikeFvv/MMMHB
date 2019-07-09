@@ -74,26 +74,29 @@
 
 @property (nonatomic, strong) UIScrollView *scrollView;
 
-// 剩余失效时间
-@property (nonatomic, strong) UILabel *titLabel;
-
-@property(nonatomic,assign)NSInteger leftTime;
 @end
 
 @implementation DepositOrderController
-
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = @"银行卡存款";
-    self.leftTime = [self.infoDic[@"validTime"] integerValue] * 60;
-
+    
+    switch ([_infoDic.type.value integerValue]) {
+        case RechargeType_GFWX:
+            self.title = @"微信支付";
+            break;
+        case RechargeType_GFZB:
+            self.title = @"支付宝支付";
+            break;
+        case RechargeType_GFBC:
+            self.title = @"银行卡支付";
+            break;
+    }
+    
     self.automaticallyAdjustsScrollViewInsets = NO;
     [self.navigationController.navigationBar setTranslucent:NO];
     [self.view addSubview:self.scrollView];
     [self initUI];
-    [self performSelector:@selector(update)];
 }
-
 
 #pragma mark - scrollView
 - (UIScrollView *)scrollView {
@@ -128,25 +131,45 @@
         make.height.mas_equalTo(CGRectGetHeight(self.view.frame)+110);
     }];
     
+    CGFloat corRadius = 8;
+    
+    if ([self.infoDic.type.value integerValue]!=RechargeType_GFBC) {
+        UIImageView* iv = [[UIImageView alloc]init];
+        [backView addSubview:iv];
+        iv.userInteractionEnabled = YES;
+        [iv mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(backView).offset(35);
+            make.left.mas_equalTo(backView.mas_left);
+            make.right.mas_equalTo(backView.mas_right);
+            make.height.equalTo(@510);
+        }];
+        [iv sd_setImageWithURL:[NSURL URLWithString:self.infoDic.bankNum] placeholderImage:[UIImage imageNamed:@"common_placeholder"]];
+        
+        
+        UIButton *submitBtn = [[UIButton alloc] init];
+        [submitBtn setTitle:@"提交信息" forState:UIControlStateNormal];
+        [submitBtn addTarget:self action:@selector(submitAction:) forControlEvents:UIControlEventTouchUpInside];
+        submitBtn.titleLabel.font = [UIFont boldSystemFontOfSize2:17];
+        [submitBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        submitBtn.layer.cornerRadius = corRadius;
+        submitBtn.layer.masksToBounds = YES;
+        submitBtn.backgroundColor = [UIColor colorWithRed:0.992 green:0.612 blue:0.424 alpha:1.000];
+        [backView addSubview:submitBtn];
+        
+        [submitBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(iv.mas_bottom).offset(CD_Scal(20, 812));
+            make.left.mas_equalTo(backView.mas_left).offset(CD_Scal(25, 812));
+            make.right.mas_equalTo(backView.mas_right).offset(-CD_Scal(25, 812));
+            make.height.mas_equalTo(44);
+        }];
+        return;
+    }
     UIView *iconView = [self headIcon];
     [backView addSubview:iconView];
     
-    UILabel *titLabel = [[UILabel alloc] init];
-    titLabel.font = [UIFont systemFontOfSize:14];
-    titLabel.textColor = COLOR_X(255, 80, 80);
-    titLabel.numberOfLines = 0;
-    titLabel.textAlignment = NSTextAlignmentLeft;
-    [backView addSubview:titLabel];
-    self.titLabel = titLabel;
-
-    [titLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.mas_equalTo(backView).offset(90);
-        make.left.mas_equalTo(backView.mas_left);
-        make.right.mas_equalTo(backView.mas_right);
-    }];
 
     UILabel *headTitleLabel = [[UILabel alloc] init];
-    headTitleLabel.text = [NSString stringWithFormat:@"尊敬的客户您好，您的存款订单已生成，请记录以下官方账户信息以及存款金额，在%zd分钟内登录您的网上银行/手机银行/支付宝进行转账，转账完成以后请保留银行回执，以便确认转账信息；",[self.infoDic[@"validTime"] integerValue]];
+    headTitleLabel.text = @"尊敬的客户您好，您的存款订单已生成，请记录以下官方账户信息以及存款金额，请尽快登录您的网上银行/手机银行/支付宝进行转账，转账完成以后请保留银行回执，以便确认转账信息；";
     headTitleLabel.font = [UIFont systemFontOfSize:15];
     headTitleLabel.textColor = [UIColor darkGrayColor];
     headTitleLabel.numberOfLines = 0;
@@ -154,37 +177,11 @@
     [backView addSubview:headTitleLabel];
 
     [headTitleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.mas_equalTo(titLabel.mas_bottom).offset(10);
+        make.top.mas_equalTo(backView).offset(90);
         make.left.mas_equalTo(backView.mas_left);
         make.right.mas_equalTo(backView.mas_right);
     }];
 
-
-    UILabel *orderNumTitLabel = [[UILabel alloc] init];
-    orderNumTitLabel.text = @"订单编号";
-    orderNumTitLabel.font = [UIFont systemFontOfSize:14];
-    orderNumTitLabel.textColor = COLOR_X(255, 80, 80);
-    orderNumTitLabel.numberOfLines = 0;
-    orderNumTitLabel.textAlignment = NSTextAlignmentCenter;
-    [backView addSubview:orderNumTitLabel];
-
-    [orderNumTitLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.mas_equalTo(headTitleLabel.mas_bottom).offset(5);
-        make.centerX.mas_equalTo(backView.mas_centerX);
-    }];
-
-    UILabel *orderNumLabel = [[UILabel alloc] init];
-    orderNumLabel.text = self.infoDic[@"orderId"];
-    orderNumLabel.font = [UIFont systemFontOfSize:14];
-    orderNumLabel.textColor = COLOR_X(255, 80, 80);
-    orderNumLabel.numberOfLines = 0;
-    orderNumLabel.textAlignment = NSTextAlignmentCenter;
-    [backView addSubview:orderNumLabel];
-
-    [orderNumLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.mas_equalTo(orderNumTitLabel.mas_bottom);
-        make.centerX.mas_equalTo(backView.mas_centerX);
-    }];
 
     UILabel *moneyTitLabel = [[UILabel alloc] init];
     moneyTitLabel.text = @"存款金额：";
@@ -195,12 +192,12 @@
     [backView addSubview:moneyTitLabel];
 
     [moneyTitLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.mas_equalTo(orderNumLabel.mas_bottom).offset(5);
-        make.centerX.mas_equalTo(backView.mas_centerX).offset(-50);
+        make.top.mas_equalTo(headTitleLabel.mas_bottom).offset(5);
+        make.centerX.mas_equalTo(backView.mas_centerX);
     }];
 
     UILabel *moneyLabel = [[UILabel alloc] init];
-    moneyLabel.text = self.infoDic[@"money"];
+    moneyLabel.text = self.money;
     moneyLabel.font = [UIFont systemFontOfSize:16];
     moneyLabel.textColor = COLOR_X(255, 80, 80);
     moneyLabel.numberOfLines = 0;
@@ -212,7 +209,6 @@
         make.centerY.mas_equalTo(moneyTitLabel.mas_centerY);
     }];
     
-    CGFloat corRadius = 8;
 
     WEAK_OBJ(weakSelf, self);
     ViewCell *cell1 = [[ViewCell alloc] init];
@@ -223,8 +219,8 @@
         make.height.equalTo(@48);
     }];
     cell1.titleLabel.text = @"收款银行";
-    if(![self.infoDic[@"bankName"] isKindOfClass:[NSNull class]])
-        cell1.textLabel.text = self.infoDic[@"bankName"];
+    if(![self.infoDic.bank.name isKindOfClass:[NSNull class]])
+        cell1.textLabel.text = self.infoDic.bank.name;
     cell1.copyBlock = ^(id object) {
         [weakSelf copyString:object];
     };
@@ -237,7 +233,7 @@
         make.height.equalTo(@48);
     }];
     cell2.titleLabel.text = @"收款人";
-    cell2.textLabel.text = self.infoDic[@"payeeName"];
+    cell2.textLabel.text = self.infoDic.payeeName;
     cell2.copyBlock = ^(id object) {
         [weakSelf copyString:object];
     };
@@ -250,7 +246,7 @@
         make.height.equalTo(@48);
     }];
     cell3.titleLabel.text = @"收款开户行";
-    cell3.textLabel.text = self.infoDic[@"bankAddress"];
+    cell3.textLabel.text = self.infoDic.bankAddress;
     cell3.copyBlock = ^(id object) {
         [weakSelf copyString:object];
     };
@@ -263,44 +259,10 @@
         make.height.equalTo(@48);
     }];
     cell4.titleLabel.text = @"收款账号";
-    cell4.textLabel.text = self.infoDic[@"bankNum"];
+    cell4.textLabel.text = self.infoDic.bankNum;
     cell4.copyBlock = ^(id object) {
         [weakSelf copyString:object];
     };
-    
-    #pragma mark - 按键 3个
-    UIButton *oneCopyBtn = [[UIButton alloc] init];
-    [oneCopyBtn setTitle:@"一键复制" forState:UIControlStateNormal];
-    [oneCopyBtn addTarget:self action:@selector(oneKeyCopyAction:) forControlEvents:UIControlEventTouchUpInside];
-    [oneCopyBtn setBackgroundImage:[UIImage imageNamed:@"rechargeBtn3"] forState:UIControlStateNormal];
-    oneCopyBtn.titleLabel.font = [UIFont boldSystemFontOfSize2:17];
-    [oneCopyBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [backView addSubview:oneCopyBtn];
-    [oneCopyBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.mas_equalTo(cell4.mas_bottom).offset(CD_Scal(20, 812));
-        make.left.mas_equalTo(backView.mas_left).offset(CD_Scal(25, 812));
-        make.right.mas_equalTo(backView.mas_right).offset(-CD_Scal(25, 812));
-        make.height.mas_equalTo(44);
-    }];
-    
-    
-    UIButton *orderBtn = [[UIButton alloc] init];
-    [orderBtn setTitle:@"重新下单" forState:UIControlStateNormal];
-    [orderBtn addTarget:self action:@selector(orderAction:) forControlEvents:UIControlEventTouchUpInside];
-    orderBtn.titleLabel.font = [UIFont boldSystemFontOfSize2:17];
-    [orderBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    orderBtn.layer.cornerRadius = corRadius;
-    orderBtn.layer.masksToBounds = YES;
-    orderBtn.backgroundColor = [UIColor colorWithRed:0.992 green:0.612 blue:0.424 alpha:1.000];
-    [backView addSubview:orderBtn];
-    
-    [orderBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.mas_equalTo(oneCopyBtn.mas_bottom).offset(10);
-        make.left.mas_equalTo(oneCopyBtn.mas_left);
-        make.right.mas_equalTo(backView.mas_centerX).offset(-10);
-        make.height.mas_equalTo(44);
-    }];
-    
     
     UIButton *submitBtn = [[UIButton alloc] init];
     [submitBtn setTitle:@"提交信息" forState:UIControlStateNormal];
@@ -313,40 +275,18 @@
     [backView addSubview:submitBtn];
     
     [submitBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.mas_equalTo(oneCopyBtn.mas_bottom).offset(10);
-        make.right.mas_equalTo(oneCopyBtn.mas_right);
-        make.left.mas_equalTo(backView.mas_centerX).offset(10);
+        make.top.mas_equalTo(cell4.mas_bottom).offset(CD_Scal(20, 812));
+        make.left.mas_equalTo(backView.mas_left).offset(CD_Scal(25, 812));
+        make.right.mas_equalTo(backView.mas_right).offset(-CD_Scal(25, 812));
         make.height.mas_equalTo(44);
     }];
 }
 
-
-#pragma mark - 一键复制
-- (void)oneKeyCopyAction:(UIButton *)sender {
-    UIPasteboard *pastboard = [UIPasteboard generalPasteboard];
-    NSMutableString *s = [[NSMutableString alloc] initWithString:@""];
-    [s appendFormat:@"收款银行：%@；",self.infoDic[@"bankName"]];
-    [s appendFormat:@"收款人：%@；",self.infoDic[@"payeeName"]];
-    [s appendFormat:@"收款开户行：%@；",self.infoDic[@"bankAddress"]];
-    [s appendFormat:@"收款账号：%@；",self.infoDic[@"bankNum"]];
-    pastboard.string = s;
-    SVP_SUCCESS_STATUS(@"复制成功");
-}
-#pragma mark - 重新下单
-- (void)orderAction:(UIButton *)sender {
-    WEAK_OBJ(weakSelf, self);
-    [NET_REQUEST_MANAGER reOrderRechargeInfoWithId:self.infoDic[@"orderId"] success:^(id object) {
-        SVP_SUCCESS_STATUS(object[@"data"]);
-        [weakSelf.navigationController popViewControllerAnimated:YES];
-    } fail:^(id object) {
-        [[FunctionManager sharedInstance] handleFailResponse:object];
-    }];
-}
 #pragma mark - 提交信息
 - (void)submitAction:(UIButton *)sender {
     WEAK_OBJ(weakSelf, self);
     SVP_SHOW;
-    [NET_REQUEST_MANAGER submitOrderRechargeInfoWithId:self.infoDic[@"orderId"] success:^(id object) {
+    [NET_REQUEST_MANAGER submitOrderRechargeInfoWithId:self.infoDic.itemId money:self.money name:self.remark success:^(id object) {
         SVP_DISMISS;
         [weakSelf submitActionBack];
     } fail:^(id object) {
@@ -382,26 +322,11 @@
 
 -(UIView *)headIcon{
     UIImageView *imgView = [[UIImageView alloc] init];
-    imgView.image = [UIImage imageNamed:[NSString stringWithFormat:@"recharget%zd",self.type]];
+    imgView.image = [UIImage imageNamed:[NSString stringWithFormat:@"recharget%@",self.infoDic.type.value]];
     imgView.contentMode = UIViewContentModeScaleAspectFit;
     imgView.frame = CGRectMake(0, 20, SCREEN_WIDTH, 50);
     
     return imgView;
 }
 
--(void)update{
-    if(self.leftTime < 0){
-        self.titLabel.text = @"订单已失效";
-        return;
-    }
-    NSInteger minu = (self.leftTime%3600)/60;
-    NSInteger second = self.leftTime%60;
-    NSInteger hour = self.leftTime/3600;
-    if(hour <= 0)
-        self.titLabel.text = [NSString stringWithFormat:@"订单失效时间还剩 %02zd:%02zd",minu,second];
-    else
-        self.titLabel.text = [NSString stringWithFormat:@"订单失效时间还剩 %02zd:%02zd:%02zd",hour,minu,second];
-    self.leftTime -= 1;
-    [self performSelector:@selector(update) withObject:nil afterDelay:1.0];
-}
 @end

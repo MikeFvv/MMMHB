@@ -32,7 +32,6 @@ MJCodingImplementation
     copy.email = self.email;
     copy.invitecode = self.invitecode;
     copy.mobile = self.mobile;
-    copy.frozenMoney = self.frozenMoney;
     copy.gender = self.gender;
     copy.balance = self.balance;
     copy.createTime = self.createTime;

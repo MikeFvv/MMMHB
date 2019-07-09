@@ -135,7 +135,7 @@
                                   @{@"休闲游戏":@""}
                                   ];
     NSMutableArray* gridParams = [NSMutableArray array];
-    NSArray* gridTypes = @[@(EnumActionTag0),@(EnumActionTag1),@(EnumActionTag2),@(EnumActionTag4)];
+    NSArray* gridTypes = @[@(EnumActionTag0),@(EnumActionTag5),@(EnumActionTag6),@(EnumActionTag7)];
     for (int i=0; i<gridSectionNames.count; i++) {
         NSDictionary* dic = gridSectionNames[i];
         NSDictionary * param = @{kTit:dic.allKeys[0],

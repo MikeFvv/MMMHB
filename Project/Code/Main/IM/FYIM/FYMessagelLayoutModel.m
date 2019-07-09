@@ -215,20 +215,6 @@
     CGSize imageSize = [self contentSize:SCREEN_WIDTH size:realImageSize];
     
     
-    //    CGFloat imgActualHeight = SSChatImageMaxSize;
-    //    CGFloat imgActualWidth =  SSChatImageMaxSize * imgWidth/imgHeight;
-    //    //        _message.contentMode =  UIViewContentModeScaleAspectFit;
-    //    if(imgActualWidth>SSChatImageMaxSize){
-    //        imgActualWidth = SSChatImageMaxSize;
-    //        imgActualHeight = imgActualWidth * imgHeight/imgWidth;
-    //    }
-    //    if(imgActualWidth<SSChatImageMaxSize*0.25){
-    //        imgActualWidth = SSChatImageMaxSize * 0.25;
-    //        imgActualHeight = SSChatImageMaxSize * 0.8;
-    //        //            _message.contentMode =  UIViewContentModeScaleAspectFill;
-    //    }
-    
-    
     if(_message.messageFrom == FYMessageDirection_RECEIVE){
         _headerImgRect = CGRectMake(FYChatIconLeftOrRight,SSChatCellTopOrBottom, SSChatIconWH, SSChatIconWH);
         

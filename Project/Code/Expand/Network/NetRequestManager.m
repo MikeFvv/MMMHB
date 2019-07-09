@@ -420,12 +420,12 @@
     [bodyDic setObject:[NSString stringWithFormat:@"%ld",(long)pageSize] forKey:@"size"];
     [bodyDic setObject:[NSString stringWithFormat:@"%@",@"id"] forKey:@"sort"];
     [bodyDic setObject:[NSString stringWithFormat:@"%@",@"false"] forKey:@"isAsc"];
-//    if(userString.length > 0){
-//        [bodyDic setObject:[NSString stringWithFormat:@"%@",userString] forKey:@"userId"];
-//    }
-//    if(type >= 0){
-//        [bodyDic setObject:[NSString stringWithFormat:@"%ld",(long)type] forKey:@"type"];
-//    }
+    if(userString.length > 0){
+        [bodyDic setObject:[NSString stringWithFormat:@"%@",userString] forKey:@"userId"];
+    }
+    if(type >= 0){
+        [bodyDic setObject:[NSString stringWithFormat:@"%ld",(long)type] forKey:@"type"];
+    }
     [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
 }
 
@@ -626,40 +626,14 @@
     [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
 }
 
--(void)submitRechargeInfoWithId:(NSString *)tId
-                              money:(NSString *)money
-                               name:(NSString *)name
-                               type:(NSInteger)type
-                           typeCode:(NSInteger)typeCode
-                             userId:(NSString *)userId
-                            success:(CallbackBlock)successBlock
-                               fail:(CallbackBlock)failBlock{
-    RequestInfo *info = [self requestInfoWithAct:ActSubmitRechargeInfo];
-    NSMutableDictionary *bodyDic = [self createDicWithHead];
-    [bodyDic setObject:tId forKey:@"id"];
-    [bodyDic setObject:money forKey:@"money"];
-    [bodyDic setObject:name forKey:@"name"];
-    [bodyDic setObject:INT_TO_STR(type) forKey:@"type"];
-    [bodyDic setObject:userId forKey:@"userId"];
-    [bodyDic setObject:INT_TO_STR(typeCode) forKey:@"typeCode"];
-    
-    
-    [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
-}
-
-#pragma mark 重新下订单
--(void)reOrderRechargeInfoWithId:(NSString *)orderId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
-    RequestInfo *info = [self requestInfoWithAct:ActReOrderRecharge];
-    NSMutableDictionary *bodyDic = [self createDicWithHead];
-    [bodyDic setObject:orderId forKey:@"orderId"];
-    [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
-}
-
 #pragma mark 提交订单
--(void)submitOrderRechargeInfoWithId:(NSString *)orderId success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
+-(void)submitOrderRechargeInfoWithId:(NSString *)orderId money:(NSString *)money
+                                name:(NSString *)name success:(CallbackBlock)successBlock fail:(CallbackBlock)failBlock{
     RequestInfo *info = [self requestInfoWithAct:ActOrderRecharge];
     NSMutableDictionary *bodyDic = [self createDicWithHead];
-    [bodyDic setObject:orderId forKey:@"orderId"];
+    [bodyDic setObject:orderId forKey:@"id"];
+    [bodyDic setObject:money forKey:@"money"];
+    [bodyDic setObject:name forKey:@"remark"];
     [self requestWithData:bodyDic requestInfo:info success:successBlock fail:failBlock];
 }
 
@@ -899,17 +873,11 @@
         case ActRequestRechargeChannel:
             urlTail = @"pay/recharge/getChanel";
             break;
-        case ActSubmitRechargeInfo:
-            urlTail = @"pay/recharge/info";
-            break;
-        case ActReOrderRecharge:
-            urlTail = @"pay/recharge/cancelpay";
-            break;
         case ActOrderRecharge:
-            urlTail = @"pay/recharger/pay";
+            urlTail = @"pay/recharge/submit";
             break;
         case ActRequestShareUrl:
-            urlTail = @"social/promotionShare/getActualDomain";
+            urlTail = @"social/promotionShare/getDomain";
             break;
         case ActRequestGuideImageList:
             urlTail = @"social/basic/querySkHelpCenter";

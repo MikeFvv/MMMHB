@@ -13,6 +13,13 @@
 #import "NSString+Size.h"
 
 
+#define dispatch_main_async_safe(block)\
+if ([NSThread isMainThread]) {\
+block();\
+} else {\
+dispatch_async(dispatch_get_main_queue(), block);\
+}
+
 
 @interface RedEnvelopeDetListController ()<UITableViewDataSource,UITableViewDelegate>
 
@@ -36,16 +43,17 @@
 @property (nonatomic,strong) EnvelopeNet *model;
 @property (nonatomic,strong) UILabel *timeLabel;
 
-@property (nonatomic,strong) UILabel *bankerLabel;
-@property (nonatomic,strong) UILabel *playerWinLabel;
+@property (nonatomic, strong) UILabel *bankerLabel;
+@property (nonatomic, strong) UILabel *playerWinLabel;
 
-@property (nonatomic,assign) CGFloat bottomViewHeight;
+@property (nonatomic, assign) CGFloat bottomViewHeight;
 
 // timeStr
-@property (nonatomic,copy) NSString *oldTimeStr;
+@property (nonatomic, copy) NSString *oldTimeStr;
 //
-@property (nonatomic,assign) BOOL isClosed;
+@property (nonatomic, assign) BOOL isClosed;
 
+@property(nonatomic, strong) NSTimer *repeatRequestTimer;
 
 @end
 
@@ -54,6 +62,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    [[EnvelopeNet shareInstance] destroyData];
     [self initData];
     [self getData];
     
@@ -64,8 +73,8 @@
     [self initSubviews];
     [self initLayout];
     
-    [self setHeadData];
-    [self setRefreshUserInfo];
+//    [self setHeadData];
+//    [self setRefreshUserInfo];
     
     [_tableView registerClass:NSClassFromString(@"RedPackedDetTableCell") forCellReuseIdentifier:@"RedPackedDetTableCell"];
     [_tableView addSubview:self.headBackView];
@@ -224,6 +233,7 @@
 }
 
 -(void)dealloc {
+    [self destoryrepeatRequestTimer];
     self.model = nil;
 }
 
@@ -437,7 +447,9 @@
         
         NSInteger time = [self.model.redPackedInfoDetail[@"exceptOverdueTimes"] integerValue];
         
-        if ([self.model.redPackedInfoDetail[@"left"] integerValue] == 0 || time <= 0) {
+        if (!self.model.redPackedInfoDetail) {
+            self.timeLabel.text = @"";
+        } else if ([self.model.redPackedInfoDetail[@"left"] integerValue] == 0 || time <= 0) {
             
             if ([self.model.redPackedInfoDetail[@"overFlag"] boolValue]) {
                 self.timeLabel.textColor = [UIColor blackColor];
@@ -499,6 +511,8 @@
  */
 - (void)startWithTime:(NSInteger)timeLine title:(NSString *)title countDownTitle:(NSString *)subTitle mainColor:(UIColor *)mColor countColor:(UIColor *)color {
     
+    __weak __typeof(self)weakSelf = self;
+    
     //倒计时时间
     __block NSInteger timeOut = timeLine;
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -506,27 +520,32 @@
     //每秒执行一次
     dispatch_source_set_timer(_timer, dispatch_walltime(NULL, 0), 1.0 * NSEC_PER_SEC, 0);
     dispatch_source_set_event_handler(_timer, ^{
-        
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
         if (timeOut <= 0) {
             //            NSLog(@"🔴=1==%@", [NSThread currentThread]);
             dispatch_source_cancel(_timer);
             dispatch_async(dispatch_get_main_queue(), ^{
                 //                self.timeLabel.backgroundColor = mColor;
-                self.timeLabel.textColor = [UIColor redColor];
-                self.timeLabel.text = title;
+                strongSelf.timeLabel.textColor = [UIColor redColor];
+                
+                if (![strongSelf.timeLabel.text isEqualToString:@"本包游戏已截止"]) {
+                    strongSelf.timeLabel.text = title;
+                } else {
+                    NSLog(@"1");
+                }
                 //                self.timeLabel.userInteractionEnabled = YES;
             });
-            [self getData];
+//            [strongSelf getData];
         } else {
             
             NSString *timeStr = [NSString stringWithFormat:@"%0.2ld", (long)timeOut];
             dispatch_async(dispatch_get_main_queue(), ^{
                 //                self.timeLabel.backgroundColor = color;
                 if ([timeStr integerValue] <= [self.oldTimeStr integerValue] && !self.isClosed) {
-                    self.timeLabel.textColor = [UIColor redColor];
-                    self.timeLabel.text = [NSString stringWithFormat:@"剩余%@%@",timeStr,subTitle];
+                    strongSelf.timeLabel.textColor = [UIColor redColor];
+                    strongSelf.timeLabel.text = [NSString stringWithFormat:@"剩余%@%@",timeStr,subTitle];
                     //                    self.timeLabel.userInteractionEnabled = NO;
-                    self.oldTimeStr = timeStr;
+                    strongSelf.oldTimeStr = timeStr;
                 }
                 
             });
@@ -609,31 +628,65 @@
     return totalHeight;
 }
 
-#pragma mark - 获取红包详情
-- (void)getData {
-    
-//    if (self.model.isGrabId) {
-//        [self setReLoadData];
-//        return;
-//    }
-    
-    NSString *redPackedId;
-    if ([self.objPar isKindOfClass:[EnvelopeNet class]]) {
-        EnvelopeNet *model = (EnvelopeNet *)self.objPar;
-        redPackedId = [model.redPackedInfoDetail[@"id"] stringValue];
-    }else {
-        redPackedId = (NSString *)self.objPar;
-        self.model.redPackedInfoDetail = [NSMutableDictionary dictionary];
-        [self.model.redPackedListArray removeAllObjects];
-        [self.model.dataList removeAllObjects];
-        SVP_SHOW;
-    }
-    
+
+//
+- (void)destoryrepeatRequestTimer {
+    dispatch_main_async_safe(^{
+        if (self.repeatRequestTimer) {
+            if ([self.repeatRequestTimer respondsToSelector:@selector(isValid)]){
+                if ([self.repeatRequestTimer isValid]){
+                    [self.repeatRequestTimer invalidate];
+                    self.repeatRequestTimer = nil;
+                }
+            }
+        }
+    })
+}
+
+//
+- (void)initTimer {
+    dispatch_main_async_safe(^{
+        [self destoryrepeatRequestTimer];
+        self.repeatRequestTimer = [NSTimer timerWithTimeInterval:3 target:self selector:@selector(sentRequestData) userInfo:nil repeats:YES];
+        [[NSRunLoop currentRunLoop] addTimer:self.repeatRequestTimer forMode:NSRunLoopCommonModes];
+    })
+}
+
+- (void)sentRequestData {
     __weak typeof(self) weakSelf = self;
-    [self.model getRedpDetSendId:redPackedId successBlock:^(NSDictionary *dic) {
+    [self.model getRedpDetSendId:self.redPackedId successBlock:^(NSDictionary *dic) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
         SVP_DISMISS;
         if (([[dic objectForKey:@"code"] integerValue] == 0)) {
+            if ([strongSelf.model.redPackedInfoDetail[@"overFlag"] integerValue] == YES) {
+                [strongSelf destoryrepeatRequestTimer];
+                [strongSelf setReLoadData];
+            }
+        } else {
+            [strongSelf destoryrepeatRequestTimer];
+            [strongSelf setReLoadData];
+            [[FunctionManager sharedInstance] handleFailResponse:dic];
+        }
+    } failureBlock:^(NSError *error) {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        [strongSelf destoryrepeatRequestTimer];
+        [strongSelf setReLoadData];
+        [[FunctionManager sharedInstance] handleFailResponse:error];
+    }];
+}
+
+
+#pragma mark - 获取红包详情
+- (void)getData {
+    
+    __weak typeof(self) weakSelf = self;
+    [self.model getRedpDetSendId:self.redPackedId successBlock:^(NSDictionary *dic) {
+        __strong __typeof(weakSelf)strongSelf = weakSelf;
+        SVP_DISMISS;
+        if (([[dic objectForKey:@"code"] integerValue] == 0)) {
+            if ([strongSelf.model.redPackedInfoDetail[@"type"] integerValue] == 2 && [strongSelf.model.redPackedInfoDetail[@"overFlag"] integerValue] != YES && !self.repeatRequestTimer) {
+                [strongSelf initTimer];
+            }
             [strongSelf setReLoadData];
         } else {
             [strongSelf setReLoadData];

@@ -87,8 +87,6 @@ static dispatch_once_t predicate;
     __weak __typeof(self)weakSelf = self;
     [BANetManager ba_request_POSTWithEntity:entity successBlock:^(id response) {
         __strong __typeof(weakSelf)strongSelf = weakSelf;
-        //        [weakSelf handleGroupListData:response[@"data"] andIsMyJoined:YES];
-        //        successBlock(response);
         [strongSelf processingData:response];
         successBlock(response);
     } failureBlock:^(NSError *error) {
@@ -242,6 +240,14 @@ static dispatch_once_t predicate;
         predicate = 0;
         instance =nil;
     }
+}
+
+- (void)destroyData {
+    [self.dataList removeAllObjects];
+    [self.redPackedInfoDetail removeAllObjects];
+    [self.redPackedListArray removeAllObjects];
+    instance = nil;
+    predicate = 0;
 }
 
 @end

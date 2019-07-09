@@ -13,10 +13,10 @@
 #import "CustomerServiceAlertView.h"
 #import "DepositOrderController.h"
 #import "ReportView.h"
-
+#import "RechargeModel.h"
 @interface Recharge2ViewController ()<UITextFieldDelegate>
 @property(nonatomic,strong)NSArray *typeArray;
-@property(nonatomic,strong)NSDictionary *infoDic;
+@property(nonatomic,strong)RechargeModel *model;
 @property(nonatomic,strong)ChannelView *channelView;
 @property(nonatomic,strong)UIView *containView;
 @property(nonatomic,assign)RechargeType rechargeType;//充值类型
@@ -26,6 +26,7 @@
 @property(nonatomic,strong)UIButton *tempBtn;
 @property(nonatomic,strong)UIScrollView *scrollView;
 @property(nonatomic,strong)UIView *tipView;
+
 @end
 
 @implementation Recharge2ViewController
@@ -60,7 +61,7 @@
     WEAK_OBJ(weakSelf, self);
     [NET_REQUEST_MANAGER requestAllRechargeChannelWithSuccess:^(id object) {
         SVP_DISMISS;
-        weakSelf.infoDic = object[@"data"];
+        weakSelf.model = [RechargeModel mj_objectWithKeyValues:object];
         [weakSelf reloadData];
     } fail:^(id object) {
         [[FunctionManager sharedInstance] handleFailResponse:object];
@@ -68,10 +69,13 @@
 }
 
 -(void)reloadData{
-    if(self.infoDic == nil)
+    if(self.model == nil)
         return;
     if(self.scrollView == nil){
-        self.typeArray = [self typeData];
+        self.typeArray = [self.model.data getHorizontalTypeData:RechargeType_All];
+        NSDictionary* dic = self.typeArray.firstObject;
+        self.rechargeType = [dic[@"tag"] integerValue];
+        
         self.view.backgroundColor = COLOR_X(237, 239, 242);
         
         WEAK_OBJ(weakSelf, self);
@@ -94,9 +98,9 @@
     if(self.channelView == nil){
         WEAK_OBJ(weakSelf, self);
         NSInteger y = 10;
-        NSInteger a = 100;
+        NSInteger a = 110;
         if(SCREEN_WIDTH == 320)
-            a = 90;
+            a = 100;
         ChannelView *channelView = [[ChannelView alloc] initWithFrame:CGRectMake(0, y, a, 320)];
         [self.scrollView addSubview:channelView];
         self.channelView = channelView;
@@ -105,23 +109,7 @@
         };
     }
     self.channelView.rechargeType = self.rechargeType;
-    if(self.rechargeType == RechargeType_gf){
-        NSArray *channelArr = @[@"银行卡"];//@[@"银行卡",@"支付宝",@"微信"];
-        self.channelView.channelArray = channelArr;
-    }else{
-        NSArray *arr = nil;
-        if(self.rechargeType == RechargeType_zhiFuBao)
-            arr = [self.infoDic objectForKey:@"alipayChanels"];
-        else if(self.rechargeType == RechargeType_yinLian)
-            arr = [self.infoDic objectForKey:@"unionPayChanels"];
-        else if(self.rechargeType == RechargeType_weiXin)
-            arr = [self.infoDic objectForKey:@"wechatChanels"];
-        NSMutableArray *channelArr = [NSMutableArray array];
-        for (NSInteger i = 0; i < arr.count; i ++) {
-            [channelArr addObject:[NSString stringWithFormat:@"通道%@",[self numberToZH:[NSString stringWithFormat:@"%ld",i + 1]]]];
-        }
-        self.channelView.channelArray = channelArr;
-    }
+    self.channelView.channelArray = [self.model.data getChannelsTitles:self.channelView.rechargeType];
     [self selectChannel:0];
 }
 
@@ -136,51 +124,6 @@
 -(void)selectChannel:(NSInteger)index{
     self.channelIndex = index;
     [self reloadContainView];
-}
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
-
-
--(NSArray *)typeData{
-    NSArray *channelArr = nil;
-    NSMutableArray *arr = [NSMutableArray array];
-    channelArr = [self.infoDic objectForKey:@"alipayChanels"];
-    if(channelArr.count > 0){
-        NSDictionary *dic3 = @{@"imgNormal":@"rec_jf",@"imgSelected":@"rec_jf2",@"tag":@(RechargeType_zhiFuBao),};
-        [arr addObject:dic3];
-        if(self.rechargeType == RechargeType_nil)
-            self.rechargeType = RechargeType_zhiFuBao;
-    }
-    channelArr = [self.infoDic objectForKey:@"wechatChanels"];
-    if(channelArr.count > 0){
-        NSDictionary *dic2 = @{@"imgNormal":@"rec_wx",@"imgSelected":@"rec_wx2",@"tag":@(RechargeType_weiXin),};
-        [arr addObject:dic2];
-        if(self.rechargeType == RechargeType_nil)
-            self.rechargeType = RechargeType_weiXin;
-    }
-    
-    channelArr = [self.infoDic objectForKey:@"unionPayChanels"];
-    if(channelArr.count > 0){
-        NSDictionary *dic4 = @{@"imgNormal":@"rec_yl",@"imgSelected":@"rec_yl2",@"tag":@(RechargeType_yinLian),};
-        [arr addObject:dic4];
-        if(self.rechargeType == RechargeType_nil)
-            self.rechargeType = RechargeType_yinLian;
-    }
-    channelArr = [self.infoDic objectForKey:@"bankPayChanels"];
-    if(channelArr.count > 0){
-        NSDictionary *dic1 = @{@"imgNormal":@"rec_gf",@"imgSelected":@"rec_gf2",@"tag":@(RechargeType_gf)};
-        [arr addObject:dic1];
-        if(self.rechargeType == RechargeType_nil)
-            self.rechargeType = RechargeType_gf;
-    }
-    return arr;
 }
 
 -(void)reloadContainView{
@@ -214,152 +157,121 @@
         make.height.equalTo(@0.5);
         make.top.equalTo(titleLabel.mas_bottom);
     }];
-    if(self.rechargeType == RechargeType_gf)
-        titleLabel.text = @"官方代理充值";
-    else{
-        NSDictionary *dic = [self currentPayInfo];
-        titleLabel.text = dic[@"title"];
-    }
-    
-//    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-//    [btn setImage:[UIImage imageNamed:@"reportBtn"] forState:UIControlStateNormal];
-//    btn.imageView.contentMode = UIViewContentModeScaleAspectFit;
-//    [btn addTarget:self action:@selector(reportAction) forControlEvents:UIControlEventTouchUpInside];
-//    [self.containView addSubview:btn];
-//    [btn mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.height.equalTo(@44);
-//        make.width.equalTo(@50);
-//        make.right.equalTo(self.containView.mas_right).offset(-10);
-//        make.centerY.equalTo(titleLabel.mas_centerY);
-//    }];
-    if(self.rechargeType == RechargeType_gf){
-        if(self.channelIndex == 1 || self.channelIndex == 2){
-            UIImageView *imgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"rec_null"]];
-            imgView.contentMode = UIViewContentModeScaleAspectFit;
-            [self.containView addSubview:imgView];
-            [imgView mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.centerY.equalTo(self.containView.mas_centerY);
-                make.left.equalTo(self.containView).offset(60);
-                make.right.equalTo(self.containView.mas_right).offset(-60);
-            }];
-            UILabel *tLabel = [[UILabel alloc] init];
-            tLabel.backgroundColor = [UIColor clearColor];
-            tLabel.textColor = COLOR_X(150, 150, 150);
-            tLabel.font = [UIFont systemFontOfSize2:15];
-            tLabel.text = @"敬请期待";
-            tLabel.textAlignment = NSTextAlignmentCenter;
-            [self.containView addSubview:tLabel];
-            [tLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.top.equalTo(imgView.mas_bottom).offset(15);
-                make.centerX.equalTo(imgView.mas_centerX);
-            }];
-        }
-    }
+    NSArray* channelsContainTitles = [self.model.data getChannelsContainTitles:self.rechargeType];
+    titleLabel.text = channelsContainTitles[self.channelIndex];
     
     NSDictionary *ddd = [self currentPayInfo];
     if(ddd){
         NSInteger y = 44 + 20;
         if(self.rechargeType == RechargeType_gf){
-            if(self.channelIndex == 0){
-                UILabel *idLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, self.containView.frame.size.width - 30, 20)];
-                [self.containView addSubview:idLabel];
-                idLabel.font = [UIFont systemFontOfSize2:15];
-                idLabel.textColor = COLOR_X(60, 60, 60);
-                
-                NSString *s = [NSString stringWithFormat:@"用户ID：%@",[AppModel shareInstance].userInfo.userId];
-                NSMutableAttributedString *attributedStr = [[NSMutableAttributedString alloc]initWithString:s];
-                NSRange rang = NSMakeRange(4, s.length - 4);
-                [attributedStr addAttribute:NSForegroundColorAttributeName value:COLOR_X(140, 140, 140) range:NSMakeRange(rang.location, rang.length)];
-                idLabel.attributedText = attributedStr;
-                
-                UIImageView *inputBg = [[UIImageView alloc] initWithFrame:CGRectMake(idLabel.frame.origin.x, idLabel.frame.size.height + y + 12, self.containView.frame.size.width - (idLabel.frame.origin.x) * 2, 44)];
-                inputBg.backgroundColor = COLOR_X(244, 244, 244);
-                inputBg.userInteractionEnabled = YES;
-                inputBg.layer.masksToBounds = YES;
-                inputBg.layer.cornerRadius = 4;
-                [view addSubview:inputBg];
-                
-                UITextField *tf = [[UITextField alloc] init];
-                tf.backgroundColor = [UIColor clearColor];
-                tf.font = [UIFont systemFontOfSize2:16];
-                tf.textColor = COLOR_X(60, 60, 60);
-                tf.frame = CGRectMake(10, 0, inputBg.frame.size.width - 20, inputBg.frame.size.height);
-                tf.delegate = self;
-                tf.returnKeyType = UIReturnKeyDone;
-                tf.placeholder = @"存款人姓名";
-                [inputBg addSubview:tf];
-                self.nameField = tf;
-                
-                inputBg = [[UIImageView alloc] initWithFrame:CGRectMake(inputBg.frame.origin.x, inputBg.frame.origin.y + inputBg.frame.size.height + 12, self.containView.frame.size.width - (inputBg.frame.origin.x) * 2, 44)];
-                
-                inputBg.userInteractionEnabled = YES;
-                [view addSubview:inputBg];
-                
-                UILabel *tLabel = [[UILabel alloc] init];
-                tLabel.backgroundColor = [UIColor clearColor];
-                tLabel.textColor = COLOR_X(80, 80, 80);
-                tLabel.font = [UIFont systemFontOfSize2:15];
-                tLabel.text = @"存款金额";
-                tLabel.textAlignment = NSTextAlignmentCenter;
-                tLabel.frame = CGRectMake(0, 0, 70, inputBg.frame.size.height);
-                [inputBg addSubview:tLabel];
-                
-                tLabel = [[UILabel alloc] init];
-                tLabel.backgroundColor = [UIColor clearColor];
-                tLabel.textColor = COLOR_X(80, 80, 80);
-                tLabel.font = [UIFont systemFontOfSize2:15];
-                tLabel.text = @"元";
-                tLabel.textAlignment = NSTextAlignmentCenter;
-                tLabel.frame = CGRectMake(inputBg.frame.size.width - 30, 0, 30, inputBg.frame.size.height);
-                [inputBg addSubview:tLabel];
-                
-                tf = [[UITextField alloc] init];
-                tf.backgroundColor = [UIColor clearColor];
-                tf.font = [UIFont boldSystemFontOfSize2:16];
-                tf.textColor = COLOR_X(70, 131, 215);
-                tf.frame = CGRectMake(80, 0, inputBg.frame.size.width - 70 - 30 - 8, inputBg.frame.size.height);
-                tf.delegate = self;
-                tf.textAlignment = NSTextAlignmentRight;
-                tf.returnKeyType = UIReturnKeyDone;
-                tf.keyboardType = UIKeyboardTypeNumberPad;
-                NSDictionary *dic = [self currentPayInfo];
-                tf.placeholder = [NSString stringWithFormat:@"%zd-%zd",[dic[@"minAmount"] integerValue],[dic[@"maxAmount"] integerValue]];
-                [inputBg addSubview:tf];
-                self.moneyTextField = tf;
-                
-                lineView = [[UIView alloc] initWithFrame:CGRectMake(0, inputBg.frame.size.height - 0.5, inputBg.frame.size.width, 0.5)];
-                lineView.backgroundColor = COLOR_X(220, 220, 220);
-                [inputBg addSubview:lineView];
-                
-                tLabel = [[UILabel alloc] init];
-                tLabel.backgroundColor = [UIColor clearColor];
-                tLabel.textColor = COLOR_X(180, 180, 180);
-                tLabel.font = [UIFont systemFontOfSize2:12];
-                tLabel.text = @"请选择常用的支付方式，为您匹配专职代理";
-                tLabel.frame = CGRectMake(inputBg.frame.origin.x, inputBg.frame.origin.y + inputBg.frame.size.height + 8, 300, 16);
-                [view addSubview:tLabel];
-                
-                UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-                [self.containView addSubview:btn];
-                btn.titleLabel.font = [UIFont boldSystemFontOfSize2:17];
-                [btn setTitle:@"下一步" forState:UIControlStateNormal];
-                [btn addTarget:self action:@selector(submitAction) forControlEvents:UIControlEventTouchUpInside];
-                [btn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-                btn.layer.cornerRadius = 8.0f;
-                btn.layer.masksToBounds = YES;
-                [btn setBackgroundColor:MBTNColor];
-                [btn delayEnable];
-                btn.frame = CGRectMake(16, tLabel.frame.size.height + tLabel.frame.origin.y + 16, self.containView.frame.size.width - 32, 44);
-                
-                NSInteger bottom = btn.frame.size.height + btn.frame.origin.y;
-                CGRect rect = self.containView.frame;
-                rect.size.height = bottom + 15;
-                self.containView.frame = rect;
+            UILabel *idLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, self.containView.frame.size.width - 30, 20)];
+            [self.containView addSubview:idLabel];
+            idLabel.font = [UIFont systemFontOfSize2:15];
+            idLabel.textColor = COLOR_X(60, 60, 60);
+            
+            NSString *s = [NSString stringWithFormat:@"用户ID：%@",[AppModel shareInstance].userInfo.userId];
+            NSMutableAttributedString *attributedStr = [[NSMutableAttributedString alloc]initWithString:s];
+            NSRange rang = NSMakeRange(4, s.length - 4);
+            [attributedStr addAttribute:NSForegroundColorAttributeName value:COLOR_X(140, 140, 140) range:NSMakeRange(rang.location, rang.length)];
+            idLabel.attributedText = attributedStr;
+            
+            UIImageView *inputBg = [[UIImageView alloc] initWithFrame:CGRectMake(idLabel.frame.origin.x, idLabel.frame.size.height + y + 12, self.containView.frame.size.width - (idLabel.frame.origin.x) * 2, 44)];
+            inputBg.backgroundColor = COLOR_X(244, 244, 244);
+            inputBg.userInteractionEnabled = YES;
+            inputBg.layer.masksToBounds = YES;
+            inputBg.layer.cornerRadius = 4;
+            [view addSubview:inputBg];
+            
+            UITextField *tf = [[UITextField alloc] init];
+            tf.backgroundColor = [UIColor clearColor];
+            tf.font = [UIFont systemFontOfSize2:16];
+            tf.textColor = COLOR_X(60, 60, 60);
+            tf.frame = CGRectMake(10, 0, inputBg.frame.size.width - 20, inputBg.frame.size.height);
+            tf.delegate = self;
+            tf.returnKeyType = UIReturnKeyDone;
+            NSString* string = self.channelView.channelArray[self.channelIndex];
+            if ([string isEqualToString:@"微信"]) {
+                tf.placeholder = @"微信昵称";
+            }else if ([string isEqualToString:@"支付宝"]){
+                tf.placeholder = @"支付宝绑定姓名";
+            }else {
+                tf.placeholder = @"开户人姓名";
             }
+            [inputBg addSubview:tf];
+            self.nameField = tf;
+            
+            inputBg = [[UIImageView alloc] initWithFrame:CGRectMake(inputBg.frame.origin.x, inputBg.frame.origin.y + inputBg.frame.size.height + 12, self.containView.frame.size.width - (inputBg.frame.origin.x) * 2, 44)];
+            
+            inputBg.userInteractionEnabled = YES;
+            [view addSubview:inputBg];
+            
+            UILabel *tLabel = [[UILabel alloc] init];
+            tLabel.backgroundColor = [UIColor clearColor];
+            tLabel.textColor = COLOR_X(80, 80, 80);
+            tLabel.font = [UIFont systemFontOfSize2:15];
+            tLabel.text = @"存款金额";
+            tLabel.textAlignment = NSTextAlignmentCenter;
+            tLabel.frame = CGRectMake(0, 0, 70, inputBg.frame.size.height);
+            [inputBg addSubview:tLabel];
+            
+            tLabel = [[UILabel alloc] init];
+            tLabel.backgroundColor = [UIColor clearColor];
+            tLabel.textColor = COLOR_X(80, 80, 80);
+            tLabel.font = [UIFont systemFontOfSize2:15];
+            tLabel.text = @"元";
+            tLabel.textAlignment = NSTextAlignmentCenter;
+            tLabel.frame = CGRectMake(inputBg.frame.size.width - 30, 0, 30, inputBg.frame.size.height);
+            [inputBg addSubview:tLabel];
+            
+            tf = [[UITextField alloc] init];
+            tf.backgroundColor = [UIColor clearColor];
+            tf.font = [UIFont boldSystemFontOfSize2:16];
+            tf.textColor = COLOR_X(70, 131, 215);
+            tf.frame = CGRectMake(80, 0, inputBg.frame.size.width - 70 - 30 - 8, inputBg.frame.size.height);
+            tf.delegate = self;
+            tf.textAlignment = NSTextAlignmentRight;
+            tf.returnKeyType = UIReturnKeyDone;
+            tf.keyboardType = UIKeyboardTypeNumberPad;
+            NSDictionary *dic = [self currentPayInfo];
+            RechargeDetailListItem* listItem = dic.allValues[0];
+            tf.placeholder = [NSString stringWithFormat:@"%zd-%zd",[listItem.minAmount integerValue],[listItem.maxAmount integerValue]];
+            [inputBg addSubview:tf];
+            self.moneyTextField = tf;
+            
+            lineView = [[UIView alloc] initWithFrame:CGRectMake(0, inputBg.frame.size.height - 0.5, inputBg.frame.size.width, 0.5)];
+            lineView.backgroundColor = COLOR_X(220, 220, 220);
+            [inputBg addSubview:lineView];
+            
+            tLabel = [[UILabel alloc] init];
+            tLabel.backgroundColor = [UIColor clearColor];
+            tLabel.textColor = COLOR_X(180, 180, 180);
+            tLabel.font = [UIFont systemFontOfSize2:12];
+            tLabel.text = @"请选择常用的支付方式，为您匹配专职代理";
+            tLabel.frame = CGRectMake(inputBg.frame.origin.x, inputBg.frame.origin.y + inputBg.frame.size.height + 8, 300, 16);
+            [view addSubview:tLabel];
+            
+            UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+            [self.containView addSubview:btn];
+            btn.titleLabel.font = [UIFont boldSystemFontOfSize2:17];
+            [btn setTitle:@"下一步" forState:UIControlStateNormal];
+            [btn addTarget:self action:@selector(submitAction) forControlEvents:UIControlEventTouchUpInside];
+            [btn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            btn.layer.cornerRadius = 8.0f;
+            btn.layer.masksToBounds = YES;
+            [btn setBackgroundColor:MBTNColor];
+            [btn delayEnable];
+            btn.frame = CGRectMake(16, tLabel.frame.size.height + tLabel.frame.origin.y + 16, self.containView.frame.size.width - 32, 44);
+            
+            NSInteger bottom = btn.frame.size.height + btn.frame.origin.y;
+            CGRect rect = self.containView.frame;
+            rect.size.height = bottom + 15;
+            self.containView.frame = rect;
+        
             
         }else{
             NSDictionary *dic = [self currentPayInfo];
-            NSArray *array = [dic[@"allocationAmount"] componentsSeparatedByString:@","];
+            RechargeDetailListItem* listItem = dic.allValues[0];
+            NSArray *array = [listItem.allocationAmount componentsSeparatedByString:@","];
             NSInteger per = 3;
             NSInteger width = 70;
             if(SCREEN_WIDTH > 375)
@@ -432,7 +344,7 @@
             tLabel.backgroundColor = [UIColor clearColor];
             tLabel.textColor = COLOR_X(180, 180, 180);
             tLabel.font = [UIFont systemFontOfSize2:13];
-            tLabel.text = [NSString stringWithFormat:@"单笔存款限额(元)：%@-%@",dic[@"minAmount"],dic[@"maxAmount"]];
+            tLabel.text = [NSString stringWithFormat:@"单笔存款限额(元)：%@-%@",listItem.minAmount,listItem.maxAmount];
             tLabel.frame = CGRectMake(inputBg.frame.origin.x, bottom + 8, 250, 16);
             [view addSubview:tLabel];
             
@@ -512,18 +424,18 @@
     }
     
     NSDictionary *dic = [self currentPayInfo];
-    
+    RechargeDetailListItem* listItem = dic.allValues[0];
     float aa = [money floatValue];
-    NSInteger minMoney = [dic[@"minAmount"] integerValue];
-    NSInteger maxMoney = [dic[@"maxAmount"] integerValue];
-    if(dic[@"minAmount"]){
+    NSInteger minMoney = [listItem.minAmount integerValue];
+    NSInteger maxMoney = [listItem.maxAmount integerValue];
+    if(listItem.minAmount){
         if(aa < minMoney){
             NSString *tip = [NSString stringWithFormat:@"存款金额最小%zd元",minMoney];
             SVP_ERROR_STATUS(tip);
             return;
         }
     }
-    if(dic[@"maxAmount"]){
+    if(listItem.maxAmount){
         if(aa > maxMoney){
             NSString *tip = [NSString stringWithFormat:@"存款金额最大%zd元",maxMoney];
             SVP_ERROR_STATUS(tip);
@@ -538,26 +450,19 @@
             return;
         }
         [self.view endEditing:YES];
-        SVP_SHOW;
-        WEAK_OBJ(weakSelf, self);
-
-        [NET_REQUEST_MANAGER submitRechargeInfoWithId:dic[@"id"] money:self.moneyTextField.text name:self.nameField.text type:[dic[@"type"] integerValue] typeCode:[dic[@"typeCode"] integerValue] userId:[AppModel shareInstance].userInfo.userId success:^(id object) {
-            SVP_DISMISS;
-           [weakSelf goToCheck:object[@"data"]];
-        } fail:^(id object) {
-            [[FunctionManager sharedInstance] handleFailResponse:object];
-        }];
+        [self goToCheck:listItem];
     }
 }
 
 -(void)openByWeb{
     NSDictionary *dic = [self currentPayInfo];
-    NSString *url = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,dic[@"url"]];
+    RechargeDetailListItem* listItem = dic.allValues[0];
+    NSString *url = [NSString stringWithFormat:@"%@%@",[AppModel shareInstance].serverUrl,listItem.url];
     NSDictionary* bodyDictionary = @{
                           @"userId":[AppModel shareInstance].userInfo.userId,
                           @"amount":self.moneyTextField.text,
-                          @"id":dic[@"id"],
-                          @"typeCode":dic[@"typeCode"]
+                          @"id":listItem.itemId,
+                          @"typeCode":listItem.type.value
                           };
     NSDictionary* encryDic =  [FunctionManager encryMethod:bodyDictionary];
     WebViewController *vc = [[WebViewController alloc] initWithUrl:url withBodyDictionary:encryDic];
@@ -568,14 +473,7 @@
 
 -(NSDictionary *)currentPayInfo{
     NSArray *arr = nil;
-    if(self.rechargeType == RechargeType_zhiFuBao)
-        arr = [self.infoDic objectForKey:@"alipayChanels"];
-    else if(self.rechargeType == RechargeType_yinLian)
-        arr = [self.infoDic objectForKey:@"unionPayChanels"];
-    else if(self.rechargeType == RechargeType_weiXin)
-        arr = [self.infoDic objectForKey:@"wechatChanels"];
-    else if(self.rechargeType == RechargeType_gf)
-        arr = [self.infoDic objectForKey:@"bankPayChanels"];
+    arr = [self.model.data getChannelsArrData:self.rechargeType];
     if(arr.count <= self.channelIndex)
         return nil;
     NSDictionary *dic = arr[self.channelIndex];
@@ -605,12 +503,11 @@
     [self.navigationController pushViewController:vc animated:YES];
 }
 
--(void)goToCheck:(NSDictionary *)dict{
-    NSDictionary *dic = [self currentPayInfo];
+-(void)goToCheck:(RechargeDetailListItem *)dict{
     DepositOrderController *vc = [[DepositOrderController alloc] init];
-    vc.titleStr = dic[@"title"];
     vc.infoDic = dict;
-    vc.type = [dic[@"type"] integerValue];
+    vc.remark = self.nameField.text;
+    vc.money = self.moneyTextField.text;
     [self.navigationController pushViewController:vc animated:YES];
 }
 
@@ -651,25 +548,6 @@
     }
     
     return _tipView;
-}
-
--(NSString *)numberToZH:(NSString *)number{
-    NSDictionary *dic = @{@"0":@"",@"1":@"一",@"2":@"二",@"3":@"三",@"4":@"四",@"5":@"五",@"6":@"六",@"7":@"七",@"8":@"八",@"9":@"九",@"10":@"十"};
-    NSInteger num = [number integerValue];
-    if(num <= 10)
-        return dic[number];
-    
-    NSInteger geWei = num % 10;
-    NSInteger shiWei = num / 10;
-    
-    NSString *getWeiString = [NSString stringWithFormat:@"%zd",geWei];
-    NSString *value1 = dic[getWeiString];
-    NSString *shiWeiString = [NSString stringWithFormat:@"%zd",shiWei];
-    NSString *value2 = dic[shiWeiString];
-    if(shiWei < 2)
-        return [NSString stringWithFormat:@"十%@",value1];
-    else
-        return [NSString stringWithFormat:@"%@十%@",value2,value1];
 }
 
 -(void)reportAction{

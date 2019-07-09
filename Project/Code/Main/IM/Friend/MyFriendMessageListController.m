@@ -44,6 +44,10 @@
 @property (nonatomic, strong) UIView *animationView;
 @property(nonatomic,strong) UITableView *tableView;
 @property(nonatomic, strong) NSMutableArray *dataSource;
+@property(nonatomic, strong) UILabel *promptLabel;
+
+//
+@property (nonatomic,assign) BOOL isDisappearController;
 
 @end
 
@@ -55,11 +59,30 @@
     self.title = @"好友消息";
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
-    
     [self initSubviews];
     
+    UILabel *promptLabel = [[UILabel alloc] init];
+    promptLabel.hidden = YES;
+    promptLabel.text = @"您还没有消息！";
+    promptLabel.font = [UIFont systemFontOfSize:22];
+    promptLabel.textColor = [UIColor darkGrayColor];
+    promptLabel.textAlignment = NSTextAlignmentCenter;
+    [self.tableView addSubview:promptLabel];
+    _promptLabel = promptLabel;
+    
+    [promptLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.mas_equalTo(self.view.mas_centerX);
+        make.centerY.mas_equalTo(self.view.mas_centerY).offset(-50);
+    }];
+    
+    
+    
     if (self.friendType == 3) {
-        [self getServiceMembers];
+        if ([AppModel shareInstance].myCustomerServiceListDict.count == 0) {
+            [self queryContactsData];
+        } else {
+            [self getServiceMembers];
+        }
     } else {
 //        [self getMyFriendList];
     }
@@ -83,7 +106,8 @@
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         
         if (self.friendType == 3) {
-            [AppModel shareInstance].customerServiceUnReadTotal = 0;
+            return;
+//            [AppModel shareInstance].customerServiceUnReadTotal = 0;
         } else {
             [AppModel shareInstance].friendUnReadTotal = 0;
         }
@@ -94,7 +118,7 @@
             PushMessageModel *pmModel = (PushMessageModel *)[MessageSingle shareInstance].allUnreadMessagesDict[queryId];
             if (pmModel) {
                 if (self.friendType == 3) {
-                    [AppModel shareInstance].customerServiceUnReadTotal += pmModel.number;
+//                    [AppModel shareInstance].customerServiceUnReadTotal += pmModel.number;
                 } else {
                     [AppModel shareInstance].friendUnReadTotal += pmModel.number;
                 }
@@ -110,12 +134,10 @@
 - (void)getMyFriendList {
 
     self.dataSource = [NSMutableArray array];
-//    NSString *queryTest = [NSString stringWithFormat:@"select * from FYContacts where contactsType = 2 and accountUserId='%@'",[AppModel shareInstance].userInfo.userId];
-    NSString *queryTest = [NSString stringWithFormat:@"select * from FYContacts where accountUserId='%@'",[AppModel shareInstance].userInfo.userId];
-    NSArray *whereMyFriendByArrayTest = [WHC_ModelSqlite query:[FYContacts class] sql:queryTest];
-    NSLog(@"1");
-    NSString *query = [NSString stringWithFormat:@"select * from FYContacts where contactsType = 2 and accountUserId='%@' order by isTopTime desc,lastTimestamp desc,lastCreate_time desc limit 999999",[AppModel shareInstance].userInfo.userId];
+//    NSString *queryTest = [NSString stringWithFormat:@"select * from FYContacts where accountUserId='%@'",[AppModel shareInstance].userInfo.userId];
+//    NSArray *whereMyFriendByArrayTest = [WHC_ModelSqlite query:[FYContacts class] sql:queryTest];
     
+    NSString *query = [NSString stringWithFormat:@"select * from FYContacts where contactsType = 2 and accountUserId='%@' order by isTopTime desc,lastTimestamp desc,lastCreate_time desc limit 999999",[AppModel shareInstance].userInfo.userId];
     NSArray *whereMyFriendByArray = [WHC_ModelSqlite query:[FYContacts class] sql:query];
     for (NSInteger index = 0; index < whereMyFriendByArray.count; index++) {
         FYContacts *model = (FYContacts *)whereMyFriendByArray[index];
@@ -123,6 +145,11 @@
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{
+        if (whereMyFriendByArray.count == 0) {
+            self.promptLabel.hidden = NO;
+        } else {
+            self.promptLabel.hidden = YES;
+        }
         [self.tableView.mj_header endRefreshing];
         [self.tableView reloadData];
         [self calculateUnreadMessages];
@@ -144,7 +171,7 @@
 #pragma mark 收到消息重新刷新
 - (void)updateValue:(NSNotification *)noti {
         NSString *info = [noti object];
-        if ([info isEqualToString:@"MyFriendListNotification"]) {
+        if ([info isEqualToString:@"MyFriendListNotification"] && !self.isDisappearController) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.tableView reloadData];
             });
@@ -182,25 +209,7 @@
         }
         
     }];
-    
-    
-    /*
-     
-     _tableView.StateView = [StateView StateViewWithHandle:^{
-     __strong __typeof(weakSelf)strongSelf = weakSelf;
-     [strongSelf getData];
-     }];
-     
-     //SVP_SHOW;
-     [NET_REQUEST_MANAGER requestSystemNoticeWithSuccess:^(id object) {
-     [self.tableView reloadData];
-     //        [self calculateUnreadMessages];
-     } fail:^(id object) {
-     
-     }];
-     [self getData];
-     
-     */
+
 }
 
 
@@ -277,7 +286,7 @@
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     SVP_DISMISS;
-    
+    self.isDisappearController = NO;
     if (self.friendType == 2) {
         [self getMyFriendList];
     } else {
@@ -287,6 +296,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    self.isDisappearController = YES;
 }
 
 #pragma mark UITableViewDataSource

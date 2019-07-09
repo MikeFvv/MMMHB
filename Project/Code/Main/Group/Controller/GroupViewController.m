@@ -390,12 +390,15 @@
     switch (_clickTag) {
         case EnumActionTag0:
             if ([_model.dataList[indexPath.row] isKindOfClass:[CDTableModel class]]) {
+                [tableView setSeparatorColor:TBSeparaColor];
                 return [tableView CDdequeueReusableCellWithIdentifier:_model.dataList[indexPath.row]];
                 
             }else{
                 if (cell == nil)
                 {
+//                    [tableView setSeparatorColor:[UIColor clearColor]];
                     cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
+                    cell.selectionStyle = UITableViewCellSelectionStyleNone;
                 }
                 
                 
@@ -411,7 +414,7 @@
                     [cell richElementsInCellWithModel:itemData];
                     [cell actionBlock:^(id data) {
                         if ([data isKindOfClass:[BannerItem class]]) {
-                            
+                            [self handleGameCell:data];
                         }
                     }];
                     return cell;
@@ -431,6 +434,42 @@
     
 }
 
+- (void)handleGameCell:(BannerItem*)item{
+    if (_clickTag == EnumActionTag5) {
+        NSInteger tag = [item.advLinkUrl integerValue];
+        if(tag == 1){
+            NSString *urlHead = [AppModel shareInstance].commonInfo[@"big.wheel.lottery.url"];
+            if(urlHead.length > 0){
+                NSString *url = [NSString stringWithFormat:@"%@?token=%@",urlHead,[AppModel shareInstance].userInfo.token];
+                WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+                vc.navigationItem.title = item.name;
+                vc.hidesBottomBarWhenPushed = YES;
+                //[vc loadWithURL:url];
+                [self.navigationController pushViewController:vc animated:YES];
+                return;
+            }
+            //        WheelViewController *vc = [[WheelViewController alloc] init];
+            //        vc.hidesBottomBarWhenPushed = YES;
+            //        [self.navigationController pushViewController:vc animated:YES];
+        }else if(tag == 2){
+            NSString *urlHead = [AppModel shareInstance].commonInfo[@"fruit.slot.url"];
+            if(urlHead.length > 0){
+                NSString *url = [NSString stringWithFormat:@"%@?token=%@",urlHead,[AppModel shareInstance].userInfo.token];
+                WebViewController *vc = [[WebViewController alloc] initWithUrl:url];
+                vc.navigationItem.title = item.name;
+                vc.hidesBottomBarWhenPushed = YES;
+                //[vc loadWithURL:url];
+                [self.navigationController pushViewController:vc animated:YES];
+                return;
+            }
+        }
+    }else{
+        AlertViewCus *view = [AlertViewCus createInstanceWithView:nil];
+        [view showWithText:@"等待更新，敬请期待" button:@"好的" callBack:nil];
+    }
+    
+    
+}
 #pragma mark - heightForRow
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     switch (_clickTag) {

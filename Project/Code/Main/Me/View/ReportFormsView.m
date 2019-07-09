@@ -220,7 +220,7 @@
     
     item = [[ReportFormsItem alloc] init];
     item.icon = @"";//@"yqhyyj";
-    item.title = @"敬请期待";//NUMBER_TO_STR(dict[@"inviteCommission"]);
+    item.title = @"敬请期待";
     item.desc = @"";
     [arr addObject:item];
     
